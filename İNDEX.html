@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WrtS - Mesajlaşma Platformu</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-white h-screen flex flex-col justify-between">
+
+    <!-- Giriş / Kimlik Ekranı (Başlangıçta görünür) -->
+    <div id="auth-screen" class="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-800 p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-700">
+            <h1 class="text-3xl font-bold text-center text-indigo-400 mb-6">WrtS'ye Hoş Geldiniz</h1>
+            
+            <form id="auth-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">E-posta Adresi</label>
+                    <input type="email" id="email" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Şifre</label>
+                    <input type="password" id="password" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500">
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-lg transition">Giriş Yap / Kayıt Ol</button>
+            </form>
+            
+            <div class="mt-6">
+                <button id="google-login" class="w-full bg-white hover:bg-slate-100 text-slate-900 font-semibold py-2 rounded-lg transition flex items-center justify-center gap-2">
+                    <span>Google ile Giriş Yap</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sohbet Ekranı (Giriş yapınca açılır) -->
+    <header class="bg-slate-800 border-b border-slate-700 p-4 flex justify-between items-center shadow-md">
+        <div class="flex items-center gap-3">
+            <img id="user-avatar" src="https://via.placeholder.com/40" class="w-10 h-10 rounded-full object-cover border border-indigo-500">
+            <div>
+                <h2 id="user-name" class="font-bold text-sm">Kullanıcı</h2>
+                <span class="text-xs text-emerald-4
