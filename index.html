@@ -14,6 +14,14 @@
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col justify-between overflow-hidden select-none">
 
+    <!-- EĞER HATA OLURSA EKRANDA GÖSTERMEK İÇİN -->
+    <div id="error-box" class="hidden fixed inset-0 bg-red-950/90 z-50 flex items-center justify-center p-6 text-center">
+        <div class="bg-red-900/50 border border-red-500/50 p-6 rounded-2xl max-w-md space-y-3">
+            <h2 class="text-xl font-bold text-red-200">Kritik Hata Yakalandı!</h2>
+            <p id="error-text" class="text-xs text-red-300 font-mono break-all"></p>
+        </div>
+    </div>
+
     <!-- 1. GİRİŞ EKRANI -->
     <div id="auth-screen" class="fixed inset-0 bg-slate-950 z-50 flex flex-col items-center justify-center p-6">
         <div class="w-full max-w-sm space-y-8">
@@ -40,4 +48,4 @@
                     <div class="flex-grow border-t border-slate-800"></div>
                 </div>
 
-                <button type="button" id="google-login" class="w-
+                <button type="button" id="google-login" class="w-full bg-white active:scale-95 hover:bg-slate-100 text-slate-900 font-semibold py-3 rounded-xl text-sm transition flex items-center justify-center gap-2">
