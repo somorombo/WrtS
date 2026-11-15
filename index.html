@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WrtS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Mobil uygulama hissi için kaydırma çubuğu ve dokunma ayarları */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        body { overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col justify-between overflow-hidden select-none">
+
+    <!-- 1. GİRİŞ EKRANI -->
+    <div id="auth-screen" class="fixed inset-0 bg-slate-950 z-50 flex flex-col items-center justify-center p-6">
+        <div class="w-full max-w-sm space-y-8">
+            <div class="text-center space-y-2">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 mb-2">
+                    <span class="text-3xl font-black tracking-tighter text-indigo-400">W</span>
+                </div>
+                <h1 class="text-4xl font-extrabold tracking-tight text-white">WrtS</h1>
+                <p class="text-sm text-slate-400">Hızlı, sade ve anlık iletişim.</p>
+            </div>
+            
+            <form id="auth-form" class="space-y-4 bg-slate-900/80 p-6 rounded-3xl border border-slate-800 shadow-2xl">
+                <div>
+                    <input type="email" id="email" placeholder="E-posta adresiniz" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition">
+                </div>
+                <div>
+                    <input type="password" id="password" placeholder="Şifreniz" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition">
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 active:scale-95 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl text-sm transition shadow-lg shadow-indigo-600/20">Giriş Yap / Kayıt Ol</button>
+                
+                <div class="relative flex py-2 items-center">
+                    <div class="flex-grow border-t border-slate-800"></div>
+                    <span class="flex-shrink mx-3 text-xs
