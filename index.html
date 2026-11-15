@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>WrtS - Mesajlaşma Platformu</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase SDK (ES Modül Olmayan, Kesin Çalışan Sürüm) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
     <style>
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -13,14 +18,6 @@
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col justify-between overflow-hidden select-none">
-
-    <!-- EĞER HATA OLURSA EKRANDA GÖSTERMEK İÇİN -->
-    <div id="error-box" class="hidden fixed inset-0 bg-red-950/90 z-50 flex items-center justify-center p-6 text-center">
-        <div class="bg-red-900/50 border border-red-500/50 p-6 rounded-2xl max-w-md space-y-3">
-            <h2 class="text-xl font-bold text-red-200">Kritik Hata Yakalandı!</h2>
-            <p id="error-text" class="text-xs text-red-300 font-mono break-all"></p>
-        </div>
-    </div>
 
     <!-- 1. GİRİŞ EKRANI -->
     <div id="auth-screen" class="fixed inset-0 bg-slate-950 z-50 flex flex-col items-center justify-center p-6">
@@ -49,3 +46,4 @@
                 </div>
 
                 <button type="button" id="google-login" class="w-full bg-white active:scale-95 hover:bg-slate-100 text-slate-900 font-semibold py-3 rounded-xl text-sm transition flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.3
