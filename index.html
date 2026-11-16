@@ -57,7 +57,6 @@
                 <button id="close-profile" class="text-slate-400 hover:text-white">✕</button>
             </div>
             
-            <!-- Dosyadan Fotoğraf Seçme -->
             <div class="flex flex-col items-center gap-2">
                 <img id="preview-avatar" src="" class="w-20 h-20 rounded-full object-cover border-2 border-indigo-500 shadow-md">
                 <input type="file" id="upload-avatar-file" accept="image/*" class="hidden">
@@ -141,13 +140,11 @@
         let tempBase64Avatar = null;
         const defaultRooms = ['genel', 'sohbet', 'oyun'];
 
-        // Oturum ve Çevrimiçi (Presence) Sistemi
         auth.onAuthStateChanged(user => {
             if (user) {
                 currentUser = user;
                 loginScreen.classList.add('hidden');
                 
-                // Çevrimiçi durumunu ayarla (Firebase onDisconnect)
                 const userStatusRef = db.ref('status/' + user.uid);
                 const myConnectionsRef = db.ref('.info/connected');
                 
@@ -158,7 +155,6 @@
                     }
                 });
 
-                // Tüm kullanıcıların çevrimiçi durumlarını dinle
                 db.ref('status').on('value', snap => {
                     activeUsersData = snap.val() || {};
                     updateOnlineDots();
@@ -190,7 +186,6 @@
             tempBase64Avatar = null;
         }
 
-        // Cihazdan Resim Seçip Sıkıştırma (Base64)
         document.getElementById('upload-avatar-file').addEventListener('change', e => {
             const file = e.target.files[0];
             if (!file) return;
@@ -224,7 +219,6 @@
             reader.readAsDataURL(file);
         });
 
-        // Profil Kaydetme
         document.getElementById('open-profile').addEventListener('click', () => document.getElementById('profile-modal').classList.remove('hidden'));
         document.getElementById('close-profile').addEventListener('click', () => document.getElementById('profile-modal').classList.add('hidden'));
         document.getElementById('modal-logout').addEventListener('click', () => {
@@ -246,7 +240,6 @@
             document.getElementById('profile-modal').classList.add('hidden');
         });
 
-        // Çevrimiçi Noktalarını Güncelleme
         function updateOnlineDots() {
             document.querySelectorAll('[data-uid]').forEach(el => {
                 const uid = el.getAttribute('data-uid');
@@ -255,7 +248,6 @@
             });
         }
 
-        // Dinamik Odalar
         function listenRooms() {
             db.ref('oda_listesi').on('value', snap => {
                 customRoomsData = snap.val() || {};
@@ -331,17 +323,30 @@
             }
         });
 
-        // Google ve E-posta Giriş
-        function showError(msg) { authError.textContent = msg; authError.classList.remove('hidden'); }
+        function showError(msg) { 
+            authError.textContent = msg; 
+            authError.classList.remove('hidden'); 
+            alert("Giriş Hatası: " + msg);
+        }
+
+        // Google Giriş (Hata yakalayıcılı)
         document.getElementById('google-btn').addEventListener('click', () => {
-            auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(err => showError(err.message));
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider).catch(err => {
+                showError(err.message);
+            });
         });
+
+        // E-posta Giriş / Kayıt (Hata yakalayıcılı)
         document.getElementById('email-form').addEventListener('submit', e => {
             e.preventDefault();
             const email = document.getElementById('email').value;
             const pass = document.getElementById('password').value;
+            
             auth.signInWithEmailAndPassword(email, pass).catch(() => {
-                auth.createUserWithEmailAndPassword(email, pass).catch(err => showError(err.message));
+                auth.createUserWithEmailAndPassword(email, pass).catch(err => {
+                    showError(err.message);
+                });
             });
         });
 
@@ -351,7 +356,6 @@
             loadRoom(currentRoom);
         });
 
-        // Emojiler
         function renderReactionsHTML(reactionsObj, room, key) {
             if (!reactionsObj) return '';
             const counts = {};
@@ -430,4 +434,55 @@
             });
 
             roomRef.on('child_removed', snap => {
-                document.getElementById(`msg-${snap.key}`)?.
+                document.getElementById(`msg-${snap.key}`)?.remove();
+            });
+        }
+
+        window.toggleActionMenu = function(key) {
+            const menu = document.getElementById(`menu-${key}`);
+            if (!menu) return;
+            const isHidden = menu.classList.contains('hidden');
+            document.querySelectorAll('[id^="menu-"]').forEach(el => el.classList.add('hidden'));
+            if (isHidden) menu.classList.remove('hidden');
+        };
+
+        window.toggleReaction = function(room, key, emoji) {
+            if(!currentUser) return;
+            const ref = db.ref(`odalar/${room}/${key}/reactions/${currentUser.uid}`);
+            ref.once('value', snap => {
+                if (snap.val() === emoji) {
+                    ref.remove();
+                } else {
+                    ref.set(emoji);
+                }
+            });
+            document.getElementById(`menu-${key}`)?.classList.add('hidden');
+        };
+
+        window.deleteMsg = function(room, key) {
+            if(confirm("Bu mesajı silmek istiyor musun?")) {
+                db.ref(`odalar/${room}/${key}`).remove();
+            }
+        };
+
+        document.getElementById('msg-form').addEventListener('submit', e => {
+            e.preventDefault();
+            const input = document.getElementById('msg-input');
+            const text = input.value.trim();
+            if(!text || !currentUser) return;
+
+            const myData = getMyData();
+
+            db.ref('odalar/' + currentRoom).push({
+                uid: currentUser.uid,
+                isim: myData.name,
+                avatar: myData.avatar,
+                bio: myData.bio,
+                mesaj: text,
+                zaman: Date.now()
+            });
+            input.value = '';
+        });
+    </script>
+</body>
+</html>
