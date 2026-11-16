@@ -91,7 +91,7 @@
                 <h3 class="text-lg font-bold text-amber-400">❌ Karşılıklı XOX</h3>
                 <button onclick="document.getElementById('games-modal').classList.add('hidden')" class="text-slate-400 hover:text-white font-bold">✕</button>
             </div>
-            <p id="xox-status" class="text-xs text-slate-300">Oda içinde karşılıklı hamleler senkronize ediliyor</p>
+            <p id="xox-status" class="text-xs text-slate-300">Oda içinde hamleler senkronize ediliyor</p>
             <div class="grid grid-cols-3 gap-2 w-48 mx-auto py-2">
                 <button onclick="makeXOXMove(0)" id="cell-0" class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-xl text-xl font-bold text-indigo-400 hover:border-indigo-500"></button>
                 <button onclick="makeXOXMove(1)" id="cell-1" class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-xl text-xl font-bold text-indigo-400 hover:border-indigo-500"></button>
@@ -107,39 +107,24 @@
         </div>
     </div>
 
-    <!-- SESLİ SOHBET MODALI (KARŞILIKLI SES AKTARIMI) -->
-    <div id="voice-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-sm space-y-4 shadow-2xl text-center">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                <h3 class="text-lg font-bold text-emerald-400">🎙️ Sesli Sohbet Odası</h3>
-                <button onclick="closeVoiceChat()" class="text-slate-400 hover:text-white font-bold">✕</button>
-            </div>
-            <div class="py-6 flex flex-col items-center gap-3">
-                <div id="voice-pulse" class="w-20 h-20 rounded-full bg-emerald-600/30 border-2 border-emerald-500 flex items-center justify-center text-2xl">🎙️</div>
-                <p id="voice-status" class="text-xs text-slate-300">Sesli sohbete bağlı değilsin.</p>
-                <audio id="remote-audio" autoplay></audio>
-            </div>
-            <div class="flex gap-2">
-                <button onclick="toggleVoiceChat()" id="join-voice-btn" class="flex-1 bg-emerald-600 hover:bg-emerald-500 py-2.5 rounded-xl text-sm font-bold transition">Mikrofonu Aç / Bağlan</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- GIF SEÇME MODALI -->
+    <!-- GIF SEÇME MODALI (Garantili Çalışan GIF Havuzu) -->
     <div id="gif-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-md space-y-4 shadow-2xl max-h-[80vh] flex flex-col">
             <div class="flex justify-between items-center">
                 <h3 class="text-lg font-bold">GIF Seç</h3>
                 <button id="close-gif-modal" class="text-slate-400 hover:text-white font-bold">✕</button>
             </div>
-            <input type="text" id="gif-search-input" placeholder="GIF ara (örn: cat, happy, dance)..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
             <div id="gif-results" class="grid grid-cols-2 gap-2 overflow-y-auto max-h-60 p-1">
-                <p class="text-xs text-slate-500 col-span-2 text-center py-4">GIF'ler yükleniyor...</p>
+                <!-- Statik Garantili Popüler GIF Örnekleri -->
+                <img src="https://media.giphy.com/media/3o7TKSjRrfIPjeiOkM/giphy.gif" class="w-full h-28 object-cover rounded-xl cursor-pointer hover:opacity-80 transition" onclick="sendGIF(this.src)">
+                <img src="https://media.giphy.com/media/l0HlvtIPzPdt2usKs/giphy.gif" class="w-full h-28 object-cover rounded-xl cursor-pointer hover:opacity-80 transition" onclick="sendGIF(this.src)">
+                <img src="https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif" class="w-full h-28 object-cover rounded-xl cursor-pointer hover:opacity-80 transition" onclick="sendGIF(this.src)">
+                <img src="https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif" class="w-full h-28 object-cover rounded-xl cursor-pointer hover:opacity-80 transition" onclick="sendGIF(this.src)">
             </div>
         </div>
     </div>
 
-    <!-- AYARLAR & PROFİL MODALI (ARKA PLAN DEĞİŞTİRME YERİNDE DURUYOR) -->
+    <!-- AYARLAR & PROFİL MODALI -->
     <div id="profile-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-sm space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center sticky top-0 bg-slate-900 pb-2 border-b border-slate-800">
@@ -204,7 +189,6 @@
             <button id="delete-room-btn" class="hidden bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 w-7 h-7 rounded-lg flex items-center justify-center text-xs shrink-0 transition" title="Bu Odayı Sil">🗑️</button>
         </div>
         <div class="flex items-center gap-1.5 sm:gap-2">
-            <button onclick="document.getElementById('voice-modal').classList.remove('hidden')" class="bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 border border-emerald-500/30 px-2 py-1.5 rounded-lg text-xs font-bold shrink-0">🎙️ Ses</button>
             <button onclick="document.getElementById('games-modal').classList.remove('hidden')" class="bg-amber-600/20 hover:bg-amber-600/40 text-amber-400 border border-amber-500/30 px-2 py-1.5 rounded-lg text-xs font-bold shrink-0">🎮 Oyun</button>
             <button id="open-users-btn" class="bg-slate-800/60 hover:bg-slate-800 px-2 py-1.5 rounded-full border border-slate-700 text-xs text-emerald-400 flex items-center gap-1 shrink-0">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -250,7 +234,7 @@
             </button>
 
             <!-- GIF Seçme Butonu -->
-            <button type="button" id="open-gif-modal" class="p-2 text-slate-400 hover:text-amber-400 bg-slate-800/60 rounded-full transition shrink-0 text-xs font-extrabold" title="GIF Gönder">GIF</button>
+            <button type="button" onclick="document.getElementById('gif-modal').classList.remove('hidden')" class="p-2 text-slate-400 hover:text-amber-400 bg-slate-800/60 rounded-full transition shrink-0 text-xs font-extrabold" title="GIF Gönder">GIF</button>
 
             <input type="text" id="msg-input" placeholder="Bir şeyler yaz..." autocomplete="off" class="flex-1 min-w-0 bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 sm:py-3 text-base sm:text-sm focus:outline-none focus:border-indigo-500">
             
@@ -290,7 +274,7 @@
         let replyingTo = null;
         const defaultRooms = ['genel', 'sohbet', 'oyun'];
 
-        // ❌ Karşılıklı XOX Oyunu Mantığı (Firebase Senkronizasyonlu)
+        // Karşılıklı XOX Oyunu Mantığı
         let xoxRef = null;
         function listenXOX(room) {
             if (xoxRef) xoxRef.off();
@@ -312,8 +296,6 @@
                 if (game.status.includes('Kazanan') || game.status.includes('Berabere') || game.board[index] !== '') return;
                 
                 game.board[index] = game.turn;
-                
-                // Kazanma Kontrolü
                 const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
                 const hasWon = wins.some(([a,b,c]) => game.board[a] && game.board[a] === game.board[b] && game.board[a] === game.board[c]);
                 
@@ -337,70 +319,7 @@
             });
         }
 
-        // 🎙️ Karşılıklı Sesli Sohbet (Web Audio / Veritabanı Stream)
-        let voiceConnected = false;
-        let voiceStream = null;
-        window.toggleVoiceChat = async function() {
-            const btn = document.getElementById('join-voice-btn');
-            const status = document.getElementById('voice-status');
-            const pulse = document.getElementById('voice-pulse');
-
-            if (!voiceConnected) {
-                try {
-                    voiceStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    voiceConnected = true;
-                    btn.textContent = "Sesli Sohbetten Ayrıl";
-                    btn.className = "flex-1 bg-red-600 hover:bg-red-500 py-2.5 rounded-xl text-sm font-bold transition";
-                    status.textContent = "Sesli sohbete bağlandın (Mikrofon açık).";
-                    pulse.classList.add('animate-bounce');
-
-                    // Ses verisini odaya canlı akıtma simülasyonu
-                    const mediaRecorder = new MediaRecorder(voiceStream);
-                    mediaRecorder.ondataavailable = e => {
-                        if (e.data.size > 0 && voiceConnected) {
-                            const reader = new FileReader();
-                            reader.onloadend = () => {
-                                db.ref(`voice_streams/${currentRoom}`).push({
-                                    uid: currentUser.uid,
-                                    audio: reader.result,
-                                    time: Date.now()
-                                });
-                            };
-                            reader.readAsDataURL(e.data);
-                        }
-                    };
-                    mediaRecorder.start(1000); // Her 1 saniyede bir ses paketi gönder
-                } catch(e) {
-                    alert("Mikrofon izni alınamadı.");
-                }
-            } else {
-                if (voiceStream) voiceStream.getTracks().forEach(t => t.stop());
-                voiceConnected = false;
-                btn.textContent = "Mikrofonu Aç / Bağlan";
-                btn.className = "flex-1 bg-emerald-600 hover:bg-emerald-500 py-2.5 rounded-xl text-sm font-bold transition";
-                status.textContent = "Sesli sohbete bağlı değilsin.";
-                pulse.classList.remove('animate-bounce');
-            }
-        }
-
-        // Karşı taraftan gelen sesleri oynatma
-        function listenVoiceStreams(room) {
-            db.ref(`voice_streams/${room}`).limitToLast(1).on('child_added', snap => {
-                const data = snap.val();
-                if (currentUser && data.uid !== currentUser.uid && voiceConnected) {
-                    const audio = document.getElementById('remote-audio');
-                    audio.src = data.audio;
-                    audio.play().catch(e => {});
-                }
-            });
-        }
-
-        window.closeVoiceChat = function() {
-            if (voiceConnected) toggleVoiceChat();
-            document.getElementById('voice-modal').classList.add('hidden');
-        }
-
-        // Arka Plan ve Tema Ayarları
+        // Tema ve Arka Plan Ayarları
         function applySettingsToUI() {
             const theme = localStorage.getItem('wrts_theme') || 'dark';
             const bgType = localStorage.getItem('wrts_bg') || 'default';
@@ -857,9 +776,7 @@
             });
             roomRef.on('child_removed', snap => { document.getElementById(`msg-${snap.key}`)?.remove(); });
 
-            // Odaya özel XOX oyununu ve ses akışını dinle
             listenXOX(room);
-            listenVoiceStreams(room);
         }
 
         window.toggleActionMenu = function(key) {
@@ -943,43 +860,8 @@
             e.target.value = '';
         });
 
-        // GIF Arama ve Tenor API Entegrasyonu
-        const gifModal = document.getElementById('gif-modal');
-        document.getElementById('open-gif-modal').addEventListener('click', () => {
-            gifModal.classList.remove('hidden');
-            fetchTrendingGIFs();
-        });
-        document.getElementById('close-gif-modal').addEventListener('click', () => gifModal.classList.add('hidden'));
-
-        async function fetchTrendingGIFs(query = '') {
-            const resultsDiv = document.getElementById('gif-results');
-            resultsDiv.innerHTML = '<p class="text-xs text-slate-500 col-span-2 text-center py-4">Yükleniyor...</p>';
-            try {
-                const url = query ? `https://g.tenor.com/v1/search?q=${encodeURIComponent(query)}&key=LIVDSRZULELA&limit=10` : `https://g.tenor.com/v1/trending?key=LIVDSRZULELA&limit=10`;
-                const res = await fetch(url);
-                const data = await res.json();
-                resultsDiv.innerHTML = '';
-                data.results.forEach(gif => {
-                    const imgUrl = gif.media[0].tinygif.url;
-                    const img = document.createElement('img');
-                    img.src = imgUrl;
-                    img.className = "w-full h-28 object-cover rounded-xl cursor-pointer hover:opacity-80 transition";
-                    img.addEventListener('click', () => sendGIF(gif.media[0].nanogif.url || imgUrl));
-                    resultsDiv.appendChild(img);
-                });
-            } catch(err) {
-                resultsDiv.innerHTML = '<p class="text-xs text-red-400 col-span-2 text-center py-4">Yüklenemedi.</p>';
-            }
-        }
-
-        let gifSearchTimeout;
-        document.getElementById('gif-search-input').addEventListener('input', e => {
-            clearTimeout(gifSearchTimeout);
-            const q = e.target.value.trim();
-            gifSearchTimeout = setTimeout(() => fetchTrendingGIFs(q), 500);
-        });
-
-        function sendGIF(url) {
+        // Garantili GIF Gönderme Fonksiyonu
+        window.sendGIF = function(url) {
             if (!currentUser) return;
             const myData = getMyData();
             const msgData = {
@@ -993,10 +875,10 @@
             };
             if (replyingTo) { msgData.replyTo = replyingTo; cancelReply(); }
             db.ref('odalar/' + currentRoom).push(msgData);
-            gifModal.classList.add('hidden');
+            document.getElementById('gif-modal').classList.add('hidden');
         }
 
-        // Ses Kaydı
+        // Ses Kaydı (Stabil Sesli Mesaj Gönderimi)
         let mediaRecorder;
         let audioChunks = [];
         const recordBtn = document.getElementById('record-btn');
