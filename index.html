@@ -179,34 +179,32 @@
         let typingTimeout = null;
         const defaultRooms = ['genel', 'sohbet', 'oyun'];
 
-        // GARANTİLİ GİRİŞ AKIŞI (Kilitlenmeyi önlemek için asenkron güvenli yapı)
+        // Orijinal Çalışan Giriş ve Çevrimiçi Akışı (Birebir Korundu)
         auth.onAuthStateChanged(user => {
             if (user) {
                 currentUser = user;
-                loginScreen.classList.add('hidden'); // Giriş ekranını anında kapatır
+                loginScreen.classList.add('hidden');
                 
+                const userStatusRef = db.ref('status/' + user.uid);
+                const myConnectionsRef = db.ref('.info/connected');
+                
+                myConnectionsRef.on('value', snap => {
+                    if (snap.val() === true) {
+                        userStatusRef.onDisconnect().set({ state: 'offline', lastChanged: firebase.database.ServerValue.TIMESTAMP });
+                        const myData = getMyData();
+                        userStatusRef.set({ state: 'online', name: myData.name, avatar: myData.avatar, lastChanged: firebase.database.ServerValue.TIMESTAMP });
+                    }
+                });
+
+                db.ref('status').on('value', snap => {
+                    activeUsersData = snap.val() || {};
+                    updateOnlineCountAndDots();
+                });
+
                 loadUserDataToUI();
                 listenRooms();
                 loadRoom(currentRoom);
                 listenTyping();
-
-                // Çevrimiçi durumunu arka planda güvenle başlat
-                try {
-                    const userStatusRef = db.ref('status/' + user.uid);
-                    db.ref('.info/connected').on('value', snap => {
-                        if (snap.val() === true) {
-                            userStatusRef.onDisconnect().set({ state: 'offline' });
-                            const myData = getMyData();
-                            userStatusRef.set({ state: 'online', name: myData.name, avatar: myData.avatar });
-                        }
-                    });
-
-                    db.ref('status').on('value', snap => {
-                        activeUsersData = snap.val() || {};
-                        updateOnlineCountAndDots();
-                    });
-                } catch(e) { console.log(e); }
-
             } else {
                 currentUser = null;
                 loginScreen.classList.remove('hidden');
@@ -214,7 +212,6 @@
         });
 
         function getMyData() {
-            if (!currentUser) return { name: "Kullanıcı", avatar: "", bio: "" };
             const name = localStorage.getItem('wrts_name_' + currentUser.uid) || currentUser.displayName || currentUser.email.split('@')[0];
             const avatar = localStorage.getItem('wrts_avatar_' + currentUser.uid) || currentUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4f46e5&color=fff`;
             const bio = localStorage.getItem('wrts_bio_' + currentUser.uid) || 'WrtS kullanıcısı.';
@@ -258,8 +255,7 @@
         document.getElementById('open-profile').addEventListener('click', () => document.getElementById('profile-modal').classList.remove('hidden'));
         document.getElementById('close-profile').addEventListener('click', () => document.getElementById('profile-modal').classList.add('hidden'));
         document.getElementById('modal-logout').addEventListener('click', () => {
-            if(currentUser) db.ref('status/' + currentUser.uid).set({ state: 'offline' });
-            auth.signOut();
+            db.ref('status/' + currentUser.uid).set({ state: 'offline' }).then(() => auth.signOut());
         });
 
         document.getElementById('save-profile').addEventListener('click', () => {
@@ -277,15 +273,14 @@
             db.ref('status/' + currentUser.uid).update({ name: md.name, avatar: md.avatar });
         });
 
-        // Çevrimiçi Kullanıcılar Modalı ve Sayacı
+        // Çevrimiçi Kullanıcılar Modalı ve Sayacı (Orijinal Kod)
         function updateOnlineCountAndDots() {
             let onlineCount = 0;
             const listDiv = document.getElementById('online-users-list');
-            if(!listDiv) return;
             listDiv.innerHTML = '';
 
             Object.entries(activeUsersData).forEach(([uid, info]) => {
-                if (info && info.state === 'online') {
+                if (info.state === 'online') {
                     onlineCount++;
                     const item = document.createElement('div');
                     item.className = "flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800 hover:border-indigo-500 cursor-pointer transition";
@@ -453,3 +448,224 @@
                 } else {
                     typingIndicator.textContent = '';
                 }
+            });
+        }
+
+        // Emojiler
+        function renderReactionsHTML(reactionsObj, room, key) {
+            if (!reactionsObj) return '';
+            const counts = {};
+            const myEmoji = currentUser ? reactionsObj[currentUser.uid] : null;
+            Object.values(reactionsObj).forEach(emoji => { counts[emoji] = (counts[emoji] || 0) + 1; });
+
+            return Object.entries(counts).map(([emoji, count]) => {
+                const isMine = myEmoji === emoji;
+                return `<button onclick="toggleReaction('${room}', '${key}', '${emoji}')" class="${isMine ? 'bg-indigo-600/40 border-indigo-400' : 'bg-slate-900/90 border-slate-700'} text-xs px-2 py-0.5 rounded-full border flex items-center gap-1 transition">
+                    <span>${emoji}</span><span class="text-[10px] text-slate-300 font-bold">${count}</span>
+                </button>`;
+            }).join('');
+        }
+
+        function createMessageElement(snap, room) {
+            const data = snap.val();
+            const key = snap.key;
+            const isMe = currentUser && data.uid === currentUser.uid;
+            
+            const div = document.createElement('div');
+            div.id = `msg-${key}`;
+            div.className = `flex gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'} items-end`;
+
+            const reactionsHTML = renderReactionsHTML(data.reactions, room, key);
+            const isOnline = activeUsersData[data.uid] && activeUsersData[data.uid].state === 'online';
+            const timeStr = new Date(data.zaman || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            let content = '';
+            if (data.type === 'image') {
+                content = `<img src="${data.url}" class="rounded-xl max-h-48 object-cover cursor-pointer" onclick="window.open('${data.url}', '_blank')">`;
+            } else if (data.type === 'audio') {
+                content = `<audio controls src="${data.url}" class="h-9 max-w-[200px]"></audio>`;
+            } else {
+                content = `<p class="text-sm break-words">${data.mesaj}</p>`;
+            }
+
+            div.innerHTML = `
+                <div class="relative shrink-0 mb-1">
+                    <img src="${data.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-6 h-6 rounded-full object-cover">
+                    <span data-uid="${data.uid}" class="absolute bottom-0 right-0 w-2 h-2 rounded-full border border-slate-900 ${isOnline ? 'bg-emerald-500' : 'bg-slate-500'}"></span>
+                </div>
+                <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[78%]">
+                    <div class="flex items-center gap-1.5 px-1 mb-0.5">
+                        <span class="text-[10px] text-slate-400">${data.isim}</span>
+                        <span class="text-[9px] text-slate-500 italic">${data.bio || ''}</span>
+                    </div>
+                    <div onclick="toggleActionMenu('${key}')" class="cursor-pointer ${isMe ? 'bg-indigo-600' : 'bg-slate-800'} px-3.5 py-2 rounded-2xl shadow">
+                        ${content}
+                        <div class="text-[9px] ${isMe ? 'text-indigo-200' : 'text-slate-400'} text-right mt-1">${timeStr}</div>
+                    </div>
+                    
+                    <div id="menu-${key}" class="hidden flex gap-1.5 items-center mt-1.5 bg-slate-900 border border-slate-800 px-2 py-1 rounded-full shadow-lg">
+                        <button onclick="toggleReaction('${room}', '${key}', '👍')" class="hover:scale-125 transition text-sm">👍</button>
+                        <button onclick="toggleReaction('${room}', '${key}', '❤️')" class="hover:scale-125 transition text-sm">❤️</button>
+                        <button onclick="toggleReaction('${room}', '${key}', '😂')" class="hover:scale-125 transition text-sm">😂</button>
+                        <button onclick="toggleReaction('${room}', '${key}', '🔥')" class="hover:scale-125 transition text-sm">🔥</button>
+                        ${isMe ? `<div class="w-[1px] h-3 bg-slate-700 mx-0.5"></div><button onclick="deleteMsg('${room}', '${key}')" class="text-red-400 hover:text-red-300 text-xs font-bold px-1">Sil</button>` : ''}
+                    </div>
+
+                    <div id="reactions-${key}" class="flex gap-1 mt-1 flex-wrap ${isMe ? 'justify-end' : 'justify-start'}">${reactionsHTML}</div>
+                </div>
+            `;
+            return div;
+        }
+
+        function loadRoom(room) {
+            if (roomRef) roomRef.off();
+            messagesDiv.innerHTML = '';
+            roomRef = db.ref('odalar/' + room).limitToLast(50);
+            
+            roomRef.on('child_added', snap => {
+                const el = createMessageElement(snap, room);
+                messagesDiv.appendChild(el);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            });
+
+            roomRef.on('child_changed', snap => {
+                const data = snap.val();
+                const key = snap.key;
+                const reactionsContainer = document.getElementById(`reactions-${key}`);
+                if (reactionsContainer) {
+                    reactionsContainer.innerHTML = renderReactionsHTML(data.reactions, room, key);
+                }
+            });
+
+            roomRef.on('child_removed', snap => {
+                document.getElementById(`msg-${snap.key}`)?.remove();
+            });
+        }
+
+        window.toggleActionMenu = function(key) {
+            const menu = document.getElementById(`menu-${key}`);
+            if (!menu) return;
+            const isHidden = menu.classList.contains('hidden');
+            document.querySelectorAll('[id^="menu-"]').forEach(el => el.classList.add('hidden'));
+            if (isHidden) menu.classList.remove('hidden');
+        };
+
+        window.toggleReaction = function(room, key, emoji) {
+            if(!currentUser) return;
+            const ref = db.ref(`odalar/${room}/${key}/reactions/${currentUser.uid}`);
+            ref.once('value', snap => {
+                if (snap.val() === emoji) ref.remove();
+                else ref.set(emoji);
+            });
+            document.getElementById(`menu-${key}`)?.classList.add('hidden');
+        };
+
+        window.deleteMsg = function(room, key) {
+            if(confirm("Bu mesajı silmek istiyor musun?")) {
+                db.ref(`odalar/${room}/${key}`).remove();
+            }
+        };
+
+        // Metin Mesajı Gönderme
+        document.getElementById('msg-form').addEventListener('submit', e => {
+            e.preventDefault();
+            const input = document.getElementById('msg-input');
+            const text = input.value.trim();
+            if(!text || !currentUser) return;
+
+            const myData = getMyData();
+            db.ref(`typing/${currentRoom}/${currentUser.uid}`).remove();
+
+            db.ref('odalar/' + currentRoom).push({
+                uid: currentUser.uid,
+                isim: myData.name,
+                avatar: myData.avatar,
+                bio: myData.bio,
+                mesaj: text,
+                type: 'text',
+                zaman: Date.now()
+            });
+            input.value = '';
+        });
+
+        // Fotoğraf Gönderme (Base64)
+        document.getElementById('img-file').addEventListener('change', e => {
+            const file = e.target.files[0];
+            if(!file || !currentUser) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX = 600;
+                    let w = img.width, h = img.height;
+                    if (w > h) { if (w > MAX) { h *= MAX / w; w = MAX; } }
+                    else { if (h > MAX) { w *= MAX / h; h = MAX; } }
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    
+                    const base64Url = canvas.toDataURL('image/jpeg', 0.6);
+                    const myData = getMyData();
+
+                    db.ref('odalar/' + currentRoom).push({
+                        uid: currentUser.uid,
+                        isim: myData.name,
+                        avatar: myData.avatar,
+                        bio: myData.bio,
+                        url: base64Url,
+                        type: 'image',
+                        zaman: Date.now()
+                    });
+                }
+                img.src = event.target.result;
+            }
+            reader.readAsDataURL(file);
+            e.target.value = '';
+        });
+
+        // Ses Kaydı
+        let mediaRecorder;
+        let audioChunks = [];
+        const recordBtn = document.getElementById('record-btn');
+
+        recordBtn.addEventListener('click', async () => {
+            if(!mediaRecorder || mediaRecorder.state === "inactive") {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                    mediaRecorder.onstop = async () => {
+                        const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                        const reader = new FileReader();
+                        reader.onloadend = function() {
+                            const base64Audio = reader.result;
+                            const myData = getMyData();
+
+                            db.ref('odalar/' + currentRoom).push({
+                                uid: currentUser.uid,
+                                isim: myData.name,
+                                avatar: myData.avatar,
+                                bio: myData.bio,
+                                url: base64Audio,
+                                type: 'audio',
+                                zaman: Date.now()
+                            });
+                        }
+                        reader.readAsDataURL(blob);
+                        stream.getTracks().forEach(t => t.stop());
+                    };
+                    mediaRecorder.start();
+                    recordBtn.classList.add('bg-rose-600', 'text-white', 'animate-pulse');
+                } catch(e) {
+                    alert("Mikrofon izni alınamadı.");
+                }
+            } else {
+                mediaRecorder.stop();
+                recordBtn.classList.remove('bg-rose-600', 'text-white', 'animate-pulse');
+            }
+        });
+    </script>
+</body>
+</html>
