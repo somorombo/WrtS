@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WrtS - Gelişmiş Sohbet Platformu</title>
+    <title>WrtS - Süper Sohbet & Oyun Platformu</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -19,7 +19,7 @@
     <!-- BİLDİRİM BALONU KAPSAYICISI -->
     <div id="notification-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-    <!-- GİRİŞ EKRANI (Orijinal ve Kararlı) -->
+    <!-- GİRİŞ EKRANI -->
     <div id="login-screen" class="fixed inset-0 bg-slate-950 z-50 flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-2xl w-full max-w-sm space-y-5 shadow-2xl">
             <h1 class="text-3xl font-black text-center text-indigo-400">WrtS</h1>
@@ -37,18 +37,36 @@
         </div>
     </div>
 
-    <!-- KULLANICI LİSTESİ & DM MODALI -->
+    <!-- KULLANICI LİSTESİ, ARKADAŞLIK & DM MODALI -->
     <div id="users-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-sm space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto">
             <div class="flex justify-between items-center sticky top-0 bg-slate-900 pb-2 border-b border-slate-800">
-                <h3 class="text-lg font-bold">Kullanıcılar & Gizli DM</h3>
+                <h3 class="text-lg font-bold">Kullanıcılar & Arkadaşlar</h3>
                 <button id="close-users-modal" class="text-slate-400 hover:text-white font-bold px-2 py-1">✕</button>
             </div>
+            
+            <!-- Gelen Arkadaşlık İstekleri -->
+            <div id="friend-requests-section" class="hidden">
+                <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">📩 Arkadaşlık İstekleri</h4>
+                <div id="friend-requests-list" class="space-y-2 mb-3"></div>
+                <hr class="border-slate-800">
+            </div>
+
+            <!-- Arkadaşlarım -->
+            <div>
+                <h4 class="text-xs font-bold text-pink-400 uppercase tracking-wider mb-2">💖 Arkadaşlarım</h4>
+                <div id="my-friends-list" class="space-y-2"><p class="text-xs text-slate-500 italic">Henüz ekli arkadaşın yok.</p></div>
+            </div>
+            <hr class="border-slate-800">
+
+            <!-- Çevrimiçi Olanlar -->
             <div>
                 <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">🟢 Çevrimiçi Olanlar</h4>
                 <div id="online-users-list" class="space-y-2"></div>
             </div>
             <hr class="border-slate-800">
+
+            <!-- Tüm Kullanıcılar -->
             <div>
                 <h4 class="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-2">👥 Tüm Kullanıcılar</h4>
                 <div id="all-users-list" class="space-y-2"><p class="text-xs text-slate-500 italic">Yükleniyor...</p></div>
@@ -84,30 +102,87 @@
         </div>
     </div>
 
-    <!-- MİNİ OYUNLAR MODALI (KARŞILIKLI XOX) -->
-    <div id="games-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-sm space-y-4 shadow-2xl text-center">
+    <!-- WEBRTC SESLİ & GÖRÜNTÜLÜ GÖRÜŞME MODALI -->
+    <div id="call-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-lg space-y-4 shadow-2xl text-center">
             <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                <h3 class="text-lg font-bold text-amber-400">❌ Karşılıklı XOX</h3>
-                <button onclick="document.getElementById('games-modal').classList.add('hidden')" class="text-slate-400 hover:text-white font-bold">✕</button>
+                <h3 class="text-lg font-bold text-emerald-400">📹 Canlı Oda Görüşmesi (WebRTC)</h3>
+                <button onclick="endWebRTCCall()" class="text-slate-400 hover:text-white font-bold">✕</button>
             </div>
-            <p id="xox-status" class="text-xs text-slate-300">Oda içinde hamleler senkronize ediliyor</p>
-            <div class="grid grid-cols-3 gap-2 w-48 mx-auto py-2">
-                <button onclick="makeXOXMove(0)" id="cell-0" class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-xl text-xl font-bold text-indigo-400 hover:border-indigo-500"></button>
-                <button onclick="makeXOXMove(1)" id="cell-1" class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-xl text-xl font-bold text-indigo-400 hover:border-indigo-500"></button>
-                <button onclick="makeXOXMove(2)" id="cell-2" class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-xl text-xl font-bold text-indigo-400 hover:border-indigo-500"></button>
-                <button onclick="makeXOXMove(3)" id="cell-3" class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-xl text-xl font-bold text-indigo-400 hover:border-indigo-500"></button>
-                <button onclick="makeXOXMove(4)" id="cell-4" class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-xl text-xl font-bold text-indigo-400 hover:border-indigo-500"></button>
-                <button onclick="makeXOXMove(5)" id="cell-5" class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-xl text-xl font-bold text-indigo-400 hover:border-indigo-500"></button>
-                <button onclick="makeXOXMove(6)" id="cell-6" class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-xl text-xl font-bold text-indigo-400 hover:border-indigo-500"></button>
-                <button onclick="makeXOXMove(7)" id="cell-7" class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-xl text-xl font-bold text-indigo-400 hover:border-indigo-500"></button>
-                <button onclick="makeXOXMove(8)" id="cell-8" class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-xl text-xl font-bold text-indigo-400 hover:border-indigo-500"></button>
+            <p id="call-status" class="text-xs text-slate-400">Oda içi P2P ses ve görüntü bağlantısı hazır.</p>
+            <div class="grid grid-cols-2 gap-2">
+                <div class="bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 relative aspect-video">
+                    <video id="local-video" autoplay muted playsinline class="w-full h-full object-cover"></video>
+                    <span class="absolute bottom-1 left-2 text-[10px] bg-black/60 px-2 py-0.5 rounded">Sen</span>
+                </div>
+                <div class="bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 relative aspect-video">
+                    <video id="remote-video" autoplay playsinline class="w-full h-full object-cover"></video>
+                    <span class="absolute bottom-1 left-2 text-[10px] bg-black/60 px-2 py-0.5 rounded">Karşı Taraf</span>
+                </div>
             </div>
-            <button onclick="resetXOXGame()" class="w-full bg-slate-800 hover:bg-slate-700 py-2 rounded-xl text-xs font-bold transition">Tahtayı Sıfırla</button>
+            <div class="flex gap-2 justify-center pt-1">
+                <button onclick="startWebRTCCall(false)" class="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded-xl text-xs font-bold transition">🎙️ Sesli Başlat</button>
+                <button onclick="startWebRTCCall(true)" class="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-xl text-xs font-bold transition">📹 Görüntülü Başlat</button>
+                <button onclick="joinWebRTCCall()" class="bg-amber-600 hover:bg-amber-500 px-4 py-2 rounded-xl text-xs font-bold transition">📲 Aramaya Katıl</button>
+                <button onclick="endWebRTCCall()" class="bg-red-600 hover:bg-red-500 px-4 py-2 rounded-xl text-xs font-bold transition">Kapat</button>
+            </div>
         </div>
     </div>
 
-    <!-- GIF SEÇME MODALI (Garantili Çalışan GIF Havuzu) -->
+    <!-- MİNİ OYUNLAR MERKEZİ (XOX, AMİRAL BATTI, KELİME TAHMİN) -->
+    <div id="games-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-md space-y-4 shadow-2xl text-center max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                <h3 class="text-lg font-bold text-amber-400">🎮 Karşılıklı Oyun Merkezi</h3>
+                <button onclick="document.getElementById('games-modal').classList.add('hidden')" class="text-slate-400 hover:text-white font-bold">✕</button>
+            </div>
+            
+            <!-- Oyun Seçme Sekmeleri -->
+            <div class="flex gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                <button onclick="switchGameTab('xox')" id="tab-xox" class="flex-1 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white">❌ XOX</button>
+                <button onclick="switchGameTab('battleship')" id="tab-battleship" class="flex-1 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white">🚢 Amiral Battı</button>
+                <button onclick="switchGameTab('word')" id="tab-word" class="flex-1 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white">🔤 Kelime Bul</button>
+            </div>
+
+            <!-- 1. XOX OYUNU -->
+            <div id="game-panel-xox" class="space-y-3">
+                <p id="xox-status" class="text-xs text-slate-300">Sıra: X</p>
+                <div class="grid grid-cols-3 gap-2 w-48 mx-auto">
+                    <button onclick="makeXOXMove(0)" id="cell-0" class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-xl text-xl font-bold text-indigo-400"></button>
+                    <button onclick="makeXOXMove(1)" id="cell-1" class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-xl text-xl font-bold text-indigo-400"></button>
+                    <button onclick="makeXOXMove(2)" id="cell-2" class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-xl text-xl font-bold text-indigo-400"></button>
+                    <button onclick="makeXOXMove(3)" id="cell-3" class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-xl text-xl font-bold text-indigo-400"></button>
+                    <button onclick="makeXOXMove(4)" id="cell-4" class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-xl text-xl font-bold text-indigo-400"></button>
+                    <button onclick="makeXOXMove(5)" id="cell-5" class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-xl text-xl font-bold text-indigo-400"></button>
+                    <button onclick="makeXOXMove(6)" id="cell-6" class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-xl text-xl font-bold text-indigo-400"></button>
+                    <button onclick="makeXOXMove(7)" id="cell-7" class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-xl text-xl font-bold text-indigo-400"></button>
+                    <button onclick="makeXOXMove(8)" id="cell-8" class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-xl text-xl font-bold text-indigo-400"></button>
+                </div>
+                <button onclick="resetXOXGame()" class="w-full bg-slate-800 hover:bg-slate-700 py-2 rounded-xl text-xs font-bold">XOX Sıfırla</button>
+            </div>
+
+            <!-- 2. AMİRAL BATTI (5x5 Hızlı Arena) -->
+            <div id="game-panel-battleship" class="hidden space-y-3">
+                <p id="bs-status" class="text-xs text-slate-300">Gizli 3 gemiyi vur! Kalan Hak: 10</p>
+                <div id="bs-grid" class="grid grid-cols-5 gap-1.5 w-60 mx-auto"></div>
+                <button onclick="resetBattleship()" class="w-full bg-slate-800 hover:bg-slate-700 py-2 rounded-xl text-xs font-bold">Yeni Deniz Haritası</button>
+            </div>
+
+            <!-- 3. KELİME TAHMİN OYUNU -->
+            <div id="game-panel-word" class="hidden space-y-3">
+                <p class="text-xs text-slate-400">Oda içi ortak kelime tahmin yarışı!</p>
+                <div id="word-display" class="text-2xl font-black tracking-widest text-emerald-400 py-2 bg-slate-950 rounded-xl border border-slate-800">_ _ _ _ _</div>
+                <p id="word-hint" class="text-xs text-amber-300 italic">İpucu: Yükleniyor...</p>
+                <div class="flex gap-2">
+                    <input type="text" id="word-guess-input" placeholder="Tahminini yaz..." class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs focus:outline-none">
+                    <button onclick="submitWordGuess()" class="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded-xl text-xs font-bold">Tahmin Et</button>
+                </div>
+                <button onclick="resetWordGame()" class="w-full bg-slate-800 hover:bg-slate-700 py-2 rounded-xl text-xs font-bold">Yeni Kelime Getir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GIF SEÇME MODALI -->
     <div id="gif-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-md space-y-4 shadow-2xl max-h-[80vh] flex flex-col">
             <div class="flex justify-between items-center">
@@ -115,11 +190,12 @@
                 <button id="close-gif-modal" class="text-slate-400 hover:text-white font-bold">✕</button>
             </div>
             <div id="gif-results" class="grid grid-cols-2 gap-2 overflow-y-auto max-h-60 p-1">
-                <!-- Statik Garantili Popüler GIF Örnekleri -->
                 <img src="https://media.giphy.com/media/3o7TKSjRrfIPjeiOkM/giphy.gif" class="w-full h-28 object-cover rounded-xl cursor-pointer hover:opacity-80 transition" onclick="sendGIF(this.src)">
                 <img src="https://media.giphy.com/media/l0HlvtIPzPdt2usKs/giphy.gif" class="w-full h-28 object-cover rounded-xl cursor-pointer hover:opacity-80 transition" onclick="sendGIF(this.src)">
                 <img src="https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif" class="w-full h-28 object-cover rounded-xl cursor-pointer hover:opacity-80 transition" onclick="sendGIF(this.src)">
                 <img src="https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif" class="w-full h-28 object-cover rounded-xl cursor-pointer hover:opacity-80 transition" onclick="sendGIF(this.src)">
+                <img src="https://media.giphy.com/media/13HgwGsXF0aiGY/giphy.gif" class="w-full h-28 object-cover rounded-xl cursor-pointer hover:opacity-80 transition" onclick="sendGIF(this.src)">
+                <img src="https://media.giphy.com/media/mlvseq9yvZhba/giphy.gif" class="w-full h-28 object-cover rounded-xl cursor-pointer hover:opacity-80 transition" onclick="sendGIF(this.src)">
             </div>
         </div>
     </div>
@@ -150,7 +226,11 @@
             <hr class="border-slate-800">
 
             <div class="space-y-3">
-                <h4 class="text-xs font-bold text-indigo-400 uppercase tracking-wider">Kişiselleştirme Ayarları</h4>
+                <h4 class="text-xs font-bold text-indigo-400 uppercase tracking-wider">Kişiselleştirme & Ses</h4>
+                <div class="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-slate-800">
+                    <span class="text-xs font-medium">Bildirim Sesleri</span>
+                    <input type="checkbox" id="sound-toggle" checked class="w-4 h-4 accent-indigo-600">
+                </div>
                 <div class="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-slate-800">
                     <span class="text-xs font-medium">Tema (Karanlık / Aydınlık)</span>
                     <select id="theme-select" class="bg-slate-900 border border-slate-700 text-xs rounded-lg px-2 py-1 text-indigo-300 focus:outline-none">
@@ -159,7 +239,7 @@
                     </select>
                 </div>
                 <div class="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-slate-800">
-                    <span class="text-xs font-medium">Sohbet Arka Planı (Duvar Kağıdı)</span>
+                    <span class="text-xs font-medium">Sohbet Arka Planı</span>
                     <select id="bg-select" class="bg-slate-900 border border-slate-700 text-xs rounded-lg px-2 py-1 text-indigo-300 focus:outline-none">
                         <option value="default">Varsayılan (Düz)</option>
                         <option value="matrix">Matris Koyu</option>
@@ -176,33 +256,44 @@
     </div>
 
     <!-- ÜST BAR VE ODALAR -->
-    <header class="bg-slate-900 border-b border-slate-800 px-3 py-3 sm:p-4 flex justify-between items-center gap-2 shrink-0 transition-colors duration-300" id="main-header">
-        <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
-            <span class="font-black text-lg sm:text-xl text-indigo-400 shrink-0">WrtS</span>
-            <select id="room-select" class="bg-slate-950 border border-slate-800 text-xs sm:text-sm rounded-lg px-2 py-1.5 text-indigo-300 font-semibold focus:outline-none truncate max-w-[100px] sm:max-w-[120px]">
+    <header class="bg-slate-900 border-b border-slate-800 px-2.5 py-2.5 sm:p-4 flex justify-between items-center gap-1.5 shrink-0 transition-colors duration-300" id="main-header">
+        <div class="flex items-center gap-1 sm:gap-1.5 min-w-0">
+            <span class="font-black text-base sm:text-xl text-indigo-400 shrink-0">WrtS</span>
+            <select id="room-select" class="bg-slate-950 border border-slate-800 text-xs rounded-lg px-1.5 py-1.5 text-indigo-300 font-semibold focus:outline-none truncate max-w-[85px] sm:max-w-[115px]">
                 <option value="genel"># Genel</option>
                 <option value="sohbet"># Muhabbet</option>
                 <option value="oyun"># Oyun</option>
             </select>
-            <button id="open-dm-list-btn" class="bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 border border-emerald-500/30 px-2 py-1.5 rounded-lg text-xs font-bold shrink-0 transition" title="Özel Mesajlarım">💬 DM</button>
-            <button id="open-room-modal" class="bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 border border-indigo-500/30 w-7 h-7 rounded-lg flex items-center justify-center font-bold text-base shrink-0 transition" title="Yeni Oda Kur">+</button>
-            <button id="delete-room-btn" class="hidden bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 w-7 h-7 rounded-lg flex items-center justify-center text-xs shrink-0 transition" title="Bu Odayı Sil">🗑️</button>
+            <button id="open-dm-list-btn" class="bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 border border-emerald-500/30 px-2 py-1.5 rounded-lg text-xs font-bold shrink-0" title="Özel Mesajlarım">💬</button>
+            <button id="open-room-modal" class="bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 border border-indigo-500/30 w-7 h-7 rounded-lg flex items-center justify-center font-bold text-sm shrink-0" title="Yeni Oda Kur">+</button>
+            <button id="delete-room-btn" class="hidden bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 w-7 h-7 rounded-lg flex items-center justify-center text-xs shrink-0" title="Bu Odayı Sil">🗑️</button>
         </div>
-        <div class="flex items-center gap-1.5 sm:gap-2">
-            <button onclick="document.getElementById('games-modal').classList.remove('hidden')" class="bg-amber-600/20 hover:bg-amber-600/40 text-amber-400 border border-amber-500/30 px-2 py-1.5 rounded-lg text-xs font-bold shrink-0">🎮 Oyun</button>
-            <button id="open-users-btn" class="bg-slate-800/60 hover:bg-slate-800 px-2 py-1.5 rounded-full border border-slate-700 text-xs text-emerald-400 flex items-center gap-1 shrink-0">
+        <div class="flex items-center gap-1 sm:gap-1.5">
+            <!-- Arama Çubuğu Aç/Kapat -->
+            <button onclick="toggleSearchBar()" class="bg-slate-800/80 hover:bg-slate-700 text-slate-300 px-2 py-1.5 rounded-lg text-xs font-bold shrink-0" title="Mesaj Ara">🔍</button>
+            <!-- Canlı Görüşme Butonu -->
+            <button onclick="document.getElementById('call-modal').classList.remove('hidden')" class="bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 border border-emerald-500/30 px-2 py-1.5 rounded-lg text-xs font-bold shrink-0" title="Görüntülü/Sesli Arama">📹</button>
+            <!-- Oyunlar Butonu -->
+            <button onclick="document.getElementById('games-modal').classList.remove('hidden')" class="bg-amber-600/20 hover:bg-amber-600/40 text-amber-400 border border-amber-500/30 px-2 py-1.5 rounded-lg text-xs font-bold shrink-0" title="Mini Oyunlar">🎮</button>
+            <!-- Kullanıcılar & Arkadaşlar -->
+            <button id="open-users-btn" class="relative bg-slate-800/60 hover:bg-slate-800 px-2 py-1.5 rounded-full border border-slate-700 text-xs text-emerald-400 flex items-center gap-1 shrink-0" title="Kullanıcılar & Arkadaşlar">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 <span id="online-count">1</span>
+                <span id="req-badge" class="hidden absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">!</span>
             </button>
-            <button id="open-profile" class="flex items-center gap-2 bg-slate-800/60 hover:bg-slate-800 px-2 py-1.5 rounded-full border border-slate-700 transition max-w-[90px] sm:max-w-[120px] shrink-0">
-                <div class="relative shrink-0">
-                    <img id="header-avatar" src="" class="w-5 h-5 rounded-full object-cover">
-                    <span id="header-status-dot" class="absolute bottom-0 right-0 w-2 h-2 bg-emerald-500 rounded-full border border-slate-900"></span>
-                </div>
+            <!-- Profil -->
+            <button id="open-profile" class="flex items-center gap-1.5 bg-slate-800/60 hover:bg-slate-800 px-2 py-1.5 rounded-full border border-slate-700 transition max-w-[80px] sm:max-w-[110px] shrink-0">
+                <img id="header-avatar" src="" class="w-5 h-5 rounded-full object-cover shrink-0">
                 <span id="user-display" class="text-xs text-slate-200 truncate font-medium"></span>
             </button>
         </div>
     </header>
+
+    <!-- MESAJ ARAMA ÇUBUĞU -->
+    <div id="search-bar" class="hidden bg-slate-900/95 border-b border-slate-800 px-4 py-2 flex items-center gap-2 max-w-2xl w-full mx-auto shrink-0">
+        <input type="text" id="msg-search-input" placeholder="Sohbette kelime ara..." class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-indigo-500">
+        <button onclick="clearSearch()" class="text-xs text-slate-400 hover:text-white px-2">Temizle</button>
+    </div>
 
     <!-- MESAJ ALANI -->
     <main id="messages" class="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4 max-w-2xl w-full mx-auto">
@@ -233,7 +324,6 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
             </button>
 
-            <!-- GIF Seçme Butonu -->
             <button type="button" onclick="document.getElementById('gif-modal').classList.remove('hidden')" class="p-2 text-slate-400 hover:text-amber-400 bg-slate-800/60 rounded-full transition shrink-0 text-xs font-extrabold" title="GIF Gönder">GIF</button>
 
             <input type="text" id="msg-input" placeholder="Bir şeyler yaz..." autocomplete="off" class="flex-1 min-w-0 bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 sm:py-3 text-base sm:text-sm focus:outline-none focus:border-indigo-500">
@@ -269,18 +359,168 @@
         let roomRef = null;
         let customRoomsData = {};
         let activeUsersData = {};
+        let myFriends = {};
         let tempBase64Avatar = null;
         let typingTimeout = null;
         let replyingTo = null;
+        let isInitialLoad = true;
         const defaultRooms = ['genel', 'sohbet', 'oyun'];
 
-        // Karşılıklı XOX Oyunu Mantığı
+        // 🔔 Bildirim Sesi Efekti (Web Audio API ile Harici Dosya Gerektirmeden Net Ses)
+        function playNotificationSound() {
+            const soundEnabled = localStorage.getItem('wrts_sound') !== 'false';
+            if (!soundEnabled) return;
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.12); // A5
+                gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.25);
+            } catch(e) {}
+        }
+
+        // 🔍 Mesaj Arama Çubuğu
+        window.toggleSearchBar = function() {
+            const bar = document.getElementById('search-bar');
+            bar.classList.toggle('hidden');
+            if (!bar.classList.contains('hidden')) {
+                document.getElementById('msg-search-input').focus();
+            } else {
+                clearSearch();
+            }
+        }
+
+        document.getElementById('msg-search-input').addEventListener('input', e => {
+            const term = e.target.value.toLowerCase().trim();
+            document.querySelectorAll('#messages > div').forEach(msgEl => {
+                const text = msgEl.innerText.toLowerCase();
+                msgEl.style.display = text.includes(term) ? 'flex' : 'none';
+            });
+        });
+
+        window.clearSearch = function() {
+            document.getElementById('msg-search-input').value = '';
+            document.querySelectorAll('#messages > div').forEach(msgEl => msgEl.style.display = 'flex');
+        }
+
+        // 📹 Gerçek WebRTC Sesli & Görüntülü Görüşme (Firebase Signaling)
+        let localStream = null;
+        let peerConnection = null;
+        const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+
+        window.startWebRTCCall = async function(withVideo) {
+            try {
+                document.getElementById('call-status').textContent = "Kamera/Mikrofon hazırlanıyor...";
+                localStream = await navigator.mediaDevices.getUserMedia({ video: withVideo, audio: true });
+                document.getElementById('local-video').srcObject = localStream;
+
+                peerConnection = new RTCPeerConnection(rtcConfig);
+                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+                peerConnection.ontrack = event => {
+                    document.getElementById('remote-video').srcObject = event.streams[0];
+                    document.getElementById('call-status').textContent = "Bağlantı kuruldu! Görüşme aktif.";
+                };
+
+                const callRef = db.ref(`webrtc/${currentRoom}`);
+                await callRef.remove();
+
+                peerConnection.onicecandidate = event => {
+                    if (event.candidate) callRef.child('offerCandidates').push(event.candidate.toJSON());
+                };
+
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
+                await callRef.child('offer').set({ type: offer.type, sdp: offer.sdp, caller: getMyData().name });
+
+                document.getElementById('call-status').textContent = "Arama başlatıldı, arkadaşının 'Aramaya Katıl'a basması bekleniyor...";
+
+                callRef.child('answer').on('value', async snap => {
+                    const data = snap.val();
+                    if (!peerConnection.currentRemoteDescription && data) {
+                        await peerConnection.setRemoteDescription(new RTCSessionDescription(data));
+                    }
+                });
+
+                callRef.child('answerCandidates').on('child_added', snap => {
+                    if (snap.val()) peerConnection.addIceCandidate(new RTCIceCandidate(snap.val()));
+                });
+            } catch(e) {
+                alert("Kamera veya mikrofon izni alınamadı: " + e.message);
+            }
+        }
+
+        window.joinWebRTCCall = async function() {
+            try {
+                const callRef = db.ref(`webrtc/${currentRoom}`);
+                const offerSnap = await callRef.child('offer').once('value');
+                const offerData = offerSnap.val();
+                if (!offerData) return alert("Şu an bu odada aktif bir arama yok. Önce Sesli/Görüntülü Başlat'a basın.");
+
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true }).catch(() => navigator.mediaDevices.getUserMedia({ video: false, audio: true }));
+                document.getElementById('local-video').srcObject = localStream;
+
+                peerConnection = new RTCPeerConnection(rtcConfig);
+                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+                peerConnection.ontrack = event => {
+                    document.getElementById('remote-video').srcObject = event.streams[0];
+                    document.getElementById('call-status').textContent = "Görüşmeye bağlandın!";
+                };
+
+                peerConnection.onicecandidate = event => {
+                    if (event.candidate) callRef.child('answerCandidates').push(event.candidate.toJSON());
+                };
+
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(offerData));
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+                await callRef.child('answer').set({ type: answer.type, sdp: answer.sdp });
+
+                callRef.child('offerCandidates').on('child_added', snap => {
+                    if (snap.val()) peerConnection.addIceCandidate(new RTCIceCandidate(snap.val()));
+                });
+            } catch(e) {
+                alert("Aramaya katılırken hata: " + e.message);
+            }
+        }
+
+        window.endWebRTCCall = function() {
+            if (localStream) localStream.getTracks().forEach(t => t.stop());
+            if (peerConnection) peerConnection.close();
+            localStream = null;
+            peerConnection = null;
+            document.getElementById('local-video').srcObject = null;
+            document.getElementById('remote-video').srcObject = null;
+            document.getElementById('call-status').textContent = "Görüşme sonlandırıldı.";
+            db.ref(`webrtc/${currentRoom}`).remove();
+            document.getElementById('call-modal').classList.add('hidden');
+        }
+
+        // 🎮 Mini Oyun Sekmeleri & 3 Oyun
+        window.switchGameTab = function(game) {
+            ['xox', 'battleship', 'word'].forEach(g => {
+                document.getElementById(`game-panel-${g}`).classList.add('hidden');
+                document.getElementById(`tab-${g}`).className = "flex-1 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white";
+            });
+            document.getElementById(`game-panel-${game}`).classList.remove('hidden');
+            document.getElementById(`tab-${game}`).className = "flex-1 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white";
+        }
+
+        // 1. XOX
         let xoxRef = null;
         function listenXOX(room) {
             if (xoxRef) xoxRef.off();
             xoxRef = db.ref(`games/${room}/xox`);
             xoxRef.on('value', snap => {
-                const game = snap.val() || { board: ['', '', '', '', '', '', '', '', ''], turn: 'X', status: 'Oynanıyor' };
+                const game = snap.val() || { board: ['', '', '', '', '', '', '', '', ''], turn: 'X', status: 'Sıra: X' };
                 for (let i = 0; i < 9; i++) {
                     const btn = document.getElementById(`cell-${i}`);
                     if (btn) btn.textContent = game.board[i] || '';
@@ -292,65 +532,142 @@
         window.makeXOXMove = function(index) {
             if (!currentUser) return;
             db.ref(`games/${currentRoom}/xox`).once('value', snap => {
-                let game = snap.val() || { board: ['', '', '', '', '', '', '', '', ''], turn: 'X', status: 'Oynanıyor' };
+                let game = snap.val() || { board: ['', '', '', '', '', '', '', '', ''], turn: 'X', status: 'Sıra: X' };
                 if (game.status.includes('Kazanan') || game.status.includes('Berabere') || game.board[index] !== '') return;
-                
                 game.board[index] = game.turn;
                 const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
                 const hasWon = wins.some(([a,b,c]) => game.board[a] && game.board[a] === game.board[b] && game.board[a] === game.board[c]);
-                
-                if (hasWon) {
-                    game.status = `Kazanan: ${game.turn} 🎉`;
-                } else if (!game.board.includes('')) {
-                    game.status = 'Berabere! 🤝';
-                } else {
-                    game.turn = game.turn === 'X' ? 'O' : 'X';
-                    game.status = `Sıra: ${game.turn}`;
-                }
+                if (hasWon) game.status = `Kazanan: ${game.turn} 🎉`;
+                else if (!game.board.includes('')) game.status = 'Berabere! 🤝';
+                else { game.turn = game.turn === 'X' ? 'O' : 'X'; game.status = `Sıra: ${game.turn}`; }
                 db.ref(`games/${currentRoom}/xox`).set(game);
             });
         }
 
         window.resetXOXGame = function() {
-            db.ref(`games/${currentRoom}/xox`).set({
-                board: ['', '', '', '', '', '', '', '', ''],
-                turn: 'X',
-                status: 'Oynanıyor'
+            db.ref(`games/${currentRoom}/xox`).set({ board: ['', '', '', '', '', '', '', '', ''], turn: 'X', status: 'Sıra: X' });
+        }
+
+        // 2. Amiral Battı (5x5 Senkronize)
+        let bsRef = null;
+        function listenBattleship(room) {
+            if (bsRef) bsRef.off();
+            bsRef = db.ref(`games/${room}/battleship`);
+            bsRef.on('value', snap => {
+                let data = snap.val();
+                if (!data) { resetBattleship(); return; }
+                const grid = document.getElementById('bs-grid');
+                grid.innerHTML = '';
+                let hits = 0;
+                data.revealed.forEach((rev, i) => {
+                    const isShip = data.ships.includes(i);
+                    if (rev && isShip) hits++;
+                    const btn = document.createElement('button');
+                    btn.className = `w-10 h-10 rounded-lg border text-sm font-bold transition ${rev ? (isShip ? 'bg-red-600 border-red-400 text-white' : 'bg-slate-800 border-slate-700 text-slate-500') : 'bg-slate-950 border-slate-800 hover:border-indigo-500'}`;
+                    btn.textContent = rev ? (isShip ? '💥' : '🌊') : '?';
+                    btn.onclick = () => shootBattleship(i);
+                    grid.appendChild(btn);
+                });
+                if (hits >= 3) document.getElementById('bs-status').textContent = "Tebrikler! Tüm gemiler battı! 🏆";
+                else if (data.shotsLeft <= 0) document.getElementById('bs-status').textContent = "Mermi bitti! Kaybettiniz 💀";
+                else document.getElementById('bs-status').textContent = `Bulunan Gemi: ${hits}/3 | Kalan Hak: ${data.shotsLeft}`;
             });
+        }
+
+        window.shootBattleship = function(idx) {
+            db.ref(`games/${currentRoom}/battleship`).once('value', snap => {
+                let data = snap.val();
+                if (!data || data.revealed[idx] || data.shotsLeft <= 0) return;
+                data.revealed[idx] = true;
+                data.shotsLeft--;
+                db.ref(`games/${currentRoom}/battleship`).set(data);
+            });
+        }
+
+        window.resetBattleship = function() {
+            const ships = [];
+            while (ships.length < 3) {
+                const r = Math.floor(Math.random() * 25);
+                if (!ships.includes(r)) ships.push(r);
+            }
+            db.ref(`games/${currentRoom}/battleship`).set({
+                ships,
+                revealed: Array(25).fill(false),
+                shotsLeft: 12
+            });
+        }
+
+        // 3. Kelime Tahmin Oyunu
+        const wordBank = [
+            { word: "GALATASARAY", hint: "Türkiye'nin en çok şampiyon olan futbol kulübü" },
+            { word: "YAZILIM", hint: "Kod yazarak uygulama geliştirme sanatı" },
+            { word: "ISTANBUL", hint: "İki kıtayı birbirine bağlayan şehir" },
+            { word: "BILGISAYAR", hint: "Verileri işleyen elektronik cihaz" },
+            { word: "KAHVE", hint: "Sabahları ayıltan sıcak içecek" }
+        ];
+        let wordRef = null;
+        function listenWordGame(room) {
+            if (wordRef) wordRef.off();
+            wordRef = db.ref(`games/${room}/word`);
+            wordRef.on('value', snap => {
+                let data = snap.val();
+                if (!data) { resetWordGame(); return; }
+                document.getElementById('word-hint').textContent = "İpucu: " + data.hint;
+                document.getElementById('word-display').textContent = data.solved ? `🎉 ${data.word} (${data.winner})` : data.word.split('').map((c, idx) => idx === 0 || idx === data.word.length - 1 ? c : '_').join(' ');
+            });
+        }
+
+        window.submitWordGuess = function() {
+            const inp = document.getElementById('word-guess-input');
+            const guess = inp.value.trim().toUpperCase();
+            if (!guess) return;
+            db.ref(`games/${currentRoom}/word`).once('value', snap => {
+                const data = snap.val();
+                if (data && !data.solved && guess === data.word) {
+                    db.ref(`games/${currentRoom}/word`).update({ solved: true, winner: getMyData().name });
+                    playNotificationSound();
+                } else {
+                    alert("Yanlış tahmin, tekrar dene!");
+                }
+            });
+            inp.value = '';
+        }
+
+        window.resetWordGame = function() {
+            const pick = wordBank[Math.floor(Math.random() * wordBank.length)];
+            db.ref(`games/${currentRoom}/word`).set({ word: pick.word, hint: pick.hint, solved: false, winner: '' });
         }
 
         // Tema ve Arka Plan Ayarları
         function applySettingsToUI() {
             const theme = localStorage.getItem('wrts_theme') || 'dark';
             const bgType = localStorage.getItem('wrts_bg') || 'default';
+            const soundEnabled = localStorage.getItem('wrts_sound') !== 'false';
 
             document.getElementById('theme-select').value = theme;
             document.getElementById('bg-select').value = bgType;
+            document.getElementById('sound-toggle').checked = soundEnabled;
 
             const body = document.getElementById('app-body');
             const header = document.getElementById('main-header');
             const footer = document.getElementById('main-footer');
 
             let bgClass = "bg-slate-950 text-white";
-            if (theme === 'light') {
-                bgClass = "bg-slate-100 text-slate-900";
-            } else {
-                if (bgType === 'matrix') bgClass = "bg-zinc-950 text-emerald-400";
-                else if (bgType === 'gradient') bgClass = "bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950 text-white";
-                else bgClass = "bg-slate-950 text-white";
-            }
+            if (theme === 'light') bgClass = "bg-slate-100 text-slate-900";
+            else if (bgType === 'matrix') bgClass = "bg-zinc-950 text-emerald-400";
+            else if (bgType === 'gradient') bgClass = "bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950 text-white";
 
             body.className = `${bgClass} h-[100dvh] w-full overflow-hidden flex flex-col justify-between relative transition-colors duration-300`;
             if (theme === 'light') {
-                header.className = "bg-white border-b border-slate-200 px-3 py-3 sm:p-4 flex justify-between items-center gap-2 shrink-0 transition-colors duration-300";
+                header.className = "bg-white border-b border-slate-200 px-2.5 py-2.5 sm:p-4 flex justify-between items-center gap-1.5 shrink-0 transition-colors duration-300";
                 footer.className = "bg-white border-t border-slate-200 p-2.5 sm:p-4 max-w-2xl w-full mx-auto shrink-0 transition-colors duration-300";
             } else {
-                header.className = "bg-slate-900 border-b border-slate-800 px-3 py-3 sm:p-4 flex justify-between items-center gap-2 shrink-0 transition-colors duration-300";
+                header.className = "bg-slate-900 border-b border-slate-800 px-2.5 py-2.5 sm:p-4 flex justify-between items-center gap-1.5 shrink-0 transition-colors duration-300";
                 footer.className = "bg-slate-900 border-t border-slate-800 p-2.5 sm:p-4 max-w-2xl w-full mx-auto shrink-0 transition-colors duration-300";
             }
         }
 
-        // Giriş Akışı
+        // Giriş Akışı & Arkadaşlık Sistemi Dinleyicileri
         auth.onAuthStateChanged(user => {
             if (user) {
                 currentUser = user;
@@ -371,6 +688,43 @@
                     updateOnlineCountAndDots();
                 });
 
+                // Arkadaşlar ve İstekler
+                db.ref(`friends/${user.uid}`).on('value', snap => {
+                    myFriends = snap.val() || {};
+                    renderFriendsList();
+                    updateOnlineCountAndDots();
+                });
+
+                db.ref(`friend_requests/${user.uid}`).on('value', snap => {
+                    const reqs = snap.val() || {};
+                    const reqEntries = Object.entries(reqs);
+                    const badge = document.getElementById('req-badge');
+                    const section = document.getElementById('friend-requests-section');
+                    const list = document.getElementById('friend-requests-list');
+                    
+                    if (reqEntries.length > 0) {
+                        badge.classList.remove('hidden');
+                        badge.textContent = reqEntries.length;
+                        section.classList.remove('hidden');
+                        list.innerHTML = '';
+                        reqEntries.forEach(([senderUid, info]) => {
+                            const div = document.createElement('div');
+                            div.className = "flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-amber-500/40";
+                            div.innerHTML = `
+                                <span class="text-xs font-bold text-slate-200">${info.name}</span>
+                                <div class="flex gap-1">
+                                    <button onclick="acceptFriendRequest('${senderUid}', '${encodeURIComponent(info.name)}', '${encodeURIComponent(info.avatar || '')}')" class="bg-emerald-600 text-white text-[10px] px-2 py-1 rounded-lg font-bold">Kabul</button>
+                                    <button onclick="rejectFriendRequest('${senderUid}')" class="bg-red-600/30 text-red-400 text-[10px] px-2 py-1 rounded-lg font-bold">Red</button>
+                                </div>
+                            `;
+                            list.appendChild(div);
+                        });
+                    } else {
+                        badge.classList.add('hidden');
+                        section.classList.add('hidden');
+                    }
+                });
+
                 loadUserDataToUI();
                 listenRooms();
                 loadRoom(currentRoom);
@@ -381,6 +735,53 @@
                 loginScreen.classList.remove('hidden');
             }
         });
+
+        // Arkadaşlık İşlemleri
+        window.sendFriendRequest = function(targetUid) {
+            if (!currentUser) return;
+            const md = getMyData();
+            db.ref(`friend_requests/${targetUid}/${currentUser.uid}`).set({
+                name: md.name,
+                avatar: md.avatar,
+                time: Date.now()
+            }).then(() => alert("Arkadaşlık isteği gönderildi!"));
+        }
+
+        window.acceptFriendRequest = function(senderUid, encName, encAvatar) {
+            const name = decodeURIComponent(encName);
+            const avatar = decodeURIComponent(encAvatar);
+            const md = getMyData();
+            db.ref(`friends/${currentUser.uid}/${senderUid}`).set({ name, avatar });
+            db.ref(`friends/${senderUid}/${currentUser.uid}`).set({ name: md.name, avatar: md.avatar });
+            db.ref(`friend_requests/${currentUser.uid}/${senderUid}`).remove();
+        }
+
+        window.rejectFriendRequest = function(senderUid) {
+            db.ref(`friend_requests/${currentUser.uid}/${senderUid}`).remove();
+        }
+
+        function renderFriendsList() {
+            const div = document.getElementById('my-friends-list');
+            const entries = Object.entries(myFriends);
+            if (entries.length === 0) {
+                div.innerHTML = '<p class="text-xs text-slate-500 italic">Henüz ekli arkadaşın yok.</p>';
+                return;
+            }
+            div.innerHTML = '';
+            entries.forEach(([uid, info]) => {
+                const isOnline = activeUsersData[uid] && activeUsersData[uid].state === 'online';
+                const item = document.createElement('div');
+                item.className = "flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-pink-500/30";
+                item.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500' : 'bg-slate-600'}"></span>
+                        <span class="text-xs font-bold text-slate-200">${info.name}</span>
+                    </div>
+                    <button onclick="startDM('${uid}', '${encodeURIComponent(info.name)}')" class="text-[11px] bg-emerald-600/20 text-emerald-400 px-2 py-1 rounded-lg font-bold">DM</button>
+                `;
+                div.appendChild(item);
+            });
+        }
 
         function getMyData() {
             const name = localStorage.getItem('wrts_name_' + currentUser.uid) || currentUser.displayName || currentUser.email.split('@')[0];
@@ -432,12 +833,14 @@
             const newBio = document.getElementById('edit-bio').value.trim();
             const themeVal = document.getElementById('theme-select').value;
             const bgVal = document.getElementById('bg-select').value;
+            const soundVal = document.getElementById('sound-toggle').checked;
             if(!newName) return alert("İsim boş olamaz!");
 
             localStorage.setItem('wrts_name_' + currentUser.uid, newName);
             localStorage.setItem('wrts_bio_' + currentUser.uid, newBio || 'WrtS kullanıcısı.');
             localStorage.setItem('wrts_theme', themeVal);
             localStorage.setItem('wrts_bg', bgVal);
+            localStorage.setItem('wrts_sound', soundVal);
             if(tempBase64Avatar) localStorage.setItem('wrts_avatar_' + currentUser.uid, tempBase64Avatar);
 
             loadUserDataToUI();
@@ -456,19 +859,23 @@
             Object.entries(activeUsersData).forEach(([uid, info]) => {
                 if (info.state === 'online') {
                     onlineCount++;
+                    const isFriend = !!myFriends[uid];
                     const item = document.createElement('div');
-                    item.className = "flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800 hover:border-indigo-500 cursor-pointer transition";
+                    item.className = "flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800";
                     item.innerHTML = `
                         <div class="flex items-center gap-2">
-                            <img src="${info.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-8 h-8 rounded-full object-cover">
+                            <img src="${info.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-7 h-7 rounded-full object-cover">
                             <div>
-                                <p class="text-sm font-bold text-slate-200">${info.name || 'Kullanıcı'}</p>
+                                <p class="text-xs font-bold text-slate-200">${info.name || 'Kullanıcı'}</p>
                                 <span class="text-[10px] text-emerald-400">● Çevrimiçi</span>
                             </div>
                         </div>
-                        ${uid !== currentUser.uid ? `<button class="text-xs bg-indigo-600/20 text-indigo-400 px-2.5 py-1 rounded-lg border border-indigo-500/30 font-bold">DM Başlat</button>` : ''}
+                        ${uid !== currentUser.uid ? `
+                        <div class="flex gap-1">
+                            ${!isFriend ? `<button onclick="sendFriendRequest('${uid}')" class="text-[10px] bg-pink-600/20 text-pink-400 px-2 py-1 rounded-lg border border-pink-500/30 font-bold">+ Ekle</button>` : ''}
+                            <button onclick="startDM('${uid}', '${encodeURIComponent(info.name || 'Kullanıcı')}')" class="text-[10px] bg-indigo-600/20 text-indigo-400 px-2 py-1 rounded-lg border border-indigo-500/30 font-bold">DM</button>
+                        </div>` : ''}
                     `;
-                    if (uid !== currentUser.uid) item.addEventListener('click', () => startDM(uid, info.name));
                     onlineListDiv.appendChild(item);
                 }
             });
@@ -487,22 +894,22 @@
                 entries.forEach(([uid, info]) => {
                     if (currentUser && uid === currentUser.uid) return;
                     const isOnline = activeUsersData[uid] && activeUsersData[uid].state === 'online';
+                    const isFriend = !!myFriends[uid];
                     const item = document.createElement('div');
-                    item.className = "flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800 hover:border-indigo-500 cursor-pointer transition";
+                    item.className = "flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800";
                     item.innerHTML = `
-                        <div class="flex items-center gap-2.5">
-                            <div class="relative shrink-0">
-                                <img src="${info.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-7 h-7 rounded-full object-cover">
-                                <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full border border-slate-900 ${isOnline ? 'bg-emerald-500' : 'bg-slate-500'}"></span>
-                            </div>
+                        <div class="flex items-center gap-2">
+                            <img src="${info.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-7 h-7 rounded-full object-cover">
                             <div>
                                 <p class="text-xs font-bold text-slate-200">${info.name || 'Kullanıcı'}</p>
                                 <span class="text-[10px] ${isOnline ? 'text-emerald-400' : 'text-slate-500'}">${isOnline ? 'Çevrimiçi' : 'Çevrimdışı'}</span>
                             </div>
                         </div>
-                        <button onclick="startDM('${uid}', '${encodeURIComponent(info.name || 'Kullanıcı')}'); event.stopPropagation();" class="text-xs bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 px-2.5 py-1 rounded-lg border border-indigo-500/30 font-bold transition">DM Başlat</button>
+                        <div class="flex gap-1">
+                            ${!isFriend ? `<button onclick="sendFriendRequest('${uid}')" class="text-[10px] bg-pink-600/20 text-pink-400 px-2 py-1 rounded-lg border border-pink-500/30 font-bold">+ Ekle</button>` : ''}
+                            <button onclick="startDM('${uid}', '${encodeURIComponent(info.name || 'Kullanıcı')}')" class="text-[10px] bg-indigo-600/20 text-indigo-400 px-2 py-1 rounded-lg border border-indigo-500/30 font-bold">DM</button>
+                        </div>
                     `;
-                    item.addEventListener('click', () => startDM(uid, info.name || 'Kullanıcı'));
                     allDiv.appendChild(item);
                 });
             });
@@ -757,26 +1164,31 @@
         function loadRoom(room) {
             if (roomRef) roomRef.off();
             messagesDiv.innerHTML = '';
+            isInitialLoad = true;
             roomRef = db.ref('odalar/' + room).limitToLast(50);
             
+            roomRef.once('value', () => { isInitialLoad = false; });
+
             roomRef.on('child_added', snap => {
+                const data = snap.val();
                 const el = createMessageElement(snap, room);
                 messagesDiv.appendChild(el);
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                if (!isInitialLoad && currentUser && data.uid !== currentUser.uid) {
+                    playNotificationSound();
+                }
             });
 
             roomRef.on('child_changed', snap => {
-                const data = snap.val();
                 const key = snap.key;
                 const msgBox = document.getElementById(`msg-${key}`);
-                if (msgBox) {
-                    const newEl = createMessageElement(snap, room);
-                    msgBox.replaceWith(newEl);
-                }
+                if (msgBox) msgBox.replaceWith(createMessageElement(snap, room));
             });
             roomRef.on('child_removed', snap => { document.getElementById(`msg-${snap.key}`)?.remove(); });
 
             listenXOX(room);
+            listenBattleship(room);
+            listenWordGame(room);
         }
 
         window.toggleActionMenu = function(key) {
@@ -816,11 +1228,7 @@
                 zaman: Date.now()
             };
 
-            if (replyingTo) {
-                msgData.replyTo = replyingTo;
-                cancelReply();
-            }
-
+            if (replyingTo) { msgData.replyTo = replyingTo; cancelReply(); }
             db.ref('odalar/' + currentRoom).push(msgData);
             input.value = '';
         });
@@ -860,7 +1268,6 @@
             e.target.value = '';
         });
 
-        // Garantili GIF Gönderme Fonksiyonu
         window.sendGIF = function(url) {
             if (!currentUser) return;
             const myData = getMyData();
@@ -878,7 +1285,9 @@
             document.getElementById('gif-modal').classList.add('hidden');
         }
 
-        // Ses Kaydı (Stabil Sesli Mesaj Gönderimi)
+        document.getElementById('close-gif-modal').addEventListener('click', () => document.getElementById('gif-modal').classList.add('hidden'));
+
+        // Ses Kaydı
         let mediaRecorder;
         let audioChunks = [];
         const recordBtn = document.getElementById('record-btn');
