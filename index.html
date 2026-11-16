@@ -14,7 +14,10 @@
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
     </style>
 </head>
-<body class="bg-slate-950 text-white h-[100dvh] w-full overflow-hidden flex flex-col justify-between">
+<body class="bg-slate-950 text-white h-[100dvh] w-full overflow-hidden flex flex-col justify-between relative">
+
+    <!-- BİLDİRİM BALONU KAPSAYICISI -->
+    <div id="notification-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
     <!-- GİRİŞ EKRANI -->
     <div id="login-screen" class="fixed inset-0 bg-slate-950 z-50 flex items-center justify-center p-4 overflow-y-auto">
@@ -34,17 +37,27 @@
         </div>
     </div>
 
-    <!-- KULLANICI LİSTESİ / ÇEVRİMİÇİ MODALI -->
+    <!-- KULLANICI LİSTESİ / ÇEVRİMİÇİ VE TÜM KULLANICILAR MODALI -->
     <div id="users-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center">
-                <h3 class="text-lg font-bold">Çevrimiçi Kullanıcılar</h3>
-                <button id="close-users-modal" class="text-slate-400 hover:text-white">✕</button>
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-sm space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-center sticky top-0 bg-slate-900 pb-2 border-b border-slate-800">
+                <h3 class="text-lg font-bold">Kullanıcılar & DM</h3>
+                <button id="close-users-modal" class="text-slate-400 hover:text-white font-bold px-2 py-1">✕</button>
             </div>
-            <div id="online-users-list" class="space-y-2 max-h-60 overflow-y-auto">
-                <!-- Dinamik dolacak -->
+            
+            <div>
+                <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">🟢 Çevrimiçi Olanlar</h4>
+                <div id="online-users-list" class="space-y-2"></div>
             </div>
-            <p class="text-[11px] text-slate-500 text-center">Bir kullanıcının üzerine tıklayarak onunla özel mesaj (DM) odası açabilirsin.</p>
+
+            <hr class="border-slate-800">
+
+            <div>
+                <h4 class="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-2">👥 Tüm Kullanıcılar (Çevrimdışı Dahil - DM)</h4>
+                <div id="all-users-list" class="space-y-2">
+                    <p class="text-xs text-slate-500 italic">Yükleniyor...</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -178,8 +191,48 @@
         let tempBase64Avatar = null;
         let typingTimeout = null;
         const defaultRooms = ['genel', 'sohbet', 'oyun'];
+        let isInitialLoad = true; // Bildirim kontrolü için ilk yükleme bayrağı
 
-        // Orijinal Çalışan Giriş ve Çevrimiçi Akışı (Birebir Korundu)
+        // Bildirim Sesi Çalma Fonksiyonu (Web Audio API - Harici dosya gerektirmez)
+        function playNotificationSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5 nota
+                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.1); // A5 nota
+                gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.3);
+            } catch(e) {}
+        }
+
+        // Ekran Üstü Şık Bildirim Balonu Gösterme
+        function showNotificationBanner(senderName, text) {
+            const container = document.getElementById('notification-container');
+            const notif = document.createElement('div');
+            notif.className = "pointer-events-auto bg-slate-900 border border-indigo-500/50 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-bounce transition transform duration-300 max-w-xs";
+            notif.innerHTML = `
+                <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-sm shrink-0">🔔</div>
+                <div class="overflow-hidden">
+                    <p class="text-xs font-bold text-indigo-300 truncate">${senderName}</p>
+                    <p class="text-xs text-slate-300 truncate">${text || 'Yeni bir medya gönderdi.'}</p>
+                </div>
+            `;
+            container.appendChild(notif);
+            playNotificationSound();
+
+            setTimeout(() => {
+                notif.style.opacity = '0';
+                setTimeout(() => notif.remove(), 300);
+            }, 4000);
+        }
+
+        // Orijinal Çalışan Giriş ve Çevrimiçi Akışı
         auth.onAuthStateChanged(user => {
             if (user) {
                 currentUser = user;
@@ -193,6 +246,9 @@
                         userStatusRef.onDisconnect().set({ state: 'offline', lastChanged: firebase.database.ServerValue.TIMESTAMP });
                         const myData = getMyData();
                         userStatusRef.set({ state: 'online', name: myData.name, avatar: myData.avatar, lastChanged: firebase.database.ServerValue.TIMESTAMP });
+                        
+                        // Kullanıcıyı genel kullanıcı havuzuna kaydet (Çevrimdışı olsalar bile DM atılabilsin diye)
+                        db.ref('users_registry/' + user.uid).set({ name: myData.name, avatar: myData.avatar, bio: myData.bio });
                     }
                 });
 
@@ -271,13 +327,14 @@
             document.getElementById('profile-modal').classList.add('hidden');
             const md = getMyData();
             db.ref('status/' + currentUser.uid).update({ name: md.name, avatar: md.avatar });
+            db.ref('users_registry/' + currentUser.uid).update({ name: md.name, avatar: md.avatar, bio: md.bio });
         });
 
-        // Çevrimiçi Kullanıcılar Modalı ve Sayacı (Orijinal Kod)
+        // Çevrimiçi Kullanıcılar ve Tüm Kayıtlı Kullanıcılar Listesi (DM)
         function updateOnlineCountAndDots() {
             let onlineCount = 0;
-            const listDiv = document.getElementById('online-users-list');
-            listDiv.innerHTML = '';
+            const onlineListDiv = document.getElementById('online-users-list');
+            onlineListDiv.innerHTML = '';
 
             Object.entries(activeUsersData).forEach(([uid, info]) => {
                 if (info.state === 'online') {
@@ -292,15 +349,16 @@
                                 <span class="text-[10px] text-emerald-400">● Çevrimiçi</span>
                             </div>
                         </div>
-                        ${uid !== currentUser.uid ? `<button class="text-xs bg-indigo-600/20 text-indigo-400 px-2.5 py-1 rounded-lg border border-indigo-500/30">Özel Mesaj (DM)</button>` : ''}
+                        ${uid !== currentUser.uid ? `<button class="text-xs bg-indigo-600/20 text-indigo-400 px-2.5 py-1 rounded-lg border border-indigo-500/30 font-bold">DM Başlat</button>` : ''}
                     `;
                     if (uid !== currentUser.uid) {
                         item.addEventListener('click', () => startDM(uid, info.name));
                     }
-                    listDiv.appendChild(item);
+                    onlineListDiv.appendChild(item);
                 }
             });
             document.getElementById('online-count').textContent = onlineCount;
+            loadAllUsersRegistry();
 
             document.querySelectorAll('[data-uid]').forEach(el => {
                 const uid = el.getAttribute('data-uid');
@@ -309,11 +367,49 @@
             });
         }
 
+        function loadAllUsersRegistry() {
+            const allDiv = document.getElementById('all-users-list');
+            db.ref('users_registry').once('value', snap => {
+                const allUsers = snap.val() || {};
+                allDiv.innerHTML = '';
+
+                const entries = Object.entries(allUsers);
+                if (entries.length === 0) {
+                    allDiv.innerHTML = '<p class="text-xs text-slate-500">Henüz kayıtlı başka kullanıcı yok.</p>';
+                    return;
+                }
+
+                entries.forEach(([uid, info]) => {
+                    if (currentUser && uid === currentUser.uid) return;
+                    const isOnline = activeUsersData[uid] && activeUsersData[uid].state === 'online';
+
+                    const item = document.createElement('div');
+                    item.className = "flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800 hover:border-indigo-500 cursor-pointer transition";
+                    item.innerHTML = `
+                        <div class="flex items-center gap-2.5">
+                            <div class="relative shrink-0">
+                                <img src="${info.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-7 h-7 rounded-full object-cover">
+                                <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full border border-slate-900 ${isOnline ? 'bg-emerald-500' : 'bg-slate-500'}"></span>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-slate-200">${info.name || 'Kullanıcı'}</p>
+                                <span class="text-[10px] ${isOnline ? 'text-emerald-400' : 'text-slate-500'}">${isOnline ? 'Çevrimiçi' : 'Çevrimdışı'}</span>
+                            </div>
+                        </div>
+                        <button onclick="startDM('${uid}', '${encodeURIComponent(info.name || 'Kullanıcı')}'); event.stopPropagation();" class="text-xs bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 px-2.5 py-1 rounded-lg border border-indigo-500/30 font-bold transition">DM Başlat</button>
+                    `;
+                    item.addEventListener('click', () => startDM(uid, info.name || 'Kullanıcı'));
+                    allDiv.appendChild(item);
+                });
+            });
+        }
+
         document.getElementById('open-users-btn').addEventListener('click', () => document.getElementById('users-modal').classList.remove('hidden'));
         document.getElementById('close-users-modal').addEventListener('click', () => document.getElementById('users-modal').classList.add('hidden'));
 
         // Özel Mesaj (DM) Başlatma
-        function startDM(targetUid, targetName) {
+        window.startDM = function(targetUid, encodedTargetName) {
+            const targetName = decodeURIComponent(encodedTargetName);
             const ids = [currentUser.uid, targetUid].sort();
             const dmRoomId = `dm_${ids[0]}_${ids[1]}`;
             
@@ -520,12 +616,24 @@
         function loadRoom(room) {
             if (roomRef) roomRef.off();
             messagesDiv.innerHTML = '';
+            isInitialLoad = true; // Oda değiştiğinde bildirim patlamasını önlemek için bayrağı sıfırla
             roomRef = db.ref('odalar/' + room).limitToLast(50);
             
             roomRef.on('child_added', snap => {
                 const el = createMessageElement(snap, room);
                 messagesDiv.appendChild(el);
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+                const data = snap.val();
+                // Eğer mesaj başkasından geldiyse ve ilk yüklemeden sonra atıldıysa bildirim çal/göster
+                if (!isInitialLoad && currentUser && data.uid !== currentUser.uid) {
+                    showNotificationBanner(data.isim, data.mesaj);
+                }
+            });
+
+            // İlk yükleme tamamlandıktan sonra bildirim bayrağını kaldır
+            roomRef.once('value', () => {
+                isInitialLoad = false;
             });
 
             roomRef.on('child_changed', snap => {
