@@ -22,4 +22,155 @@
             <form id="email-form" class="space-y-3">
                 <input type="email" id="email" placeholder="E-posta" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-base sm:text-sm focus:outline-none focus:border-indigo-500">
                 <input type="password" id="password" placeholder="Şifre (En az 6 karakter)" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-base sm:text-sm focus:outline-none focus:border-indigo-500">
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 py-3 rounded-xl font-bold text
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 py-3 rounded-xl font-bold text-sm transition">Giriş Yap / Kayıt Ol</button>
+            </form>
+
+            <div class="text-center text-xs text-slate-500">veya</div>
+
+            <!-- RENKLİ GOOGLE LOGOSU EKLENDİ -->
+            <button id="google-btn" type="button" class="w-full bg-white text-slate-900 hover:bg-slate-200 py-3 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                <span>Google ile Giriş Yap</span>
+            </button>
+            
+            <p id="auth-error" class="text-xs text-red-400 text-center hidden"></p>
+        </div>
+    </div>
+
+    <!-- ÜST BAR VE ODALAR -->
+    <header class="bg-slate-900 border-b border-slate-800 px-3 py-3 sm:p-4 flex justify-between items-center gap-2 shrink-0">
+        <div class="flex items-center gap-2 min-w-0">
+            <span class="font-black text-lg sm:text-xl text-indigo-400 shrink-0">WrtS</span>
+            <select id="room-select" class="bg-slate-950 border border-slate-800 text-xs sm:text-sm rounded-lg px-2 py-1.5 text-indigo-300 font-semibold focus:outline-none truncate max-w-[130px] sm:max-w-none">
+                <option value="genel"># Genel</option>
+                <option value="sohbet"># Muhabbet</option>
+                <option value="oyun"># Oyun</option>
+            </select>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+            <span id="user-display" class="text-xs text-slate-300 font-medium max-w-[75px] sm:max-w-[140px] truncate"></span>
+            <button id="logout-btn" class="bg-red-500/20 text-red-400 px-2.5 py-1.5 rounded-lg text-xs font-bold shrink-0">Çıkış</button>
+        </div>
+    </header>
+
+    <!-- MESAJ ALANI -->
+    <main id="messages" class="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 max-w-2xl w-full mx-auto">
+    </main>
+
+    <!-- MESAJ GÖNDERME -->
+    <footer class="bg-slate-900 border-t border-slate-800 p-2.5 sm:p-4 max-w-2xl w-full mx-auto shrink-0">
+        <form id="msg-form" class="flex items-center gap-2 w-full">
+            <input type="text" id="msg-input" placeholder="Bir şeyler yaz..." autocomplete="off" class="flex-1 min-w-0 bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 sm:py-3 text-base sm:text-sm focus:outline-none focus:border-indigo-500">
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl font-bold text-sm shrink-0">Gönder</button>
+        </form>
+    </footer>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCz5KvCtJFPgmk-7bLWY-aIoGz1MXMGrWg",
+            authDomain: "wrts-46aaf.firebaseapp.com",
+            databaseURL: "https://wrts-46aaf-default-rtdb.firebaseio.com",
+            projectId: "wrts-46aaf",
+            storageBucket: "wrts-46aaf.firebasestorage.app",
+            messagingSenderId: "627981661221",
+            appId: "1:627981661221:web:5635a97ba39a9032cb7bcc"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        const loginScreen = document.getElementById('login-screen');
+        const authError = document.getElementById('auth-error');
+        const messagesDiv = document.getElementById('messages');
+        const roomSelect = document.getElementById('room-select');
+        
+        let currentUser = null;
+        let currentRoom = 'genel';
+        let roomRef = null;
+
+        // Oturum Kontrolü
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                currentUser = user;
+                loginScreen.classList.add('hidden');
+                document.getElementById('user-display').textContent = user.displayName || user.email.split('@')[0];
+                loadRoom(currentRoom);
+            } else {
+                currentUser = null;
+                loginScreen.classList.remove('hidden');
+            }
+        });
+
+        // Hata Gösterici
+        function showError(msg) {
+            authError.textContent = msg;
+            authError.classList.remove('hidden');
+        }
+
+        // Google Giriş
+        document.getElementById('google-btn').addEventListener('click', () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider).catch(err => showError("Google Hatası: " + err.message));
+        });
+
+        // E-posta Giriş
+        document.getElementById('email-form').addEventListener('submit', e => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            
+            auth.signInWithEmailAndPassword(email, pass).catch(() => {
+                auth.createUserWithEmailAndPassword(email, pass).catch(err => showError("Hata: " + err.message));
+            });
+        });
+
+        // Çıkış
+        document.getElementById('logout-btn').addEventListener('click', () => auth.signOut());
+
+        // Oda Değiştirme
+        roomSelect.addEventListener('change', e => {
+            currentRoom = e.target.value;
+            loadRoom(currentRoom);
+        });
+
+        function loadRoom(room) {
+            if (roomRef) roomRef.off();
+            messagesDiv.innerHTML = '';
+            
+            roomRef = db.ref('odalar/' + room).limitToLast(50);
+            roomRef.on('child_added', snap => {
+                const data = snap.val();
+                const isMe = currentUser && data.uid === currentUser.uid;
+                
+                const div = document.createElement('div');
+                div.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'}`;
+                div.innerHTML = `
+                    <span class="text-[11px] text-slate-400 mb-1">${data.isim}</span>
+                    <div class="${isMe ? 'bg-indigo-600' : 'bg-slate-800'} px-3.5 py-2 rounded-2xl max-w-[80%] sm:max-w-xs break-words text-sm">
+                        ${data.mesaj}
+                    </div>
+                `;
+                messagesDiv.appendChild(div);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            });
+        }
+
+        // Mesaj Gönderme
+        document.getElementById('msg-form').addEventListener('submit', e => {
+            e.preventDefault();
+            const input = document.getElementById('msg-input');
+            const text = input.value.trim();
+            if (!text || !currentUser) return;
+
+            db.ref('odalar/' + currentRoom).push({
+                uid: currentUser.uid,
+                isim: currentUser.displayName || currentUser.email.split('@')[0],
+                mesaj: text,
+                zaman: Date.now()
+            });
+            input.value = '';
+        });
+    </script>
+</body>
+</html>
