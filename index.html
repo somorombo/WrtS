@@ -179,32 +179,34 @@
         let typingTimeout = null;
         const defaultRooms = ['genel', 'sohbet', 'oyun'];
 
-        // Orijinal Çalışan Giriş Akışı (Asla Ellenmedi)
+        // GARANTİLİ GİRİŞ AKIŞI (Kilitlenmeyi önlemek için asenkron güvenli yapı)
         auth.onAuthStateChanged(user => {
             if (user) {
                 currentUser = user;
-                loginScreen.classList.add('hidden');
+                loginScreen.classList.add('hidden'); // Giriş ekranını anında kapatır
                 
-                const userStatusRef = db.ref('status/' + user.uid);
-                const myConnectionsRef = db.ref('.info/connected');
-                
-                myConnectionsRef.on('value', snap => {
-                    if (snap.val() === true) {
-                        userStatusRef.onDisconnect().set({ state: 'offline', lastChanged: firebase.database.ServerValue.TIMESTAMP });
-                        const myData = getMyData();
-                        userStatusRef.set({ state: 'online', name: myData.name, avatar: myData.avatar, lastChanged: firebase.database.ServerValue.TIMESTAMP });
-                    }
-                });
-
-                db.ref('status').on('value', snap => {
-                    activeUsersData = snap.val() || {};
-                    updateOnlineCountAndDots();
-                });
-
                 loadUserDataToUI();
                 listenRooms();
                 loadRoom(currentRoom);
                 listenTyping();
+
+                // Çevrimiçi durumunu arka planda güvenle başlat
+                try {
+                    const userStatusRef = db.ref('status/' + user.uid);
+                    db.ref('.info/connected').on('value', snap => {
+                        if (snap.val() === true) {
+                            userStatusRef.onDisconnect().set({ state: 'offline' });
+                            const myData = getMyData();
+                            userStatusRef.set({ state: 'online', name: myData.name, avatar: myData.avatar });
+                        }
+                    });
+
+                    db.ref('status').on('value', snap => {
+                        activeUsersData = snap.val() || {};
+                        updateOnlineCountAndDots();
+                    });
+                } catch(e) { console.log(e); }
+
             } else {
                 currentUser = null;
                 loginScreen.classList.remove('hidden');
@@ -212,6 +214,7 @@
         });
 
         function getMyData() {
+            if (!currentUser) return { name: "Kullanıcı", avatar: "", bio: "" };
             const name = localStorage.getItem('wrts_name_' + currentUser.uid) || currentUser.displayName || currentUser.email.split('@')[0];
             const avatar = localStorage.getItem('wrts_avatar_' + currentUser.uid) || currentUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4f46e5&color=fff`;
             const bio = localStorage.getItem('wrts_bio_' + currentUser.uid) || 'WrtS kullanıcısı.';
@@ -230,4 +233,223 @@
 
         // Cihazdan Avatar Seçimi & Sıkıştırma (Base64)
         document.getElementById('upload-avatar-file').addEventListener('change', e => {
-            const file = e.target.
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX = 150;
+                    let w = img.width, h = img.height;
+                    if (w > h) { if (w > MAX) { h *= MAX / w; w = MAX; } }
+                    else { if (h > MAX) { w *= MAX / h; h = MAX; } }
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    tempBase64Avatar = canvas.toDataURL('image/jpeg', 0.7);
+                    document.getElementById('preview-avatar').src = tempBase64Avatar;
+                }
+                img.src = event.target.result;
+            }
+            reader.readAsDataURL(file);
+        });
+
+        // Profil Modalı
+        document.getElementById('open-profile').addEventListener('click', () => document.getElementById('profile-modal').classList.remove('hidden'));
+        document.getElementById('close-profile').addEventListener('click', () => document.getElementById('profile-modal').classList.add('hidden'));
+        document.getElementById('modal-logout').addEventListener('click', () => {
+            if(currentUser) db.ref('status/' + currentUser.uid).set({ state: 'offline' });
+            auth.signOut();
+        });
+
+        document.getElementById('save-profile').addEventListener('click', () => {
+            const newName = document.getElementById('edit-name').value.trim();
+            const newBio = document.getElementById('edit-bio').value.trim();
+            if(!newName) return alert("İsim boş olamaz!");
+
+            localStorage.setItem('wrts_name_' + currentUser.uid, newName);
+            localStorage.setItem('wrts_bio_' + currentUser.uid, newBio || 'WrtS kullanıcısı.');
+            if(tempBase64Avatar) localStorage.setItem('wrts_avatar_' + currentUser.uid, tempBase64Avatar);
+
+            loadUserDataToUI();
+            document.getElementById('profile-modal').classList.add('hidden');
+            const md = getMyData();
+            db.ref('status/' + currentUser.uid).update({ name: md.name, avatar: md.avatar });
+        });
+
+        // Çevrimiçi Kullanıcılar Modalı ve Sayacı
+        function updateOnlineCountAndDots() {
+            let onlineCount = 0;
+            const listDiv = document.getElementById('online-users-list');
+            if(!listDiv) return;
+            listDiv.innerHTML = '';
+
+            Object.entries(activeUsersData).forEach(([uid, info]) => {
+                if (info && info.state === 'online') {
+                    onlineCount++;
+                    const item = document.createElement('div');
+                    item.className = "flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800 hover:border-indigo-500 cursor-pointer transition";
+                    item.innerHTML = `
+                        <div class="flex items-center gap-2">
+                            <img src="${info.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-8 h-8 rounded-full object-cover">
+                            <div>
+                                <p class="text-sm font-bold text-slate-200">${info.name || 'Kullanıcı'}</p>
+                                <span class="text-[10px] text-emerald-400">● Çevrimiçi</span>
+                            </div>
+                        </div>
+                        ${uid !== currentUser.uid ? `<button class="text-xs bg-indigo-600/20 text-indigo-400 px-2.5 py-1 rounded-lg border border-indigo-500/30">Özel Mesaj (DM)</button>` : ''}
+                    `;
+                    if (uid !== currentUser.uid) {
+                        item.addEventListener('click', () => startDM(uid, info.name));
+                    }
+                    listDiv.appendChild(item);
+                }
+            });
+            document.getElementById('online-count').textContent = onlineCount;
+
+            document.querySelectorAll('[data-uid]').forEach(el => {
+                const uid = el.getAttribute('data-uid');
+                const isOnline = activeUsersData[uid] && activeUsersData[uid].state === 'online';
+                el.className = `absolute bottom-0 right-0 w-2 h-2 rounded-full border border-slate-900 ${isOnline ? 'bg-emerald-500' : 'bg-slate-500'}`;
+            });
+        }
+
+        document.getElementById('open-users-btn').addEventListener('click', () => document.getElementById('users-modal').classList.remove('hidden'));
+        document.getElementById('close-users-modal').addEventListener('click', () => document.getElementById('users-modal').classList.add('hidden'));
+
+        // Özel Mesaj (DM) Başlatma
+        function startDM(targetUid, targetName) {
+            const ids = [currentUser.uid, targetUid].sort();
+            const dmRoomId = `dm_${ids[0]}_${ids[1]}`;
+            
+            db.ref('oda_listesi/' + dmRoomId).set({
+                name: `DM: ${targetName}`,
+                creator: currentUser.uid,
+                createdAt: Date.now()
+            });
+
+            currentRoom = dmRoomId;
+            roomSelect.value = dmRoomId;
+            document.getElementById('users-modal').classList.add('hidden');
+            loadRoom(dmRoomId);
+        }
+
+        // Dinamik Odalar
+        function listenRooms() {
+            db.ref('oda_listesi').on('value', snap => {
+                customRoomsData = snap.val() || {};
+                const prev = currentRoom;
+
+                roomSelect.innerHTML = `
+                    <option value="genel"># Genel</option>
+                    <option value="sohbet"># Muhabbet</option>
+                    <option value="oyun"># Oyun</option>
+                `;
+
+                Object.entries(customRoomsData).forEach(([id, info]) => {
+                    const opt = document.createElement('option');
+                    opt.value = id;
+                    opt.textContent = info.name.startsWith('DM:') ? info.name : `# ${info.name}`;
+                    roomSelect.appendChild(opt);
+                });
+
+                if (!defaultRooms.includes(prev) && !customRoomsData[prev]) {
+                    currentRoom = 'genel';
+                    roomSelect.value = 'genel';
+                    loadRoom('genel');
+                } else {
+                    roomSelect.value = currentRoom;
+                }
+                updateDeleteRoomButton();
+            });
+        }
+
+        function updateDeleteRoomButton() {
+            const roomInfo = customRoomsData[currentRoom];
+            if (roomInfo && currentUser && roomInfo.creator === currentUser.uid) {
+                deleteRoomBtn.classList.remove('hidden');
+            } else {
+                deleteRoomBtn.classList.add('hidden');
+            }
+        }
+
+        document.getElementById('open-room-modal').addEventListener('click', () => {
+            document.getElementById('room-modal').classList.remove('hidden');
+            document.getElementById('new-room-name').focus();
+        });
+        document.getElementById('close-room-modal').addEventListener('click', () => document.getElementById('room-modal').classList.add('hidden'));
+
+        document.getElementById('create-room-btn').addEventListener('click', () => {
+            const nameInput = document.getElementById('new-room-name');
+            const rawName = nameInput.value.trim();
+            if (!rawName || !currentUser) return;
+
+            const roomId = 'oda_' + Date.now();
+            db.ref('oda_listesi/' + roomId).set({
+                name: rawName,
+                creator: currentUser.uid,
+                createdAt: Date.now()
+            }).then(() => {
+                nameInput.value = '';
+                document.getElementById('room-modal').classList.add('hidden');
+                currentRoom = roomId;
+                roomSelect.value = roomId;
+                loadRoom(roomId);
+            });
+        });
+
+        deleteRoomBtn.addEventListener('click', () => {
+            if (defaultRooms.includes(currentRoom)) return;
+            if (confirm("Bu odayı silmek istediğine emin misin?")) {
+                db.ref('oda_listesi/' + currentRoom).remove();
+                db.ref('odalar/' + currentRoom).remove();
+            }
+        });
+
+        // Giriş İşlemleri
+        function showError(msg) { authError.textContent = msg; authError.classList.remove('hidden'); }
+        document.getElementById('google-btn').addEventListener('click', () => {
+            auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(err => showError(err.message));
+        });
+        document.getElementById('email-form').addEventListener('submit', e => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            auth.signInWithEmailAndPassword(email, pass).catch(() => {
+                auth.createUserWithEmailAndPassword(email, pass).catch(err => showError(err.message));
+            });
+        });
+
+        roomSelect.addEventListener('change', e => {
+            currentRoom = e.target.value;
+            updateDeleteRoomButton();
+            loadRoom(currentRoom);
+        });
+
+        // Yazıyor... (Typing) Sistemi
+        const msgInput = document.getElementById('msg-input');
+        msgInput.addEventListener('input', () => {
+            if(!currentUser) return;
+            const typingRef = db.ref(`typing/${currentRoom}/${currentUser.uid}`);
+            const md = getMyData();
+            typingRef.set(md.name);
+
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                typingRef.remove();
+            }, 2000);
+        });
+
+        function listenTyping() {
+            db.ref('typing').on('value', snap => {
+                const typingData = snap.val() || {};
+                const roomTyping = typingData[currentRoom] || {};
+                const othersTyping = Object.entries(roomTyping)
+                    .filter(([uid]) => currentUser && uid !== currentUser.uid)
+                    .map(([_, name]) => name);
+
+                if (othersTyping.length > 0) {
+                    typingIndicator.textContent = othersTyping.join(', ') + (othersTyping.length > 1 ? ' yazıyorlar...' : ' yazıyor...');
+                } else {
+                    typingIndicator.textContent = '';
+                }
