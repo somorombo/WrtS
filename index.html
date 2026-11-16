@@ -784,8 +784,8 @@
                 const roomSelect = document.getElementById('room-select');
                 roomSelect.innerHTML = `<option value="genel"># Genel</option><option value="sohbet"># Muhabbet</option><option value="oyun"># Oyun</option>`;
                 Object.entries(customRoomsData).forEach(([id, info]) => {
-                    // Kesinlikle özel_dm ile başlayanlar oda listesine eklenmez!
-                    if (!id.startsWith('özel_dm_')) {
+                    // Kesinlikle oda_ ile başlamayan ve içinde özel_dm olan hiçbir şey listeye girmeyecek!
+                    if (id.startsWith('oda_') && !id.startsWith('özel_dm_')) {
                         const opt = document.createElement('option'); opt.value = id; opt.textContent = `# ${info.name}`;
                         roomSelect.appendChild(opt);
                     }
