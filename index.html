@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WrtS - Gelişmiş Sohbet</title>
+    <title>WrtS - Gelişmiş Sohbet Platformu</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -14,12 +14,21 @@
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
     </style>
 </head>
-<body class="bg-slate-950 text-white h-[100dvh] w-full overflow-hidden flex flex-col justify-between relative">
+<body id="app-body" class="bg-slate-950 text-white h-[100dvh] w-full overflow-hidden flex flex-col justify-between relative transition-colors duration-300">
 
     <!-- BİLDİRİM BALONU KAPSAYICISI -->
     <div id="notification-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-    <!-- GİRİŞ EKRANI -->
+    <!-- GİZLİLİK / PANIC SCREEN (Baban Yakalarsa Ekranı Değiştirme) -->
+    <div id="panic-screen" class="fixed inset-0 bg-white text-black z-[100] hidden flex flex-col p-6 font-mono">
+        <div class="flex justify-between items-center border-b pb-2 mb-4">
+            <h1 class="text-xl font-bold">Not Defteri - Ders Çalışma Notları</h1>
+            <button onclick="togglePanicMode()" class="text-xs bg-gray-200 px-3 py-1 rounded">Normal Ekrana Dön</button>
+        </div>
+        <textarea class="w-full h-full resize-none focus:outline-none text-sm" placeholder="Fizik formülleri ve özetler buraya yazılır..."></textarea>
+    </div>
+
+    <!-- GİRİŞ EKRANI (Asla Bozmadığımız Orijinal Sağlam Akış) -->
     <div id="login-screen" class="fixed inset-0 bg-slate-950 z-50 flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-2xl w-full max-w-sm space-y-5 shadow-2xl">
             <h1 class="text-3xl font-black text-center text-indigo-400">WrtS</h1>
@@ -37,39 +46,34 @@
         </div>
     </div>
 
-    <!-- KULLANICI LİSTESİ VE GİZLİ DM BAŞLATMA MODALI -->
+    <!-- KULLANICI LİSTESİ & DM MODALI -->
     <div id="users-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-sm space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto">
             <div class="flex justify-between items-center sticky top-0 bg-slate-900 pb-2 border-b border-slate-800">
-                <h3 class="text-lg font-bold">Kullanıcılar & DM</h3>
+                <h3 class="text-lg font-bold">Kullanıcılar & Gizli DM</h3>
                 <button id="close-users-modal" class="text-slate-400 hover:text-white font-bold px-2 py-1">✕</button>
             </div>
-            
             <div>
                 <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">🟢 Çevrimiçi Olanlar</h4>
                 <div id="online-users-list" class="space-y-2"></div>
             </div>
-
             <hr class="border-slate-800">
-
             <div>
                 <h4 class="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-2">👥 Tüm Kullanıcılar (Çevrimdışı Dahil)</h4>
-                <div id="all-users-list" class="space-y-2">
-                    <p class="text-xs text-slate-500 italic">Yükleniyor...</p>
-                </div>
+                <div id="all-users-list" class="space-y-2"><p class="text-xs text-slate-500 italic">Yükleniyor...</p></div>
             </div>
         </div>
     </div>
 
-    <!-- ÖZEL MESAJLARIM (DM LİSTESİ) MODALI -->
+    <!-- ÖZEL MESAJLARIM (GİZLİ DM LİSTESİ) MODALI -->
     <div id="dm-list-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-sm space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto">
             <div class="flex justify-between items-center sticky top-0 bg-slate-900 pb-2 border-b border-slate-800">
                 <h3 class="text-lg font-bold">💬 Özel Mesajlarım</h3>
-                <button id="close-dm-list-modal" class="text-slate-400 hover:text-white font-bold px-2 py-1">✕</button>
+                <button id="close-dm-list-modal" class="text-slate-400 hover:text-white font-bold">✕</button>
             </div>
             <div id="my-dms-list" class="space-y-2">
-                <p class="text-xs text-slate-500 italic">Henüz bir özel sohbetin yok. Kullanıcılar listesinden biriyle DM başlatabilirsin.</p>
+                <p class="text-xs text-slate-500 italic">Henüz gizli özel sohbetin yok.</p>
             </div>
         </div>
     </div>
@@ -89,12 +93,12 @@
         </div>
     </div>
 
-    <!-- PROFİL DÜZENLEME MODALI -->
+    <!-- AYARLAR & PROFİL MODALI (Kişiselleştirme 1 & 4 burada!) -->
     <div id="profile-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center">
-                <h3 class="text-lg font-bold">Profil Ayarları</h3>
-                <button id="close-profile" class="text-slate-400 hover:text-white">✕</button>
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-sm space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center sticky top-0 bg-slate-900 pb-2 border-b border-slate-800">
+                <h3 class="text-lg font-bold">Ayarlar & Profil</h3>
+                <button id="close-profile" class="text-slate-400 hover:text-white font-bold">✕</button>
             </div>
             
             <div class="flex flex-col items-center gap-2">
@@ -111,6 +115,29 @@
                 <label class="block text-xs text-slate-400 mb-1">Hakkında / Açıklama</label>
                 <input type="text" id="edit-bio" placeholder="Örn: WrtS kullanıcısı..." maxlength="60" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-base sm:text-sm focus:outline-none focus:border-indigo-500">
             </div>
+
+            <hr class="border-slate-800">
+
+            <!-- KİŞİSELLEŞTİRME: TEMA VE DUVAR KAĞIDI SEÇENEKLERİ -->
+            <div class="space-y-3">
+                <h4 class="text-xs font-bold text-indigo-400 uppercase tracking-wider">Kişiselleştirme Ayarları</h4>
+                <div class="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-slate-800">
+                    <span class="text-xs font-medium">Tema (Karanlık / Aydınlık)</span>
+                    <select id="theme-select" class="bg-slate-900 border border-slate-700 text-xs rounded-lg px-2 py-1 text-indigo-300 focus:outline-none">
+                        <option value="dark">Karanlık Mod</option>
+                        <option value="light">Aydınlık Mod</option>
+                    </select>
+                </div>
+                <div class="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-slate-800">
+                    <span class="text-xs font-medium">Sohbet Arka Planı (Duvar Kağıdı)</span>
+                    <select id="bg-select" class="bg-slate-900 border border-slate-700 text-xs rounded-lg px-2 py-1 text-indigo-300 focus:outline-none">
+                        <option value="default">Varsayılan (Düz)</option>
+                        <option value="matrix">Matris Koyu</option>
+                        <option value="gradient">Şık Gradyan</option>
+                    </select>
+                </div>
+            </div>
+
             <div class="flex gap-2 pt-2">
                 <button id="save-profile" class="flex-1 bg-indigo-600 hover:bg-indigo-500 py-2.5 rounded-xl text-sm font-bold transition">Kaydet</button>
                 <button id="modal-logout" class="bg-red-500/20 text-red-400 px-4 py-2.5 rounded-xl text-sm font-bold transition">Çıkış</button>
@@ -118,27 +145,58 @@
         </div>
     </div>
 
+    <!-- GIF SEÇME MODALI -->
+    <div id="gif-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-md space-y-4 shadow-2xl max-h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-bold">GIF Seç</h3>
+                <button id="close-gif-modal" class="text-slate-400 hover:text-white font-bold">✕</button>
+            </div>
+            <input type="text" id="gif-search-input" placeholder="GIF ara (örn: cat, happy, dance)..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
+            <div id="gif-results" class="grid grid-cols-2 gap-2 overflow-y-auto max-h-60 p-1">
+                <p class="text-xs text-slate-500 col-span-2 text-center py-4">GIF'ler yükleniyor...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MİNİ OYUNLAR MODALI (Eğlence 5) -->
+    <div id="games-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-md space-y-4 shadow-2xl text-center">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                <h3 class="text-lg font-bold text-amber-400">🎮 WrtS Mini Oyunlar & Eğlence</h3>
+                <button onclick="document.getElementById('games-modal').classList.add('hidden')" class="text-slate-400 hover:text-white font-bold">✕</button>
+            </div>
+            <p class="text-xs text-slate-300">Arkadaşlarınla kapışabileceğin mini oyun alanı:</p>
+            <div class="grid grid-cols-2 gap-3 py-4">
+                <button onclick="alert('XOX Oyunu yakında aktifleşecek!')" class="bg-slate-950 border border-slate-800 p-4 rounded-xl hover:border-amber-500 transition font-bold text-sm">❌ Tic-Tac-Toe (XOX)</button>
+                <button onclick="alert('Kelime tahmin oyunu yakında!')" class="bg-slate-950 border border-slate-800 p-4 rounded-xl hover:border-amber-500 transition font-bold text-sm">🔤 Kelime Bulmaca</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ÜST BAR VE ODALAR -->
-    <header class="bg-slate-900 border-b border-slate-800 px-3 py-3 sm:p-4 flex justify-between items-center gap-2 shrink-0">
+    <header class="bg-slate-900 border-b border-slate-800 px-3 py-3 sm:p-4 flex justify-between items-center gap-2 shrink-0 transition-colors duration-300" id="main-header">
         <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
             <span class="font-black text-lg sm:text-xl text-indigo-400 shrink-0">WrtS</span>
-            <select id="room-select" class="bg-slate-950 border border-slate-800 text-xs sm:text-sm rounded-lg px-2 py-1.5 text-indigo-300 font-semibold focus:outline-none truncate max-w-[110px] sm:max-w-[150px]">
+            <select id="room-select" class="bg-slate-950 border border-slate-800 text-xs sm:text-sm rounded-lg px-2 py-1.5 text-indigo-300 font-semibold focus:outline-none truncate max-w-[110px] sm:max-w-[130px]">
                 <option value="genel"># Genel</option>
                 <option value="sohbet"># Muhabbet</option>
                 <option value="oyun"># Oyun</option>
             </select>
-            <!-- ÖZEL MESAJLARIM BUTONU (GENEL ODALARDA GÖrünmez, Sadece DM'ye özel) -->
-            <button id="open-dm-list-btn" class="bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 border border-emerald-500/30 px-2.5 py-1.5 rounded-lg text-xs font-bold shrink-0 transition" title="Özel Mesajlarım">💬 DM'lerim</button>
+            <button id="open-dm-list-btn" class="bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 border border-emerald-500/30 px-2 py-1.5 rounded-lg text-xs font-bold shrink-0 transition" title="Özel Mesajlarım">💬 DM</button>
             <button id="open-room-modal" class="bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 border border-indigo-500/30 w-7 h-7 rounded-lg flex items-center justify-center font-bold text-base shrink-0 transition" title="Yeni Oda Kur">+</button>
             <button id="delete-room-btn" class="hidden bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 w-7 h-7 rounded-lg flex items-center justify-center text-xs shrink-0 transition" title="Bu Odayı Sil">🗑️</button>
         </div>
-        <div class="flex items-center gap-2">
-            <!-- Çevrimiçi Kullanıcı Listesi Butonu -->
+        <div class="flex items-center gap-1.5 sm:gap-2">
+            <!-- Panic Button (Gizlilik Düğmesi) -->
+            <button onclick="togglePanicMode()" class="bg-red-600/20 hover:bg-red-600/40 text-red-400 border border-red-500/30 px-2 py-1.5 rounded-lg text-xs font-bold shrink-0" title="Panik Modu (Ekranı Gizle)">🛡️ Gizle</button>
+            <!-- Eğlence / Mini Oyunlar Butonu -->
+            <button onclick="document.getElementById('games-modal').classList.remove('hidden')" class="bg-amber-600/20 hover:bg-amber-600/40 text-amber-400 border border-amber-500/30 px-2 py-1.5 rounded-lg text-xs font-bold shrink-0">🎮 Oyun</button>
             <button id="open-users-btn" class="bg-slate-800/60 hover:bg-slate-800 px-2 py-1.5 rounded-full border border-slate-700 text-xs text-emerald-400 flex items-center gap-1 shrink-0" title="Aktif Kullanıcılar">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 <span id="online-count">1</span>
             </button>
-            <button id="open-profile" class="flex items-center gap-2 bg-slate-800/60 hover:bg-slate-800 px-2.5 py-1.5 rounded-full border border-slate-700 transition max-w-[120px] sm:max-w-[150px] shrink-0">
+            <button id="open-profile" class="flex items-center gap-2 bg-slate-800/60 hover:bg-slate-800 px-2.5 py-1.5 rounded-full border border-slate-700 transition max-w-[100px] sm:max-w-[130px] shrink-0">
                 <div class="relative shrink-0">
                     <img id="header-avatar" src="" class="w-5 h-5 rounded-full object-cover">
                     <span id="header-status-dot" class="absolute bottom-0 right-0 w-2 h-2 bg-emerald-500 rounded-full border border-slate-900"></span>
@@ -156,19 +214,29 @@
     <div id="typing-indicator" class="px-4 py-1 text-[11px] text-slate-400 italic max-w-2xl w-full mx-auto h-5 shrink-0">
     </div>
 
-    <!-- MESAJ GÖNDERME ÇUBUĞU (FOTO + SES + METİN) -->
-    <footer class="bg-slate-900 border-t border-slate-800 p-2.5 sm:p-4 max-w-2xl w-full mx-auto shrink-0">
+    <!-- YANITLANAN MESAJ ÖNİZLEME ÇUBUĞU (Mesajlaşma 1) -->
+    <div id="reply-preview-bar" class="hidden max-w-2xl w-full mx-auto px-4 py-1.5 bg-slate-900/90 border-t border-slate-800 flex justify-between items-center shrink-0">
+        <div class="flex items-center gap-2 truncate text-xs">
+            <span class="text-indigo-400 font-bold">Yanıtlanıyor:</span>
+            <span id="reply-preview-text" class="text-slate-300 truncate"></span>
+        </div>
+        <button onclick="cancelReply()" class="text-slate-400 hover:text-white font-bold text-xs px-2">✕</button>
+    </div>
+
+    <!-- MESAJ GÖNDERME ÇUBUĞU (Tüm Eğlence ve Mesaj Araçları Burada) -->
+    <footer class="bg-slate-900 border-t border-slate-800 p-2.5 sm:p-4 max-w-2xl w-full mx-auto shrink-0 transition-colors duration-300" id="main-footer">
         <form id="msg-form" class="flex items-center gap-2 w-full">
-            <!-- Fotoğraf Butonu -->
             <button type="button" onclick="document.getElementById('img-file').click()" class="p-2 text-slate-400 hover:text-indigo-400 bg-slate-800/60 rounded-full transition shrink-0" title="Fotoğraf Gönder">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
             </button>
             <input type="file" id="img-file" accept="image/*" class="hidden">
 
-            <!-- Ses Kayıt Butonu -->
-            <button type="button" id="record-btn" class="p-2 text-slate-400 hover:text-rose-400 bg-slate-800/60 rounded-full transition shrink-0" title="Ses Kaydet (Bas ve Konuş)">
+            <button type="button" id="record-btn" class="p-2 text-slate-400 hover:text-rose-400 bg-slate-800/60 rounded-full transition shrink-0" title="Ses Kaydet">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
             </button>
+
+            <!-- Eğlence 1: GIF Gönderme Butonu -->
+            <button type="button" id="open-gif-modal" class="p-2 text-slate-400 hover:text-amber-400 bg-slate-800/60 rounded-full transition shrink-0 text-xs font-extrabold" title="GIF Gönder">GIF</button>
 
             <input type="text" id="msg-input" placeholder="Bir şeyler yaz..." autocomplete="off" class="flex-1 min-w-0 bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 sm:py-3 text-base sm:text-sm focus:outline-none focus:border-indigo-500">
             
@@ -205,62 +273,58 @@
         let activeUsersData = {};
         let tempBase64Avatar = null;
         let typingTimeout = null;
+        let replyingTo = null; // Mesajlaşma 1 (Alıntı)
         const defaultRooms = ['genel', 'sohbet', 'oyun'];
-        let isInitialLoad = true;
 
-        // Bildirim Sesi
-        function playNotificationSound() {
-            try {
-                const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(587.33, ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.1);
-                gain.gain.setValueAtTime(0.1, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.start();
-                osc.stop(ctx.currentTime + 0.3);
-            } catch(e) {}
+        // Panik Modu (Gizlilik Düğmesi)
+        function togglePanicMode() {
+            const p = document.getElementById('panic-screen');
+            p.classList.toggle('hidden');
         }
 
-        // Bildirim Balonu
-        function showNotificationBanner(senderName, text) {
-            const container = document.getElementById('notification-container');
-            const notif = document.createElement('div');
-            notif.className = "pointer-events-auto bg-slate-900 border border-indigo-500/50 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-bounce transition transform duration-300 max-w-xs";
-            notif.innerHTML = `
-                <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-sm shrink-0">🔔</div>
-                <div class="overflow-hidden">
-                    <p class="text-xs font-bold text-indigo-300 truncate">${senderName}</p>
-                    <p class="text-xs text-slate-300 truncate">${text || 'Yeni mesaj gönderdi.'}</p>
-                </div>
-            `;
-            container.appendChild(notif);
-            playNotificationSound();
-            setTimeout(() => {
-                notif.style.opacity = '0';
-                setTimeout(() => notif.remove(), 300);
-            }, 4000);
+        // Kişiselleştirme Ayarlarını Uygulama (Tema ve Duvar Kağıdı)
+        function applySettingsToUI() {
+            const theme = localStorage.getItem('wrts_theme') || 'dark';
+            const bgType = localStorage.getItem('wrts_bg') || 'default';
+
+            document.getElementById('theme-select').value = theme;
+            document.getElementById('bg-select').value = bgType;
+
+            const body = document.getElementById('app-body');
+            const header = document.getElementById('main-header');
+            const footer = document.getElementById('main-footer');
+
+            let bgClass = "bg-slate-950 text-white";
+            if (theme === 'light') {
+                bgClass = "bg-slate-100 text-slate-900";
+            } else {
+                if (bgType === 'matrix') bgClass = "bg-zinc-950 text-emerald-400";
+                else if (bgType === 'gradient') bgClass = "bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950 text-white";
+                else bgClass = "bg-slate-950 text-white";
+            }
+
+            body.className = `${bgClass} h-[100dvh] w-full overflow-hidden flex flex-col justify-between relative transition-colors duration-300`;
+            if (theme === 'light') {
+                header.className = "bg-white border-b border-slate-200 px-3 py-3 sm:p-4 flex justify-between items-center gap-2 shrink-0 transition-colors duration-300";
+                footer.className = "bg-white border-t border-slate-200 p-2.5 sm:p-4 max-w-2xl w-full mx-auto shrink-0 transition-colors duration-300";
+            } else {
+                header.className = "bg-slate-900 border-b border-slate-800 px-3 py-3 sm:p-4 flex justify-between items-center gap-2 shrink-0 transition-colors duration-300";
+                footer.className = "bg-slate-900 border-t border-slate-800 p-2.5 sm:p-4 max-w-2xl w-full mx-auto shrink-0 transition-colors duration-300";
+            }
         }
 
-        // Giriş ve Bağlantı Akışı (Asla Bozulmadı)
+        // Orijinal Güvenli Giriş Akışı
         auth.onAuthStateChanged(user => {
             if (user) {
                 currentUser = user;
                 loginScreen.classList.add('hidden');
                 
                 const userStatusRef = db.ref('status/' + user.uid);
-                const myConnectionsRef = db.ref('.info/connected');
-                
-                myConnectionsRef.on('value', snap => {
+                db.ref('.info/connected').on('value', snap => {
                     if (snap.val() === true) {
                         userStatusRef.onDisconnect().set({ state: 'offline', lastChanged: firebase.database.ServerValue.TIMESTAMP });
                         const myData = getMyData();
                         userStatusRef.set({ state: 'online', name: myData.name, avatar: myData.avatar, lastChanged: firebase.database.ServerValue.TIMESTAMP });
-                        
                         db.ref('users_registry/' + user.uid).set({ name: myData.name, avatar: myData.avatar, bio: myData.bio });
                     }
                 });
@@ -274,6 +338,7 @@
                 listenRooms();
                 loadRoom(currentRoom);
                 listenTyping();
+                applySettingsToUI();
             } else {
                 currentUser = null;
                 loginScreen.classList.remove('hidden');
@@ -297,7 +362,6 @@
             tempBase64Avatar = null;
         }
 
-        // Avatar Seçimi & Sıkıştırma
         document.getElementById('upload-avatar-file').addEventListener('change', e => {
             const file = e.target.files[0];
             if (!file) return;
@@ -320,7 +384,7 @@
             reader.readAsDataURL(file);
         });
 
-        // Profil Modalı
+        // Profil & Ayarlar Modalı Kaydetme
         document.getElementById('open-profile').addEventListener('click', () => document.getElementById('profile-modal').classList.remove('hidden'));
         document.getElementById('close-profile').addEventListener('click', () => document.getElementById('profile-modal').classList.add('hidden'));
         document.getElementById('modal-logout').addEventListener('click', () => {
@@ -330,20 +394,26 @@
         document.getElementById('save-profile').addEventListener('click', () => {
             const newName = document.getElementById('edit-name').value.trim();
             const newBio = document.getElementById('edit-bio').value.trim();
+            const themeVal = document.getElementById('theme-select').value;
+            const bgVal = document.getElementById('bg-select').value;
+
             if(!newName) return alert("İsim boş olamaz!");
 
             localStorage.setItem('wrts_name_' + currentUser.uid, newName);
             localStorage.setItem('wrts_bio_' + currentUser.uid, newBio || 'WrtS kullanıcısı.');
+            localStorage.setItem('wrts_theme', themeVal);
+            localStorage.setItem('wrts_bg', bgVal);
             if(tempBase64Avatar) localStorage.setItem('wrts_avatar_' + currentUser.uid, tempBase64Avatar);
 
             loadUserDataToUI();
+            applySettingsToUI();
             document.getElementById('profile-modal').classList.add('hidden');
             const md = getMyData();
             db.ref('status/' + currentUser.uid).update({ name: md.name, avatar: md.avatar });
             db.ref('users_registry/' + currentUser.uid).update({ name: md.name, avatar: md.avatar, bio: md.bio });
         });
 
-        // Çevrimiçi Kullanıcılar ve Tüm Kullanıcılar Listesi
+        // Çevrimiçi & Çevrimdışı DM Listesi
         function updateOnlineCountAndDots() {
             let onlineCount = 0;
             const onlineListDiv = document.getElementById('online-users-list');
@@ -364,20 +434,12 @@
                         </div>
                         ${uid !== currentUser.uid ? `<button class="text-xs bg-indigo-600/20 text-indigo-400 px-2.5 py-1 rounded-lg border border-indigo-500/30 font-bold">DM Başlat</button>` : ''}
                     `;
-                    if (uid !== currentUser.uid) {
-                        item.addEventListener('click', () => startDM(uid, info.name));
-                    }
+                    if (uid !== currentUser.uid) item.addEventListener('click', () => startDM(uid, info.name));
                     onlineListDiv.appendChild(item);
                 }
             });
             document.getElementById('online-count').textContent = onlineCount;
             loadAllUsersRegistry();
-
-            document.querySelectorAll('[data-uid]').forEach(el => {
-                const uid = el.getAttribute('data-uid');
-                const isOnline = activeUsersData[uid] && activeUsersData[uid].state === 'online';
-                el.className = `absolute bottom-0 right-0 w-2 h-2 rounded-full border border-slate-900 ${isOnline ? 'bg-emerald-500' : 'bg-slate-500'}`;
-            });
         }
 
         function loadAllUsersRegistry() {
@@ -385,17 +447,12 @@
             db.ref('users_registry').once('value', snap => {
                 const allUsers = snap.val() || {};
                 allDiv.innerHTML = '';
-
                 const entries = Object.entries(allUsers);
-                if (entries.length === 0) {
-                    allDiv.innerHTML = '<p class="text-xs text-slate-500">Henüz kayıtlı başka kullanıcı yok.</p>';
-                    return;
-                }
+                if (entries.length === 0) { allDiv.innerHTML = '<p class="text-xs text-slate-500">Henüz kayıtlı başka kullanıcı yok.</p>'; return; }
 
                 entries.forEach(([uid, info]) => {
                     if (currentUser && uid === currentUser.uid) return;
                     const isOnline = activeUsersData[uid] && activeUsersData[uid].state === 'online';
-
                     const item = document.createElement('div');
                     item.className = "flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800 hover:border-indigo-500 cursor-pointer transition";
                     item.innerHTML = `
@@ -420,32 +477,21 @@
         document.getElementById('open-users-btn').addEventListener('click', () => document.getElementById('users-modal').classList.remove('hidden'));
         document.getElementById('close-users-modal').addEventListener('click', () => document.getElementById('users-modal').classList.add('hidden'));
 
-        // 🔒 ÖZEL VE GİZLİ DM SİSTEMİ (Genel Odalardan Tamamen Ayrıldı)
+        // Gizli DM Sistemi
         window.startDM = function(targetUid, encodedTargetName) {
             const targetName = decodeURIComponent(encodedTargetName);
             const ids = [currentUser.uid, targetUid].sort();
             const dmRoomId = `dm_${ids[0]}_${ids[1]}`;
             
-            // DM odasını sisteme kaydet ama GENEL ODA LİSTESİNDE GÖSTERME (Ayrı tutulacak)
-            db.ref('gizli_dm_listesi/' + currentUser.uid + '/' + dmRoomId).set({
-                targetUid: targetUid,
-                targetName: targetName,
-                createdAt: Date.now()
-            });
-            // Karşı tarafın da özel mesajlarım listesine ekle ki o da görebilsin
-            db.ref('gizli_dm_listesi/' + targetUid + '/' + dmRoomId).set({
-                targetUid: currentUser.uid,
-                targetName: getMyData().name,
-                createdAt: Date.now()
-            });
+            db.ref('gizli_dm_listesi/' + currentUser.uid + '/' + dmRoomId).set({ targetUid, targetName, createdAt: Date.now() });
+            db.ref('gizli_dm_listesi/' + targetUid + '/' + dmRoomId).set({ targetUid: currentUser.uid, targetName: getMyData().name, createdAt: Date.now() });
 
             currentRoom = dmRoomId;
-            roomSelect.value = "genel"; // Seçim kutusunu genel göster (DM'ler listede gizli)
+            roomSelect.value = "genel";
             document.getElementById('users-modal').classList.add('hidden');
             loadRoom(dmRoomId);
         }
 
-        // "Özel Mesajlarım" Modalını Açma ve Listeleme
         document.getElementById('open-dm-list-btn').addEventListener('click', () => {
             const modal = document.getElementById('dm-list-modal');
             const listDiv = document.getElementById('my-dms-list');
@@ -456,11 +502,7 @@
                 const dms = snap.val() || {};
                 listDiv.innerHTML = '';
                 const entries = Object.entries(dms);
-                
-                if (entries.length === 0) {
-                    listDiv.innerHTML = '<p class="text-xs text-slate-500 italic">Henüz gizli özel sohbetin yok. Kullanıcılar listesinden biriyle DM başlatabilirsin.</p>';
-                    return;
-                }
+                if (entries.length === 0) { listDiv.innerHTML = '<p class="text-xs text-slate-500 italic">Henüz gizli özel sohbetin yok.</p>'; return; }
 
                 entries.forEach(([dmRoomId, info]) => {
                     const item = document.createElement('div');
@@ -470,7 +512,7 @@
                             <div class="w-8 h-8 rounded-full bg-emerald-600/20 text-emerald-400 flex items-center justify-center font-bold text-sm">💬</div>
                             <div>
                                 <p class="text-xs font-bold text-slate-200">${info.targetName}</p>
-                                <span class="text-[10px] text-slate-400">Gizli Özel Sohbet</span>
+                                <span class="text-[10px] text-slate-400">Özel Sohbet</span>
                             </div>
                         </div>
                         <span class="text-xs bg-emerald-600/20 text-emerald-400 px-2.5 py-1 rounded-lg border border-emerald-500/30 font-bold">Aç</span>
@@ -488,356 +530,12 @@
 
         document.getElementById('close-dm-list-modal').addEventListener('click', () => document.getElementById('dm-list-modal').classList.add('hidden'));
 
-        // Normal Odalar Listesi
+        // Normal Odalar
         function listenRooms() {
             db.ref('oda_listesi').on('value', snap => {
                 customRoomsData = snap.val() || {};
                 const prev = currentRoom;
-
-                roomSelect.innerHTML = `
-                    <option value="genel"># Genel</option>
-                    <option value="sohbet"># Muhabbet</option>
-                    <option value="oyun"># Oyun</option>
-                `;
-
+                roomSelect.innerHTML = `<option value="genel"># Genel</option><option value="sohbet"># Muhabbet</option><option value="oyun"># Oyun</option>`;
                 Object.entries(customRoomsData).forEach(([id, info]) => {
-                    // DM odaları ASLA normal oda listesinde görünmez!
                     if (!id.startsWith('dm_')) {
-                        const opt = document.createElement('option');
-                        opt.value = id;
-                        opt.textContent = `# ${info.name}`;
-                        roomSelect.appendChild(opt);
-                    }
-                });
-
-                if (!defaultRooms.includes(prev) && !customRoomsData[prev] && !prev.startsWith('dm_')) {
-                    currentRoom = 'genel';
-                    roomSelect.value = 'genel';
-                    loadRoom('genel');
-                } else if (!prev.startsWith('dm_')) {
-                    roomSelect.value = currentRoom;
-                }
-                updateDeleteRoomButton();
-            });
-        }
-
-        function updateDeleteRoomButton() {
-            const roomInfo = customRoomsData[currentRoom];
-            if (roomInfo && currentUser && roomInfo.creator === currentUser.uid) {
-                deleteRoomBtn.classList.remove('hidden');
-            } else {
-                deleteRoomBtn.classList.add('hidden');
-            }
-        }
-
-        document.getElementById('open-room-modal').addEventListener('click', () => {
-            document.getElementById('room-modal').classList.remove('hidden');
-            document.getElementById('new-room-name').focus();
-        });
-        document.getElementById('close-room-modal').addEventListener('click', () => document.getElementById('room-modal').classList.add('hidden'));
-
-        document.getElementById('create-room-btn').addEventListener('click', () => {
-            const nameInput = document.getElementById('new-room-name');
-            const rawName = nameInput.value.trim();
-            if (!rawName || !currentUser) return;
-
-            const roomId = 'oda_' + Date.now();
-            db.ref('oda_listesi/' + roomId).set({
-                name: rawName,
-                creator: currentUser.uid,
-                createdAt: Date.now()
-            }).then(() => {
-                nameInput.value = '';
-                document.getElementById('room-modal').classList.add('hidden');
-                currentRoom = roomId;
-                roomSelect.value = roomId;
-                loadRoom(roomId);
-            });
-        });
-
-        deleteRoomBtn.addEventListener('click', () => {
-            if (defaultRooms.includes(currentRoom)) return;
-            if (confirm("Bu odayı silmek istediğine emin misin?")) {
-                db.ref('oda_listesi/' + currentRoom).remove();
-                db.ref('odalar/' + currentRoom).remove();
-            }
-        });
-
-        // Giriş İşlemleri
-        function showError(msg) { authError.textContent = msg; authError.classList.remove('hidden'); }
-        document.getElementById('google-btn').addEventListener('click', () => {
-            auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(err => showError(err.message));
-        });
-        document.getElementById('email-form').addEventListener('submit', e => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('password').value;
-            auth.signInWithEmailAndPassword(email, pass).catch(() => {
-                auth.createUserWithEmailAndPassword(email, pass).catch(err => showError(err.message));
-            });
-        });
-
-        roomSelect.addEventListener('change', e => {
-            currentRoom = e.target.value;
-            updateDeleteRoomButton();
-            loadRoom(currentRoom);
-        });
-
-        // Yazıyor... Sistemi
-        const msgInput = document.getElementById('msg-input');
-        msgInput.addEventListener('input', () => {
-            if(!currentUser) return;
-            const typingRef = db.ref(`typing/${currentRoom}/${currentUser.uid}`);
-            const md = getMyData();
-            typingRef.set(md.name);
-
-            clearTimeout(typingTimeout);
-            typingTimeout = setTimeout(() => {
-                typingRef.remove();
-            }, 2000);
-        });
-
-        function listenTyping() {
-            db.ref('typing').on('value', snap => {
-                const typingData = snap.val() || {};
-                const roomTyping = typingData[currentRoom] || {};
-                const othersTyping = Object.entries(roomTyping)
-                    .filter(([uid]) => currentUser && uid !== currentUser.uid)
-                    .map(([_, name]) => name);
-
-                if (othersTyping.length > 0) {
-                    typingIndicator.textContent = othersTyping.join(', ') + (othersTyping.length > 1 ? ' yazıyorlar...' : ' yazıyor...');
-                } else {
-                    typingIndicator.textContent = '';
-                }
-            });
-        }
-
-        // Emojiler
-        function renderReactionsHTML(reactionsObj, room, key) {
-            if (!reactionsObj) return '';
-            const counts = {};
-            const myEmoji = currentUser ? reactionsObj[currentUser.uid] : null;
-            Object.values(reactionsObj).forEach(emoji => { counts[emoji] = (counts[emoji] || 0) + 1; });
-
-            return Object.entries(counts).map(([emoji, count]) => {
-                const isMine = myEmoji === emoji;
-                return `<button onclick="toggleReaction('${room}', '${key}', '${emoji}')" class="${isMine ? 'bg-indigo-600/40 border-indigo-400' : 'bg-slate-900/90 border-slate-700'} text-xs px-2 py-0.5 rounded-full border flex items-center gap-1 transition">
-                    <span>${emoji}</span><span class="text-[10px] text-slate-300 font-bold">${count}</span>
-                </button>`;
-            }).join('');
-        }
-
-        function createMessageElement(snap, room) {
-            const data = snap.val();
-            const key = snap.key;
-            const isMe = currentUser && data.uid === currentUser.uid;
-            
-            const div = document.createElement('div');
-            div.id = `msg-${key}`;
-            div.className = `flex gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'} items-end`;
-
-            const reactionsHTML = renderReactionsHTML(data.reactions, room, key);
-            const isOnline = activeUsersData[data.uid] && activeUsersData[data.uid].state === 'online';
-            const timeStr = new Date(data.zaman || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-            let content = '';
-            if (data.type === 'image') {
-                content = `<img src="${data.url}" class="rounded-xl max-h-48 object-cover cursor-pointer" onclick="window.open('${data.url}', '_blank')">`;
-            } else if (data.type === 'audio') {
-                content = `<audio controls src="${data.url}" class="h-9 max-w-[200px]"></audio>`;
-            } else {
-                content = `<p class="text-sm break-words">${data.mesaj}</p>`;
-            }
-
-            div.innerHTML = `
-                <div class="relative shrink-0 mb-1">
-                    <img src="${data.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-6 h-6 rounded-full object-cover">
-                    <span data-uid="${data.uid}" class="absolute bottom-0 right-0 w-2 h-2 rounded-full border border-slate-900 ${isOnline ? 'bg-emerald-500' : 'bg-slate-500'}"></span>
-                </div>
-                <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[78%]">
-                    <div class="flex items-center gap-1.5 px-1 mb-0.5">
-                        <span class="text-[10px] text-slate-400">${data.isim}</span>
-                        <span class="text-[9px] text-slate-500 italic">${data.bio || ''}</span>
-                    </div>
-                    <div onclick="toggleActionMenu('${key}')" class="cursor-pointer ${isMe ? 'bg-indigo-600' : 'bg-slate-800'} px-3.5 py-2 rounded-2xl shadow">
-                        ${content}
-                        <div class="text-[9px] ${isMe ? 'text-indigo-200' : 'text-slate-400'} text-right mt-1">${timeStr}</div>
-                    </div>
-                    
-                    <div id="menu-${key}" class="hidden flex gap-1.5 items-center mt-1.5 bg-slate-900 border border-slate-800 px-2 py-1 rounded-full shadow-lg">
-                        <button onclick="toggleReaction('${room}', '${key}', '👍')" class="hover:scale-125 transition text-sm">👍</button>
-                        <button onclick="toggleReaction('${room}', '${key}', '❤️')" class="hover:scale-125 transition text-sm">❤️</button>
-                        <button onclick="toggleReaction('${room}', '${key}', '😂')" class="hover:scale-125 transition text-sm">😂</button>
-                        <button onclick="toggleReaction('${room}', '${key}', '🔥')" class="hover:scale-125 transition text-sm">🔥</button>
-                        ${isMe ? `<div class="w-[1px] h-3 bg-slate-700 mx-0.5"></div><button onclick="deleteMsg('${room}', '${key}')" class="text-red-400 hover:text-red-300 text-xs font-bold px-1">Sil</button>` : ''}
-                    </div>
-
-                    <div id="reactions-${key}" class="flex gap-1 mt-1 flex-wrap ${isMe ? 'justify-end' : 'justify-start'}">${reactionsHTML}</div>
-                </div>
-            `;
-            return div;
-        }
-
-        function loadRoom(room) {
-            if (roomRef) roomRef.off();
-            messagesDiv.innerHTML = '';
-            isInitialLoad = true;
-            roomRef = db.ref('odalar/' + room).limitToLast(50);
-            
-            roomRef.on('child_added', snap => {
-                const el = createMessageElement(snap, room);
-                messagesDiv.appendChild(el);
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
-                const data = snap.val();
-                if (!isInitialLoad && currentUser && data.uid !== currentUser.uid) {
-                    showNotificationBanner(data.isim, data.mesaj);
-                }
-            });
-
-            roomRef.once('value', () => {
-                isInitialLoad = false;
-            });
-
-            roomRef.on('child_changed', snap => {
-                const data = snap.val();
-                const key = snap.key;
-                const reactionsContainer = document.getElementById(`reactions-${key}`);
-                if (reactionsContainer) {
-                    reactionsContainer.innerHTML = renderReactionsHTML(data.reactions, room, key);
-                }
-            });
-
-            roomRef.on('child_removed', snap => {
-                document.getElementById(`msg-${snap.key}`)?.remove();
-            });
-        }
-
-        window.toggleActionMenu = function(key) {
-            const menu = document.getElementById(`menu-${key}`);
-            if (!menu) return;
-            const isHidden = menu.classList.contains('hidden');
-            document.querySelectorAll('[id^="menu-"]').forEach(el => el.classList.add('hidden'));
-            if (isHidden) menu.classList.remove('hidden');
-        };
-
-        window.toggleReaction = function(room, key, emoji) {
-            if(!currentUser) return;
-            const ref = db.ref(`odalar/${room}/${key}/reactions/${currentUser.uid}`);
-            ref.once('value', snap => {
-                if (snap.val() === emoji) ref.remove();
-                else ref.set(emoji);
-            });
-            document.getElementById(`menu-${key}`)?.classList.add('hidden');
-        };
-
-        window.deleteMsg = function(room, key) {
-            if(confirm("Bu mesajı silmek istiyor musun?")) {
-                db.ref(`odalar/${room}/${key}`).remove();
-            }
-        };
-
-        // Metin Mesajı Gönderme
-        document.getElementById('msg-form').addEventListener('submit', e => {
-            e.preventDefault();
-            const input = document.getElementById('msg-input');
-            const text = input.value.trim();
-            if(!text || !currentUser) return;
-
-            const myData = getMyData();
-            db.ref(`typing/${currentRoom}/${currentUser.uid}`).remove();
-
-            db.ref('odalar/' + currentRoom).push({
-                uid: currentUser.uid,
-                isim: myData.name,
-                avatar: myData.avatar,
-                bio: myData.bio,
-                mesaj: text,
-                type: 'text',
-                zaman: Date.now()
-            });
-            input.value = '';
-        });
-
-        // Fotoğraf Gönderme
-        document.getElementById('img-file').addEventListener('change', e => {
-            const file = e.target.files[0];
-            if(!file || !currentUser) return;
-
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    const MAX = 600;
-                    let w = img.width, h = img.height;
-                    if (w > h) { if (w > MAX) { h *= MAX / w; w = MAX; } }
-                    else { if (h > MAX) { w *= MAX / h; h = MAX; } }
-                    canvas.width = w; canvas.height = h;
-                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                    
-                    const base64Url = canvas.toDataURL('image/jpeg', 0.6);
-                    const myData = getMyData();
-
-                    db.ref('odalar/' + currentRoom).push({
-                        uid: currentUser.uid,
-                        isim: myData.name,
-                        avatar: myData.avatar,
-                        bio: myData.bio,
-                        url: base64Url,
-                        type: 'image',
-                        zaman: Date.now()
-                    });
-                }
-                img.src = event.target.result;
-            }
-            reader.readAsDataURL(file);
-            e.target.value = '';
-        });
-
-        // Ses Kaydı
-        let mediaRecorder;
-        let audioChunks = [];
-        const recordBtn = document.getElementById('record-btn');
-
-        recordBtn.addEventListener('click', async () => {
-            if(!mediaRecorder || mediaRecorder.state === "inactive") {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorder = new MediaRecorder(stream);
-                    audioChunks = [];
-                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-                    mediaRecorder.onstop = async () => {
-                        const blob = new Blob(audioChunks, { type: 'audio/webm' });
-                        const reader = new FileReader();
-                        reader.onloadend = function() {
-                            const base64Audio = reader.result;
-                            const myData = getMyData();
-
-                            db.ref('odalar/' + currentRoom).push({
-                                uid: currentUser.uid,
-                                isim: myData.name,
-                                avatar: myData.avatar,
-                                bio: myData.bio,
-                                url: base64Audio,
-                                type: 'audio',
-                                zaman: Date.now()
-                            });
-                        }
-                        reader.readAsDataURL(blob);
-                        stream.getTracks().forEach(t => t.stop());
-                    };
-                    mediaRecorder.start();
-                    recordBtn.classList.add('bg-rose-600', 'text-white', 'animate-pulse');
-                } catch(e) {
-                    alert("Mikrofon izni alınamadı.");
-                }
-            } else {
-                mediaRecorder.stop();
-                recordBtn.classList.remove('bg-rose-600', 'text-white', 'animate-pulse');
-            }
-        });
-    </script>
-</body>
-</html>
+                        const
