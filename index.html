@@ -34,6 +34,21 @@
         </div>
     </div>
 
+    <!-- YENİ ODA OLUŞTURMA MODALI -->
+    <div id="room-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-bold">Yeni Oda Oluştur</h3>
+                <button id="close-room-modal" class="text-slate-400 hover:text-white">✕</button>
+            </div>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Oda Adı</label>
+                <input type="text" id="new-room-name" placeholder="Örn: Müzik, Gece Tayfa..." maxlength="20" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-base sm:text-sm focus:outline-none focus:border-indigo-500">
+            </div>
+            <button id="create-room-btn" class="w-full bg-indigo-600 hover:bg-indigo-500 py-2.5 rounded-xl text-sm font-bold transition">Odayı Kur</button>
+        </div>
+    </div>
+
     <!-- PROFİL DÜZENLEME MODALI -->
     <div id="profile-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
@@ -43,11 +58,11 @@
             </div>
             <div>
                 <label class="block text-xs text-slate-400 mb-1">Görünen Ad</label>
-                <input type="text" id="edit-name" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
+                <input type="text" id="edit-name" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-base sm:text-sm focus:outline-none focus:border-indigo-500">
             </div>
             <div>
                 <label class="block text-xs text-slate-400 mb-1">Avatar URL (İsteğe bağlı resim linki)</label>
-                <input type="text" id="edit-avatar" placeholder="https://..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
+                <input type="text" id="edit-avatar" placeholder="https://..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-base sm:text-sm focus:outline-none focus:border-indigo-500">
             </div>
             <div class="flex gap-2 pt-2">
                 <button id="save-profile" class="flex-1 bg-indigo-600 hover:bg-indigo-500 py-2.5 rounded-xl text-sm font-bold">Kaydet</button>
@@ -58,22 +73,26 @@
 
     <!-- ÜST BAR VE ODALAR -->
     <header class="bg-slate-900 border-b border-slate-800 px-3 py-3 sm:p-4 flex justify-between items-center gap-2 shrink-0">
-        <div class="flex items-center gap-2 min-w-0">
+        <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
             <span class="font-black text-lg sm:text-xl text-indigo-400 shrink-0">WrtS</span>
-            <select id="room-select" class="bg-slate-950 border border-slate-800 text-xs sm:text-sm rounded-lg px-2 py-1.5 text-indigo-300 font-semibold focus:outline-none truncate">
+            <select id="room-select" class="bg-slate-950 border border-slate-800 text-xs sm:text-sm rounded-lg px-2 py-1.5 text-indigo-300 font-semibold focus:outline-none truncate max-w-[115px] sm:max-w-[160px]">
                 <option value="genel"># Genel</option>
                 <option value="sohbet"># Muhabbet</option>
                 <option value="oyun"># Oyun</option>
             </select>
+            <!-- Oda Oluştur Butonu -->
+            <button id="open-room-modal" class="bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 border border-indigo-500/30 w-7 h-7 rounded-lg flex items-center justify-center font-bold text-base shrink-0 transition" title="Yeni Oda Kur">+</button>
+            <!-- Oda Sil Butonu (Sadece özel odalarda görünür) -->
+            <button id="delete-room-btn" class="hidden bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 w-7 h-7 rounded-lg flex items-center justify-center text-xs shrink-0 transition" title="Bu Odayı Sil">🗑️</button>
         </div>
-        <button id="open-profile" class="flex items-center gap-2 bg-slate-800/60 hover:bg-slate-800 px-3 py-1.5 rounded-full border border-slate-700 transition max-w-[150px]">
+        <button id="open-profile" class="flex items-center gap-2 bg-slate-800/60 hover:bg-slate-800 px-2.5 py-1.5 rounded-full border border-slate-700 transition max-w-[130px] sm:max-w-[160px] shrink-0">
             <img id="header-avatar" src="" class="w-5 h-5 rounded-full object-cover shrink-0">
             <span id="user-display" class="text-xs text-slate-200 truncate font-medium"></span>
         </button>
     </header>
 
     <!-- MESAJ ALANI -->
-    <main id="messages" class="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 max-w-2xl w-full mx-auto">
+    <main id="messages" class="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4 max-w-2xl w-full mx-auto">
     </main>
 
     <!-- MESAJ GÖNDERME ÇUBUĞU -->
@@ -103,18 +122,20 @@
         const authError = document.getElementById('auth-error');
         const messagesDiv = document.getElementById('messages');
         const roomSelect = document.getElementById('room-select');
+        const deleteRoomBtn = document.getElementById('delete-room-btn');
         
         let currentUser = null;
         let currentRoom = 'genel';
         let roomRef = null;
+        let customRoomsData = {};
+        const defaultRooms = ['genel', 'sohbet', 'oyun'];
 
-        // Oturum Durumu & Yerel Profil Hafızası
+        // Oturum Durumu
         auth.onAuthStateChanged(user => {
             if (user) {
                 currentUser = user;
                 loginScreen.classList.add('hidden');
                 
-                // Kayıtlı özel isim/avatar var mı kontrol et
                 const savedName = localStorage.getItem('wrts_name_' + user.uid) || user.displayName || user.email.split('@')[0];
                 const savedAvatar = localStorage.getItem('wrts_avatar_' + user.uid) || user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(savedName)}&background=4f46e5&color=fff`;
 
@@ -123,6 +144,7 @@
                 document.getElementById('edit-name').value = savedName;
                 document.getElementById('edit-avatar').value = localStorage.getItem('wrts_avatar_' + user.uid) || '';
 
+                listenRooms();
                 loadRoom(currentRoom);
             } else {
                 currentUser = null;
@@ -130,7 +152,86 @@
             }
         });
 
-        // Profil Modalı İşlemleri
+        // Dinamik Odaları Dinle
+        function listenRooms() {
+            db.ref('oda_listesi').on('value', snap => {
+                customRoomsData = snap.val() || {};
+                const previousSelection = currentRoom;
+
+                roomSelect.innerHTML = `
+                    <option value="genel"># Genel</option>
+                    <option value="sohbet"># Muhabbet</option>
+                    <option value="oyun"># Oyun</option>
+                `;
+
+                Object.entries(customRoomsData).forEach(([id, info]) => {
+                    const opt = document.createElement('option');
+                    opt.value = id;
+                    opt.textContent = `# ${info.name}`;
+                    roomSelect.appendChild(opt);
+                });
+
+                // Seçili oda silindiyse Genele dön
+                if (!defaultRooms.includes(previousSelection) && !customRoomsData[previousSelection]) {
+                    currentRoom = 'genel';
+                    roomSelect.value = 'genel';
+                    loadRoom('genel');
+                } else {
+                    roomSelect.value = currentRoom;
+                }
+                updateDeleteRoomButton();
+            });
+        }
+
+        function updateDeleteRoomButton() {
+            const roomInfo = customRoomsData[currentRoom];
+            if (roomInfo && currentUser && roomInfo.creator === currentUser.uid) {
+                deleteRoomBtn.classList.remove('hidden');
+            } else {
+                deleteRoomBtn.classList.add('hidden');
+            }
+        }
+
+        // Oda Oluşturma Modalı
+        document.getElementById('open-room-modal').addEventListener('click', () => {
+            document.getElementById('room-modal').classList.remove('hidden');
+            document.getElementById('new-room-name').focus();
+        });
+        document.getElementById('close-room-modal').addEventListener('click', () => {
+            document.getElementById('room-modal').classList.add('hidden');
+        });
+
+        document.getElementById('create-room-btn').addEventListener('click', () => {
+            const nameInput = document.getElementById('new-room-name');
+            const rawName = nameInput.value.trim();
+            if (!rawName || !currentUser) return;
+
+            const roomId = 'oda_' + Date.now();
+            db.ref('oda_listesi/' + roomId).set({
+                name: rawName,
+                creator: currentUser.uid,
+                createdAt: Date.now()
+            }).then(() => {
+                nameInput.value = '';
+                document.getElementById('room-modal').classList.add('hidden');
+                currentRoom = roomId;
+                roomSelect.value = roomId;
+                updateDeleteRoomButton();
+                loadRoom(roomId);
+            });
+        });
+
+        // Oda Silme
+        deleteRoomBtn.addEventListener('click', () => {
+            if (defaultRooms.includes(currentRoom)) return;
+            if (confirm("Bu odayı ve içindeki tüm mesajları kalıcı olarak silmek istediğine emin misin?")) {
+                const roomToDelete = currentRoom;
+                db.ref('oda_listesi/' + roomToDelete).remove();
+                db.ref('odalar/' + roomToDelete).remove();
+            }
+        });
+
+        // Profil Modalı
         document.getElementById('open-profile').addEventListener('click', () => document.getElementById('profile-modal').classList.remove('hidden'));
         document.getElementById('close-profile').addEventListener('click', () => document.getElementById('profile-modal').classList.add('hidden'));
         document.getElementById('modal-logout').addEventListener('click', () => auth.signOut());
@@ -141,10 +242,14 @@
             if(!newName) return alert("İsim boş olamaz!");
 
             localStorage.setItem('wrts_name_' + currentUser.uid, newName);
-            if(newAvatar) localStorage.setItem('wrts_avatar_' + currentUser.uid, newAvatar);
+            if(newAvatar) {
+                localStorage.setItem('wrts_avatar_' + currentUser.uid, newAvatar);
+                document.getElementById('header-avatar').src = newAvatar;
+            } else {
+                localStorage.removeItem('wrts_avatar_' + currentUser.uid);
+            }
 
             document.getElementById('user-display').textContent = newName;
-            if(newAvatar) document.getElementById('header-avatar').src = newAvatar;
             document.getElementById('profile-modal').classList.add('hidden');
         });
 
@@ -162,72 +267,123 @@
             });
         });
 
-        // Odalar
+        // Oda Değiştirme
         roomSelect.addEventListener('change', e => {
             currentRoom = e.target.value;
+            updateDeleteRoomButton();
             loadRoom(currentRoom);
         });
+
+        // Emojileri Gruplayıp Sayma Fonksiyonu
+        function renderReactionsHTML(reactionsObj, room, key) {
+            if (!reactionsObj) return '';
+            const counts = {};
+            const myEmoji = currentUser ? reactionsObj[currentUser.uid] : null;
+
+            Object.values(reactionsObj).forEach(emoji => {
+                counts[emoji] = (counts[emoji] || 0) + 1;
+            });
+
+            return Object.entries(counts).map(([emoji, count]) => {
+                const isMine = myEmoji === emoji;
+                return `<button onclick="toggleReaction('${room}', '${key}', '${emoji}')" class="${isMine ? 'bg-indigo-600/40 border-indigo-400' : 'bg-slate-900/90 border-slate-700'} text-xs px-2 py-0.5 rounded-full border flex items-center gap-1 transition">
+                    <span>${emoji}</span><span class="text-[10px] text-slate-300 font-bold">${count}</span>
+                </button>`;
+            }).join('');
+        }
+
+        function createMessageElement(snap, room) {
+            const data = snap.val();
+            const key = snap.key;
+            const isMe = currentUser && data.uid === currentUser.uid;
+            
+            const div = document.createElement('div');
+            div.id = `msg-${key}`;
+            div.className = `flex gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'} items-end`;
+
+            const reactionsHTML = renderReactionsHTML(data.reactions, room, key);
+
+            div.innerHTML = `
+                <img src="${data.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-6 h-6 rounded-full object-cover shrink-0 mb-1">
+                <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[78%]">
+                    <span class="text-[10px] text-slate-400 mb-0.5 px-1">${data.isim}</span>
+                    <div onclick="toggleActionMenu('${key}')" class="cursor-pointer ${isMe ? 'bg-indigo-600' : 'bg-slate-800'} px-3.5 py-2 rounded-2xl shadow">
+                        <p class="text-sm break-words">${data.mesaj}</p>
+                    </div>
+                    
+                    <!-- Dokununca Açılan Emoji ve Silme Barı -->
+                    <div id="menu-${key}" class="hidden flex gap-1.5 items-center mt-1.5 bg-slate-900 border border-slate-800 px-2 py-1 rounded-full shadow-lg">
+                        <button onclick="toggleReaction('${room}', '${key}', '👍')" class="hover:scale-125 transition text-sm">👍</button>
+                        <button onclick="toggleReaction('${room}', '${key}', '❤️')" class="hover:scale-125 transition text-sm">❤️</button>
+                        <button onclick="toggleReaction('${room}', '${key}', '😂')" class="hover:scale-125 transition text-sm">😂</button>
+                        <button onclick="toggleReaction('${room}', '${key}', '🔥')" class="hover:scale-125 transition text-sm">🔥</button>
+                        ${isMe ? `<div class="w-[1px] h-3 bg-slate-700 mx-0.5"></div><button onclick="deleteMsg('${room}', '${key}')" class="text-red-400 hover:text-red-300 text-xs font-bold px-1">Sil</button>` : ''}
+                    </div>
+
+                    <!-- Mevcut Tepkiler -->
+                    <div id="reactions-${key}" class="flex gap-1 mt-1 flex-wrap ${isMe ? 'justify-end' : 'justify-start'}">${reactionsHTML}</div>
+                </div>
+            `;
+            return div;
+        }
 
         function loadRoom(room) {
             if (roomRef) roomRef.off();
             messagesDiv.innerHTML = '';
             roomRef = db.ref('odalar/' + room).limitToLast(50);
             
+            // Yeni mesaj geldiğinde
             roomRef.on('child_added', snap => {
-                const data = snap.val();
-                const key = snap.key;
-                const isMe = currentUser && data.uid === currentUser.uid;
-                
-                const div = document.createElement('div');
-                div.id = `msg-${key}`;
-                div.className = `flex gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'} items-end`;
-
-                // Emojileri hazırla
-                let reactionsHTML = '';
-                if(data.reactions) {
-                    Object.values(data.reactions).forEach(emoji => {
-                        reactionsHTML += `<span class="bg-slate-900/80 text-xs px-1.5 py-0.5 rounded-full border border-slate-700">${emoji}</span>`;
-                    });
-                }
-
-                div.innerHTML = `
-                    <img src="${data.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-6 h-6 rounded-full object-cover shrink-0 mb-1">
-                    <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[75%]">
-                        <span class="text-[10px] text-slate-400 mb-0.5 px-1">${data.isim}</span>
-                        <div class="relative group ${isMe ? 'bg-indigo-600' : 'bg-slate-800'} px-3.5 py-2 rounded-2xl shadow">
-                            <p class="text-sm break-words">${data.mesaj}</p>
-                            
-                            <!-- Emoji Ekleme ve Silme Butonları -->
-                            <div class="absolute -bottom-3 ${isMe ? 'right-2' : 'left-2'} flex gap-1 items-center opacity-0 group-hover:opacity-100 transition">
-                                <button onclick="addReaction('${room}', '${key}', '👍')" class="bg-slate-800 hover:bg-slate-700 text-xs px-1 rounded shadow">👍</button>
-                                <button onclick="addReaction('${room}', '${key}', '❤️')" class="bg-slate-800 hover:bg-slate-700 text-xs px-1 rounded shadow">❤️</button>
-                                <button onclick="addReaction('${room}', '${key}', '🔥')" class="bg-slate-800 hover:bg-slate-700 text-xs px-1 rounded shadow">🔥</button>
-                                ${isMe ? `<button onclick="deleteMsg('${room}', '${key}')" class="bg-red-600 text-white rounded-full w-4 h-4 text-[10px] flex items-center justify-center shadow ml-1">×</button>` : ''}
-                            </div>
-                        </div>
-                        <div class="flex gap-1 mt-1 flex-wrap">${reactionsHTML}</div>
-                    </div>
-                `;
-                messagesDiv.appendChild(div);
+                const el = createMessageElement(snap, room);
+                messagesDiv.appendChild(el);
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
             });
+
+            // Mesaja emoji eklendiğinde veya değiştiğinde ANLIK güncelle
+            roomRef.on('child_changed', snap => {
+                const data = snap.val();
+                const key = snap.key;
+                const reactionsContainer = document.getElementById(`reactions-${key}`);
+                if (reactionsContainer) {
+                    reactionsContainer.innerHTML = renderReactionsHTML(data.reactions, room, key);
+                }
+            });
+
+            // Başkası mesaj sildiğinde ekrandan anında kaldır
+            roomRef.on('child_removed', snap => {
+                document.getElementById(`msg-${snap.key}`)?.remove();
+            });
         }
+
+        // Mesaja dokununca emoji menüsünü aç/kapat
+        window.toggleActionMenu = function(key) {
+            const menu = document.getElementById(`menu-${key}`);
+            if (!menu) return;
+            const isHidden = menu.classList.contains('hidden');
+            // Önce açık olan diğer tüm menüleri kapat
+            document.querySelectorAll('[id^="menu-"]').forEach(el => el.classList.add('hidden'));
+            if (isHidden) menu.classList.remove('hidden');
+        };
+
+        // Emoji Ekle veya Aynı Emojiye Tekrar Basıldıysa Kaldır
+        window.toggleReaction = function(room, key, emoji) {
+            if(!currentUser) return;
+            const ref = db.ref(`odalar/${room}/${key}/reactions/${currentUser.uid}`);
+            ref.once('value', snap => {
+                if (snap.val() === emoji) {
+                    ref.remove(); // Aynı emojiye basınca geri alır
+                } else {
+                    ref.set(emoji);
+                }
+            });
+            document.getElementById(`menu-${key}`)?.classList.add('hidden');
+        };
 
         window.deleteMsg = function(room, key) {
             if(confirm("Bu mesajı silmek istiyor musun?")) {
                 db.ref(`odalar/${room}/${key}`).remove();
-                document.getElementById(`msg-${key}`)?.remove();
             }
         };
-
-        window.addReaction = function(room, key, emoji) {
-            if(!currentUser) return;
-            db.ref(`odalar/${room}/${key}/reactions/${currentUser.uid}`).set(emoji);
-        };
-
-        // Realtime Tepki Dinleyici
-        // (Tepki eklendiğinde mesajı günceller)
-        // ... (Veritabanı zaten anlık senkronizedir)
 
         // Mesaj Gönderme
         document.getElementById('msg-form').addEventListener('submit', e => {
