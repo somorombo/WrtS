@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WrtS - Sohbet Platformu</title>
+    <title>WrtS - Gelişmiş Sohbet</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -31,6 +31,20 @@
                 <span>Google ile Giriş Yap</span>
             </button>
             <p id="auth-error" class="text-xs text-red-400 text-center hidden"></p>
+        </div>
+    </div>
+
+    <!-- KULLANICI LİSTESİ / ÇEVRİMİÇİ MODALI -->
+    <div id="users-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-bold">Çevrimiçi Kullanıcılar</h3>
+                <button id="close-users-modal" class="text-slate-400 hover:text-white">✕</button>
+            </div>
+            <div id="online-users-list" class="space-y-2 max-h-60 overflow-y-auto">
+                <!-- Dinamik dolacak -->
+            </div>
+            <p class="text-[11px] text-slate-500 text-center">Bir kullanıcının üzerine tıklayarak onunla özel mesaj (DM) odası açabilirsin.</p>
         </div>
     </div>
 
@@ -82,7 +96,7 @@
     <header class="bg-slate-900 border-b border-slate-800 px-3 py-3 sm:p-4 flex justify-between items-center gap-2 shrink-0">
         <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
             <span class="font-black text-lg sm:text-xl text-indigo-400 shrink-0">WrtS</span>
-            <select id="room-select" class="bg-slate-950 border border-slate-800 text-xs sm:text-sm rounded-lg px-2 py-1.5 text-indigo-300 font-semibold focus:outline-none truncate max-w-[115px] sm:max-w-[160px]">
+            <select id="room-select" class="bg-slate-950 border border-slate-800 text-xs sm:text-sm rounded-lg px-2 py-1.5 text-indigo-300 font-semibold focus:outline-none truncate max-w-[110px] sm:max-w-[150px]">
                 <option value="genel"># Genel</option>
                 <option value="sohbet"># Muhabbet</option>
                 <option value="oyun"># Oyun</option>
@@ -90,24 +104,47 @@
             <button id="open-room-modal" class="bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 border border-indigo-500/30 w-7 h-7 rounded-lg flex items-center justify-center font-bold text-base shrink-0 transition" title="Yeni Oda Kur">+</button>
             <button id="delete-room-btn" class="hidden bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 w-7 h-7 rounded-lg flex items-center justify-center text-xs shrink-0 transition" title="Bu Odayı Sil">🗑️</button>
         </div>
-        <button id="open-profile" class="flex items-center gap-2 bg-slate-800/60 hover:bg-slate-800 px-2.5 py-1.5 rounded-full border border-slate-700 transition max-w-[130px] sm:max-w-[160px] shrink-0">
-            <div class="relative shrink-0">
-                <img id="header-avatar" src="" class="w-5 h-5 rounded-full object-cover">
-                <span id="header-status-dot" class="absolute bottom-0 right-0 w-2 h-2 bg-emerald-500 rounded-full border border-slate-900"></span>
-            </div>
-            <span id="user-display" class="text-xs text-slate-200 truncate font-medium"></span>
-        </button>
+        <div class="flex items-center gap-2">
+            <!-- Çevrimiçi Kullanıcı Listesi Butonu -->
+            <button id="open-users-btn" class="bg-slate-800/60 hover:bg-slate-800 px-2 py-1.5 rounded-full border border-slate-700 text-xs text-emerald-400 flex items-center gap-1 shrink-0" title="Aktif Kullanıcılar">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span id="online-count">1</span>
+            </button>
+            <button id="open-profile" class="flex items-center gap-2 bg-slate-800/60 hover:bg-slate-800 px-2.5 py-1.5 rounded-full border border-slate-700 transition max-w-[120px] sm:max-w-[150px] shrink-0">
+                <div class="relative shrink-0">
+                    <img id="header-avatar" src="" class="w-5 h-5 rounded-full object-cover">
+                    <span id="header-status-dot" class="absolute bottom-0 right-0 w-2 h-2 bg-emerald-500 rounded-full border border-slate-900"></span>
+                </div>
+                <span id="user-display" class="text-xs text-slate-200 truncate font-medium"></span>
+            </button>
+        </div>
     </header>
 
     <!-- MESAJ ALANI -->
     <main id="messages" class="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4 max-w-2xl w-full mx-auto">
     </main>
 
-    <!-- MESAJ GÖNDERME ÇUBUĞU -->
+    <!-- YAZIYOR GÖSTERGESİ -->
+    <div id="typing-indicator" class="px-4 py-1 text-[11px] text-slate-400 italic max-w-2xl w-full mx-auto h-5 shrink-0">
+    </div>
+
+    <!-- MESAJ GÖNDERME ÇUBUĞU (FOTO + SES + METİN) -->
     <footer class="bg-slate-900 border-t border-slate-800 p-2.5 sm:p-4 max-w-2xl w-full mx-auto shrink-0">
         <form id="msg-form" class="flex items-center gap-2 w-full">
+            <!-- Fotoğraf Butonu -->
+            <button type="button" onclick="document.getElementById('img-file').click()" class="p-2 text-slate-400 hover:text-indigo-400 bg-slate-800/60 rounded-full transition shrink-0" title="Fotoğraf Gönder">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            </button>
+            <input type="file" id="img-file" accept="image/*" class="hidden">
+
+            <!-- Ses Kayıt Butonu -->
+            <button type="button" id="record-btn" class="p-2 text-slate-400 hover:text-rose-400 bg-slate-800/60 rounded-full transition shrink-0" title="Ses Kaydet (Bas ve Konuş)">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+            </button>
+
             <input type="text" id="msg-input" placeholder="Bir şeyler yaz..." autocomplete="off" class="flex-1 min-w-0 bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 sm:py-3 text-base sm:text-sm focus:outline-none focus:border-indigo-500">
-            <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl font-bold text-sm shrink-0">Gönder</button>
+            
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-bold text-sm shrink-0">Gönder</button>
         </form>
     </footer>
 
@@ -131,6 +168,7 @@
         const messagesDiv = document.getElementById('messages');
         const roomSelect = document.getElementById('room-select');
         const deleteRoomBtn = document.getElementById('delete-room-btn');
+        const typingIndicator = document.getElementById('typing-indicator');
         
         let currentUser = null;
         let currentRoom = 'genel';
@@ -138,8 +176,10 @@
         let customRoomsData = {};
         let activeUsersData = {};
         let tempBase64Avatar = null;
+        let typingTimeout = null;
         const defaultRooms = ['genel', 'sohbet', 'oyun'];
 
+        // Oturum ve Çevrimiçi (Presence)
         auth.onAuthStateChanged(user => {
             if (user) {
                 currentUser = user;
@@ -151,18 +191,20 @@
                 myConnectionsRef.on('value', snap => {
                     if (snap.val() === true) {
                         userStatusRef.onDisconnect().set({ state: 'offline', lastChanged: firebase.database.ServerValue.TIMESTAMP });
-                        userStatusRef.set({ state: 'online', lastChanged: firebase.database.ServerValue.TIMESTAMP });
+                        const myData = getMyData();
+                        userStatusRef.set({ state: 'online', name: myData.name, avatar: myData.avatar, lastChanged: firebase.database.ServerValue.TIMESTAMP });
                     }
                 });
 
                 db.ref('status').on('value', snap => {
                     activeUsersData = snap.val() || {};
-                    updateOnlineDots();
+                    updateOnlineCountAndDots();
                 });
 
                 loadUserDataToUI();
                 listenRooms();
                 loadRoom(currentRoom);
+                listenTyping();
             } else {
                 currentUser = null;
                 loginScreen.classList.remove('hidden');
@@ -172,7 +214,7 @@
         function getMyData() {
             const name = localStorage.getItem('wrts_name_' + currentUser.uid) || currentUser.displayName || currentUser.email.split('@')[0];
             const avatar = localStorage.getItem('wrts_avatar_' + currentUser.uid) || currentUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4f46e5&color=fff`;
-            const bio = localStorage.getItem('wrts_bio_' + currentUser.uid) || 'WrtS platformunda çevrimiçi.';
+            const bio = localStorage.getItem('wrts_bio_' + currentUser.uid) || 'WrtS kullanıcısı.';
             return { name, avatar, bio };
         }
 
@@ -186,31 +228,21 @@
             tempBase64Avatar = null;
         }
 
+        // Cihazdan Avatar Seçimi & Sıkıştırma (Base64)
         document.getElementById('upload-avatar-file').addEventListener('change', e => {
             const file = e.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = function(event) {
                 const img = new Image();
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 150;
-                    const MAX_HEIGHT = 150;
-                    let width = img.width;
-                    let height = img.height;
-
-                    if (width > height) {
-                        if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                    } else {
-                        if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-                    }
-
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-
+                    const MAX = 150;
+                    let w = img.width, h = img.height;
+                    if (w > h) { if (w > MAX) { h *= MAX / w; w = MAX; } }
+                    else { if (h > MAX) { w *= MAX / h; h = MAX; } }
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
                     tempBase64Avatar = canvas.toDataURL('image/jpeg', 0.7);
                     document.getElementById('preview-avatar').src = tempBase64Avatar;
                 }
@@ -219,6 +251,7 @@
             reader.readAsDataURL(file);
         });
 
+        // Profil Modalı
         document.getElementById('open-profile').addEventListener('click', () => document.getElementById('profile-modal').classList.remove('hidden'));
         document.getElementById('close-profile').addEventListener('click', () => document.getElementById('profile-modal').classList.add('hidden'));
         document.getElementById('modal-logout').addEventListener('click', () => {
@@ -232,15 +265,44 @@
 
             localStorage.setItem('wrts_name_' + currentUser.uid, newName);
             localStorage.setItem('wrts_bio_' + currentUser.uid, newBio || 'WrtS kullanıcısı.');
-            if(tempBase64Avatar) {
-                localStorage.setItem('wrts_avatar_' + currentUser.uid, tempBase64Avatar);
-            }
+            if(tempBase64Avatar) localStorage.setItem('wrts_avatar_' + currentUser.uid, tempBase64Avatar);
 
             loadUserDataToUI();
             document.getElementById('profile-modal').classList.add('hidden');
+            // Durum verisini de güncelle
+            const md = getMyData();
+            db.ref('status/' + currentUser.uid).update({ name: md.name, avatar: md.avatar });
         });
 
-        function updateOnlineDots() {
+        // Çevrimiçi Kullanıcılar Modalı ve Sayacı
+        function updateOnlineCountAndDots() {
+            let onlineCount = 0;
+            const listDiv = document.getElementById('online-users-list');
+            listDiv.innerHTML = '';
+
+            Object.entries(activeUsersData).forEach(([uid, info]) => {
+                if (info.state === 'online') {
+                    onlineCount++;
+                    const item = document.createElement('div');
+                    item.className = "flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800 hover:border-indigo-500 cursor-pointer transition";
+                    item.innerHTML = `
+                        <div class="flex items-center gap-2">
+                            <img src="${info.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-8 h-8 rounded-full object-cover">
+                            <div>
+                                <p class="text-sm font-bold text-slate-200">${info.name || 'Kullanıcı'}</p>
+                                <span class="text-[10px] text-emerald-400">● Çevrimiçi</span>
+                            </div>
+                        </div>
+                        ${uid !== currentUser.uid ? `<button class="text-xs bg-indigo-600/20 text-indigo-400 px-2.5 py-1 rounded-lg border border-indigo-500/30">Özel Mesaj (DM)</button>` : ''}
+                    `;
+                    if (uid !== currentUser.uid) {
+                        item.addEventListener('click', () => startDM(uid, info.name));
+                    }
+                    listDiv.appendChild(item);
+                }
+            });
+            document.getElementById('online-count').textContent = onlineCount;
+
             document.querySelectorAll('[data-uid]').forEach(el => {
                 const uid = el.getAttribute('data-uid');
                 const isOnline = activeUsersData[uid] && activeUsersData[uid].state === 'online';
@@ -248,6 +310,28 @@
             });
         }
 
+        document.getElementById('open-users-btn').addEventListener('click', () => document.getElementById('users-modal').classList.remove('hidden'));
+        document.getElementById('close-users-modal').addEventListener('click', () => document.getElementById('users-modal').classList.add('hidden'));
+
+        // Özel Mesaj (DM) Başlatma
+        function startDM(targetUid, targetName) {
+            const ids = [currentUser.uid, targetUid].sort();
+            const dmRoomId = `dm_${ids[0]}_${ids[1]}`;
+            
+            // DM odasını oda listesine ekle
+            db.ref('oda_listesi/' + dmRoomId).set({
+                name: `DM: ${targetName}`,
+                creator: currentUser.uid,
+                createdAt: Date.now()
+            });
+
+            currentRoom = dmRoomId;
+            roomSelect.value = dmRoomId;
+            document.getElementById('users-modal').classList.add('hidden');
+            loadRoom(dmRoomId);
+        }
+
+        // Dinamik Odalar
         function listenRooms() {
             db.ref('oda_listesi').on('value', snap => {
                 customRoomsData = snap.val() || {};
@@ -262,7 +346,7 @@
                 Object.entries(customRoomsData).forEach(([id, info]) => {
                     const opt = document.createElement('option');
                     opt.value = id;
-                    opt.textContent = `# ${info.name}`;
+                    opt.textContent = info.name.startsWith('DM:') ? info.name : `# ${info.name}`;
                     roomSelect.appendChild(opt);
                 });
 
@@ -290,9 +374,7 @@
             document.getElementById('room-modal').classList.remove('hidden');
             document.getElementById('new-room-name').focus();
         });
-        document.getElementById('close-room-modal').addEventListener('click', () => {
-            document.getElementById('room-modal').classList.add('hidden');
-        });
+        document.getElementById('close-room-modal').addEventListener('click', () => document.getElementById('room-modal').classList.add('hidden'));
 
         document.getElementById('create-room-btn').addEventListener('click', () => {
             const nameInput = document.getElementById('new-room-name');
@@ -309,44 +391,29 @@
                 document.getElementById('room-modal').classList.add('hidden');
                 currentRoom = roomId;
                 roomSelect.value = roomId;
-                updateDeleteRoomButton();
                 loadRoom(roomId);
             });
         });
 
         deleteRoomBtn.addEventListener('click', () => {
             if (defaultRooms.includes(currentRoom)) return;
-            if (confirm("Bu odayı ve mesajları silmek istediğine emin misin?")) {
-                const roomToDelete = currentRoom;
-                db.ref('oda_listesi/' + roomToDelete).remove();
-                db.ref('odalar/' + roomToDelete).remove();
+            if (confirm("Bu odayı silmek istediğine emin misin?")) {
+                db.ref('oda_listesi/' + currentRoom).remove();
+                db.ref('odalar/' + currentRoom).remove();
             }
         });
 
-        function showError(msg) { 
-            authError.textContent = msg; 
-            authError.classList.remove('hidden'); 
-            alert("Giriş Hatası: " + msg);
-        }
-
-        // Google Giriş (Hata yakalayıcılı)
+        // Giriş İşlemleri
+        function showError(msg) { authError.textContent = msg; authError.classList.remove('hidden'); }
         document.getElementById('google-btn').addEventListener('click', () => {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).catch(err => {
-                showError(err.message);
-            });
+            auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(err => showError(err.message));
         });
-
-        // E-posta Giriş / Kayıt (Hata yakalayıcılı)
         document.getElementById('email-form').addEventListener('submit', e => {
             e.preventDefault();
             const email = document.getElementById('email').value;
             const pass = document.getElementById('password').value;
-            
             auth.signInWithEmailAndPassword(email, pass).catch(() => {
-                auth.createUserWithEmailAndPassword(email, pass).catch(err => {
-                    showError(err.message);
-                });
+                auth.createUserWithEmailAndPassword(email, pass).catch(err => showError(err.message));
             });
         });
 
@@ -356,14 +423,42 @@
             loadRoom(currentRoom);
         });
 
+        // Yazıyor... (Typing) Sistemi
+        const msgInput = document.getElementById('msg-input');
+        msgInput.addEventListener('input', () => {
+            if(!currentUser) return;
+            const typingRef = db.ref(`typing/${currentRoom}/${currentUser.uid}`);
+            const md = getMyData();
+            typingRef.set(md.name);
+
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                typingRef.remove();
+            }, 2000);
+        });
+
+        function listenTyping() {
+            db.ref('typing').on('value', snap => {
+                const typingData = snap.val() || {};
+                const roomTyping = typingData[currentRoom] || {};
+                const othersTyping = Object.entries(roomTyping)
+                    .filter(([uid]) => currentUser && uid !== currentUser.uid)
+                    .map(([_, name]) => name);
+
+                if (othersTyping.length > 0) {
+                    typingIndicator.textContent = othersTyping.join(', ') + (othersTyping.length > 1 ? ' yazıyorlar...' : ' yazıyor...');
+                } else {
+                    typingIndicator.textContent = '';
+                }
+            });
+        }
+
+        // Emojiler
         function renderReactionsHTML(reactionsObj, room, key) {
             if (!reactionsObj) return '';
             const counts = {};
             const myEmoji = currentUser ? reactionsObj[currentUser.uid] : null;
-
-            Object.values(reactionsObj).forEach(emoji => {
-                counts[emoji] = (counts[emoji] || 0) + 1;
-            });
+            Object.values(reactionsObj).forEach(emoji => { counts[emoji] = (counts[emoji] || 0) + 1; });
 
             return Object.entries(counts).map(([emoji, count]) => {
                 const isMine = myEmoji === emoji;
@@ -384,6 +479,16 @@
 
             const reactionsHTML = renderReactionsHTML(data.reactions, room, key);
             const isOnline = activeUsersData[data.uid] && activeUsersData[data.uid].state === 'online';
+            const timeStr = new Date(data.zaman || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            let content = '';
+            if (data.type === 'image') {
+                content = `<img src="${data.url}" class="rounded-xl max-h-48 object-cover cursor-pointer" onclick="window.open('${data.url}', '_blank')">`;
+            } else if (data.type === 'audio') {
+                content = `<audio controls src="${data.url}" class="h-9 max-w-[200px]"></audio>`;
+            } else {
+                content = `<p class="text-sm break-words">${data.mesaj}</p>`;
+            }
 
             div.innerHTML = `
                 <div class="relative shrink-0 mb-1">
@@ -396,7 +501,8 @@
                         <span class="text-[9px] text-slate-500 italic">${data.bio || ''}</span>
                     </div>
                     <div onclick="toggleActionMenu('${key}')" class="cursor-pointer ${isMe ? 'bg-indigo-600' : 'bg-slate-800'} px-3.5 py-2 rounded-2xl shadow">
-                        <p class="text-sm break-words">${data.mesaj}</p>
+                        ${content}
+                        <div class="text-[9px] ${isMe ? 'text-indigo-200' : 'text-slate-400'} text-right mt-1">${timeStr}</div>
                     </div>
                     
                     <div id="menu-${key}" class="hidden flex gap-1.5 items-center mt-1.5 bg-slate-900 border border-slate-800 px-2 py-1 rounded-full shadow-lg">
@@ -450,11 +556,8 @@
             if(!currentUser) return;
             const ref = db.ref(`odalar/${room}/${key}/reactions/${currentUser.uid}`);
             ref.once('value', snap => {
-                if (snap.val() === emoji) {
-                    ref.remove();
-                } else {
-                    ref.set(emoji);
-                }
+                if (snap.val() === emoji) ref.remove();
+                else ref.set(emoji);
             });
             document.getElementById(`menu-${key}`)?.classList.add('hidden');
         };
@@ -465,6 +568,7 @@
             }
         };
 
+        // Metin Mesajı Gönderme
         document.getElementById('msg-form').addEventListener('submit', e => {
             e.preventDefault();
             const input = document.getElementById('msg-input');
@@ -472,6 +576,7 @@
             if(!text || !currentUser) return;
 
             const myData = getMyData();
+            db.ref(`typing/${currentRoom}/${currentUser.uid}`).remove();
 
             db.ref('odalar/' + currentRoom).push({
                 uid: currentUser.uid,
@@ -479,9 +584,89 @@
                 avatar: myData.avatar,
                 bio: myData.bio,
                 mesaj: text,
+                type: 'text',
                 zaman: Date.now()
             });
             input.value = '';
+        });
+
+        // Fotoğraf Gönderme (Base64 ile Sıkıştırıp Ücretsiz Kaydetme)
+        document.getElementById('img-file').addEventListener('change', e => {
+            const file = e.target.files[0];
+            if(!file || !currentUser) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX = 600; // Sohbet için ideal boyut
+                    let w = img.width, h = img.height;
+                    if (w > h) { if (w > MAX) { h *= MAX / w; w = MAX; } }
+                    else { if (h > MAX) { w *= MAX / h; h = MAX; } }
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    
+                    const base64Url = canvas.toDataURL('image/jpeg', 0.6);
+                    const myData = getMyData();
+
+                    db.ref('odalar/' + currentRoom).push({
+                        uid: currentUser.uid,
+                        isim: myData.name,
+                        avatar: myData.avatar,
+                        bio: myData.bio,
+                        url: base64Url,
+                        type: 'image',
+                        zaman: Date.now()
+                    });
+                }
+                img.src = event.target.result;
+            }
+            reader.readAsDataURL(file);
+            e.target.value = '';
+        });
+
+        // Ses Kaydı (Base64 ile Ücretsiz Gönderme)
+        let mediaRecorder;
+        let audioChunks = [];
+        const recordBtn = document.getElementById('record-btn');
+
+        recordBtn.addEventListener('click', async () => {
+            if(!mediaRecorder || mediaRecorder.state === "inactive") {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                    mediaRecorder.onstop = async () => {
+                        const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                        const reader = new FileReader();
+                        reader.onloadend = function() {
+                            const base64Audio = reader.result;
+                            const myData = getMyData();
+
+                            db.ref('odalar/' + currentRoom).push({
+                                uid: currentUser.uid,
+                                isim: myData.name,
+                                avatar: myData.avatar,
+                                bio: myData.bio,
+                                url: base64Audio,
+                                type: 'audio',
+                                zaman: Date.now()
+                            });
+                        }
+                        reader.readAsDataURL(blob);
+                        stream.getTracks().forEach(t => t.stop());
+                    };
+                    mediaRecorder.start();
+                    recordBtn.classList.add('bg-rose-600', 'text-white', 'animate-pulse');
+                } catch(e) {
+                    alert("Mikrofon izni alınamadı.");
+                }
+            } else {
+                mediaRecorder.stop();
+                recordBtn.classList.remove('bg-rose-600', 'text-white', 'animate-pulse');
+            }
         });
     </script>
 </body>
