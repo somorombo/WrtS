@@ -16,10 +16,7 @@
 </head>
 <body id="app-body" class="bg-slate-950 text-white h-[100dvh] w-full overflow-hidden flex flex-col justify-between relative transition-colors duration-300">
 
-    <!-- BİLDİRİM BALONU KAPSAYICISI -->
-    <div id="notification-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
-
-    <!-- GİRİŞ EKRANI -->
+    <!-- GİRİŞ EKRANI (Orijinal ve Kararlı Hali) -->
     <div id="login-screen" class="fixed inset-0 bg-slate-950 z-50 flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-2xl w-full max-w-sm space-y-5 shadow-2xl">
             <h1 class="text-3xl font-black text-center text-indigo-400">WrtS</h1>
@@ -96,7 +93,6 @@
 
             <hr class="border-slate-800">
 
-            <!-- TEMA VE BİLDİRİM AYARLARI -->
             <div class="space-y-3">
                 <h4 class="text-xs font-bold text-indigo-400 uppercase tracking-wider">Tercihler</h4>
                 <div class="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-slate-800">
@@ -105,10 +101,6 @@
                         <option value="dark">Karanlık Mod</option>
                         <option value="light">Aydınlık Mod</option>
                     </select>
-                </div>
-                <div class="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-slate-800">
-                    <span class="text-xs font-medium">Bildirimler ve Sesler</span>
-                    <input type="checkbox" id="notification-toggle" checked class="w-4 h-4 accent-indigo-600 rounded cursor-pointer">
                 </div>
             </div>
 
@@ -126,9 +118,9 @@
                 <h3 class="text-lg font-bold">GIF Seç</h3>
                 <button id="close-gif-modal" class="text-slate-400 hover:text-white font-bold">✕</button>
             </div>
-            <input type="text" id="gif-search-input" placeholder="GIF ara (örn: cat, happy, dance)..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
+            <input type="text" id="gif-search-input" placeholder="GIF ara..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
             <div id="gif-results" class="grid grid-cols-2 gap-2 overflow-y-auto max-h-60 p-1">
-                <p class="text-xs text-slate-500 col-span-2 text-center py-4">Popüler GIF'ler yükleniyor...</p>
+                <p class="text-xs text-slate-500 col-span-2 text-center py-4">Yükleniyor...</p>
             </div>
         </div>
     </div>
@@ -146,13 +138,4 @@
             <button id="delete-room-btn" class="hidden bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 w-7 h-7 rounded-lg flex items-center justify-center text-xs shrink-0 transition" title="Bu Odayı Sil">🗑️</button>
         </div>
         <div class="flex items-center gap-2">
-            <button id="open-users-btn" class="bg-slate-800/60 hover:bg-slate-800 px-2 py-1.5 rounded-full border border-slate-700 text-xs text-emerald-400 flex items-center gap-1 shrink-0" title="Aktif Kullanıcılar">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span id="online-count">1</span>
-            </button>
-            <button id="open-profile" class="flex items-center gap-2 bg-slate-800/60 hover:bg-slate-800 px-2.5 py-1.5 rounded-full border border-slate-700 transition max-w-[120px] sm:max-w-[150px] shrink-0">
-                <div class="relative shrink-0">
-                    <img id="header-avatar" src="" class="w-5 h-5 rounded-full object-cover">
-                    <span id="header-status-dot" class="absolute bottom-0 right-0 w-2 h-2 bg-emerald-500 rounded-full border border-slate-900"></span>
-                </div>
-                <span id="
+            <button id="open-users-btn" class="bg-slate-800
