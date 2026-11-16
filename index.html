@@ -143,7 +143,7 @@
         </div>
     </div>
 
-    <!-- GIF SEÇİCİ MODALI (TEKİL KOPYA) -->
+    <!-- GIF SEÇİCİ MODALI -->
     <div id="gif-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-md space-y-3 max-h-[85vh] flex flex-col">
             <div class="flex justify-between items-center"><h3 class="font-bold text-cyan-400">🎞️ GIF Seç</h3><button onclick="closeModal('gif-modal')">✕</button></div>
@@ -784,8 +784,11 @@
                 const roomSelect = document.getElementById('room-select');
                 roomSelect.innerHTML = `<option value="genel"># Genel</option><option value="sohbet"># Muhabbet</option><option value="oyun"># Oyun</option>`;
                 Object.entries(customRoomsData).forEach(([id, info]) => {
-                    const opt = document.createElement('option'); opt.value = id; opt.textContent = `# ${info.name}`;
-                    roomSelect.appendChild(opt);
+                    // Kesinlikle özel_dm ile başlayanlar oda listesine eklenmez!
+                    if (!id.startsWith('özel_dm_')) {
+                        const opt = document.createElement('option'); opt.value = id; opt.textContent = `# ${info.name}`;
+                        roomSelect.appendChild(opt);
+                    }
                 });
                 if (!currentRoom.startsWith('özel_dm_')) roomSelect.value = currentRoom;
                 updateRoomRoleButton();
