@@ -2,48 +2,170 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WrtS - Mesajlaşma Platformu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WrtS</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Firebase SDK (ES Modül Olmayan, Kesin Çalışan Sürüm) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
-    <style>
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        body { overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; }
-    </style>
 </head>
-<body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col justify-between overflow-hidden select-none">
+<body class="bg-slate-950 text-white h-screen flex flex-col justify-between">
 
-    <!-- 1. GİRİŞ EKRANI -->
-    <div id="auth-screen" class="fixed inset-0 bg-slate-950 z-50 flex flex-col items-center justify-center p-6">
-        <div class="w-full max-w-sm space-y-8">
-            <div class="text-center space-y-2">
-                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 mb-2">
-                    <span class="text-3xl font-black tracking-tighter text-indigo-400">W</span>
-                </div>
-                <h1 class="text-4xl font-extrabold tracking-tight text-white">WrtS</h1>
-                <p class="text-sm text-slate-400">Canlı Odalar ve Anlık İletişim</p>
-            </div>
+    <!-- GİRİŞ EKRANI -->
+    <div id="login-screen" class="fixed inset-0 bg-slate-950 z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl w-full max-w-sm space-y-5">
+            <h1 class="text-3xl font-black text-center text-indigo-400">WrtS</h1>
             
-            <form id="auth-form" class="space-y-4 bg-slate-900/80 p-6 rounded-3xl border border-slate-800 shadow-2xl">
-                <div>
-                    <input type="email" id="email" placeholder="E-posta adresiniz" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition">
-                </div>
-                <div>
-                    <input type="password" id="password" placeholder="Şifreniz" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition">
-                </div>
-                <button type="submit" class="w-full bg-indigo-600 active:scale-95 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl text-sm transition shadow-lg shadow-indigo-600/20">Giriş Yap / Kayıt Ol</button>
-                
-                <div class="relative flex py-2 items-center">
-                    <div class="flex-grow border-t border-slate-800"></div>
-                    <span class="flex-shrink mx-3 text-xs text-slate-500">veya</span>
-                    <div class="flex-grow border-t border-slate-800"></div>
-                </div>
+            <form id="email-form" class="space-y-3">
+                <input type="email" id="email" placeholder="E-posta" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500">
+                <input type="password" id="password" placeholder="Şifre (En az 6 karakter)" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500">
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 py-3 rounded-xl font-bold text-sm transition">Giriş Yap / Kayıt Ol</button>
+            </form>
 
-                <button type="button" id="google-login" class="w-full bg-white active:scale-95 hover:bg-slate-100 text-slate-900 font-semibold py-3 rounded-xl text-sm transition flex items-center justify-center gap-2">
-                    <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.3
+            <div class="text-center text-xs text-slate-500">veya</div>
+
+            <button id="google-btn" type="button" class="w-full bg-white text-slate-900 hover:bg-slate-200 py-3 rounded-xl font-bold text-sm transition">
+                Google ile Giriş Yap
+            </button>
+            
+            <p id="auth-error" class="text-xs text-red-400 text-center hidden"></p>
+        </div>
+    </div>
+
+    <!-- ÜST BAR VE ODALAR -->
+    <header class="bg-slate-900 border-b border-slate-800 p-4 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <span class="font-black text-xl text-indigo-400">WrtS</span>
+            <select id="room-select" class="bg-slate-950 border border-slate-800 text-sm rounded-lg px-3 py-1.5 text-indigo-300 font-semibold focus:outline-none">
+                <option value="genel"># Genel</option>
+                <option value="sohbet"># Muhabbet</option>
+                <option value="oyun"># Oyun</option>
+            </select>
+        </div>
+        <div class="flex items-center gap-3">
+            <span id="user-display" class="text-xs text-slate-300 font-medium"></span>
+            <button id="logout-btn" class="bg-red-500/20 text-red-400 px-3 py-1.5 rounded-lg text-xs font-bold">Çıkış</button>
+        </div>
+    </header>
+
+    <!-- MESAJ ALANI -->
+    <main id="messages" class="flex-1 overflow-y-auto p-4 space-y-3 max-w-2xl w-full mx-auto">
+    </main>
+
+    <!-- MESAJ GÖNDERME -->
+    <footer class="bg-slate-900 border-t border-slate-800 p-4 max-w-2xl w-full mx-auto">
+        <form id="msg-form" class="flex gap-2">
+            <input type="text" id="msg-input" placeholder="Bir şeyler yaz..." autocomplete="off" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500">
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 px-6 py-3 rounded-xl font-bold text-sm">Gönder</button>
+        </form>
+    </footer>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCz5KvCtJFPgmk-7bLWY-aIoGz1MXMGrWg",
+            authDomain: "wrts-46aaf.firebaseapp.com",
+            databaseURL: "https://wrts-46aaf-default-rtdb.firebaseio.com",
+            projectId: "wrts-46aaf",
+            storageBucket: "wrts-46aaf.firebasestorage.app",
+            messagingSenderId: "627981661221",
+            appId: "1:627981661221:web:5635a97ba39a9032cb7bcc"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        const loginScreen = document.getElementById('login-screen');
+        const authError = document.getElementById('auth-error');
+        const messagesDiv = document.getElementById('messages');
+        const roomSelect = document.getElementById('room-select');
+        
+        let currentUser = null;
+        let currentRoom = 'genel';
+        let roomRef = null;
+
+        // Oturum Kontrolü
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                currentUser = user;
+                loginScreen.classList.add('hidden');
+                document.getElementById('user-display').textContent = user.displayName || user.email.split('@')[0];
+                loadRoom(currentRoom);
+            } else {
+                currentUser = null;
+                loginScreen.classList.remove('hidden');
+            }
+        });
+
+        // Hata Gösterici
+        function showError(msg) {
+            authError.textContent = msg;
+            authError.classList.remove('hidden');
+        }
+
+        // Google Giriş
+        document.getElementById('google-btn').addEventListener('click', () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider).catch(err => showError("Google Hatası: " + err.message));
+        });
+
+        // E-posta Giriş
+        document.getElementById('email-form').addEventListener('submit', e => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            
+            auth.signInWithEmailAndPassword(email, pass).catch(() => {
+                auth.createUserWithEmailAndPassword(email, pass).catch(err => showError("Hata: " + err.message));
+            });
+        });
+
+        // Çıkış
+        document.getElementById('logout-btn').addEventListener('click', () => auth.signOut());
+
+        // Oda Değiştirme
+        roomSelect.addEventListener('change', e => {
+            currentRoom = e.target.value;
+            loadRoom(currentRoom);
+        });
+
+        function loadRoom(room) {
+            if (roomRef) roomRef.off();
+            messagesDiv.innerHTML = '';
+            
+            roomRef = db.ref('odalar/' + room).limitToLast(50);
+            roomRef.on('child_added', snap => {
+                const data = snap.val();
+                const isMe = currentUser && data.uid === currentUser.uid;
+                
+                const div = document.createElement('div');
+                div.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'}`;
+                div.innerHTML = `
+                    <span class="text-[11px] text-slate-400 mb-1">${data.isim}</span>
+                    <div class="${isMe ? 'bg-indigo-600' : 'bg-slate-800'} px-4 py-2 rounded-2xl max-w-xs break-words text-sm">
+                        ${data.mesaj}
+                    </div>
+                `;
+                messagesDiv.appendChild(div);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            });
+        }
+
+        // Mesaj Gönderme
+        document.getElementById('msg-form').addEventListener('submit', e => {
+            e.preventDefault();
+            const input = document.getElementById('msg-input');
+            const text = input.value.trim();
+            if (!text || !currentUser) return;
+
+            db.ref('odalar/' + currentRoom).push({
+                uid: currentUser.uid,
+                isim: currentUser.displayName || currentUser.email.split('@')[0],
+                mesaj: text,
+                zaman: Date.now()
+            });
+            input.value = '';
+        });
+    </script>
+</body>
+</html>
