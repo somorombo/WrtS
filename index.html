@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WrtS - Gelişmiş Sohbet</title>
+    <title>WrtS - Sohbet Platformu</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
     <style>
         body { overscroll-behavior-y: none; }
         ::-webkit-scrollbar { width: 4px; }
@@ -19,7 +18,7 @@
 
     <!-- GİRİŞ EKRANI -->
     <div id="login-screen" class="fixed inset-0 bg-slate-950 z-50 flex items-center justify-center p-4 overflow-y-auto">
-        <div class="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-2xl w-full max-w-sm space-y-5">
+        <div class="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-2xl w-full max-w-sm space-y-5 shadow-2xl">
             <h1 class="text-3xl font-black text-center text-indigo-400">WrtS</h1>
             <form id="email-form" class="space-y-3">
                 <input type="email" id="email" placeholder="E-posta" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-base sm:text-sm focus:outline-none focus:border-indigo-500">
@@ -42,14 +41,13 @@
                 <h3 class="text-lg font-bold">Profil Ayarları</h3>
                 <button id="close-profile" class="text-slate-400 hover:text-white">✕</button>
             </div>
-            <div class="flex flex-col items-center gap-2">
-                <img id="modal-avatar" src="" class="w-20 h-20 rounded-full object-cover border-2 border-indigo-500">
-                <input type="file" id="avatar-file" accept="image/*" class="hidden">
-                <button type="button" onclick="document.getElementById('avatar-file').click()" class="text-xs text-indigo-400 hover:underline">Fotoğrafı Değiştir</button>
-            </div>
             <div>
                 <label class="block text-xs text-slate-400 mb-1">Görünen Ad</label>
                 <input type="text" id="edit-name" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
+            </div>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Avatar URL (İsteğe bağlı resim linki)</label>
+                <input type="text" id="edit-avatar" placeholder="https://..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
             </div>
             <div class="flex gap-2 pt-2">
                 <button id="save-profile" class="flex-1 bg-indigo-600 hover:bg-indigo-500 py-2.5 rounded-xl text-sm font-bold">Kaydet</button>
@@ -78,28 +76,11 @@
     <main id="messages" class="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 max-w-2xl w-full mx-auto">
     </main>
 
-    <!-- YÜKLENİYOR BİLDİRİMİ -->
-    <div id="upload-status" class="hidden bg-indigo-600/20 border-t border-indigo-500/30 text-indigo-300 text-xs py-1 px-4 text-center">
-        Medya yükleniyor...
-    </div>
-
     <!-- MESAJ GÖNDERME ÇUBUĞU -->
     <footer class="bg-slate-900 border-t border-slate-800 p-2.5 sm:p-4 max-w-2xl w-full mx-auto shrink-0">
         <form id="msg-form" class="flex items-center gap-2 w-full">
-            <!-- Fotoğraf Butonu -->
-            <button type="button" onclick="document.getElementById('img-file').click()" class="p-2 text-slate-400 hover:text-indigo-400 bg-slate-800/60 rounded-full transition" title="Fotoğraf Gönder">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-            </button>
-            <input type="file" id="img-file" accept="image/*" class="hidden">
-
-            <!-- Ses Kayıt Butonu -->
-            <button type="button" id="record-btn" class="p-2 text-slate-400 hover:text-rose-400 bg-slate-800/60 rounded-full transition" title="Ses Kaydet">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
-            </button>
-
             <input type="text" id="msg-input" placeholder="Bir şeyler yaz..." autocomplete="off" class="flex-1 min-w-0 bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 sm:py-3 text-base sm:text-sm focus:outline-none focus:border-indigo-500">
-            
-            <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-bold text-sm shrink-0">Gönder</button>
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl font-bold text-sm shrink-0">Gönder</button>
         </form>
     </footer>
 
@@ -117,25 +98,31 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.database();
-        const storage = firebase.storage();
 
         const loginScreen = document.getElementById('login-screen');
         const authError = document.getElementById('auth-error');
         const messagesDiv = document.getElementById('messages');
         const roomSelect = document.getElementById('room-select');
-        const uploadStatus = document.getElementById('upload-status');
         
         let currentUser = null;
         let currentRoom = 'genel';
         let roomRef = null;
-        let selectedAvatar = null;
 
-        // Oturum Durumu
+        // Oturum Durumu & Yerel Profil Hafızası
         auth.onAuthStateChanged(user => {
             if (user) {
                 currentUser = user;
                 loginScreen.classList.add('hidden');
-                updateUserUI();
+                
+                // Kayıtlı özel isim/avatar var mı kontrol et
+                const savedName = localStorage.getItem('wrts_name_' + user.uid) || user.displayName || user.email.split('@')[0];
+                const savedAvatar = localStorage.getItem('wrts_avatar_' + user.uid) || user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(savedName)}&background=4f46e5&color=fff`;
+
+                document.getElementById('user-display').textContent = savedName;
+                document.getElementById('header-avatar').src = savedAvatar;
+                document.getElementById('edit-name').value = savedName;
+                document.getElementById('edit-avatar').value = localStorage.getItem('wrts_avatar_' + user.uid) || '';
+
                 loadRoom(currentRoom);
             } else {
                 currentUser = null;
@@ -143,49 +130,25 @@
             }
         });
 
-        function updateUserUI() {
-            const name = currentUser.displayName || currentUser.email.split('@')[0];
-            const avatar = currentUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4f46e5&color=fff`;
-            document.getElementById('user-display').textContent = name;
-            document.getElementById('header-avatar').src = avatar;
-            document.getElementById('modal-avatar').src = avatar;
-            document.getElementById('edit-name').value = name;
-        }
-
-        // Profil Modalı
+        // Profil Modalı İşlemleri
         document.getElementById('open-profile').addEventListener('click', () => document.getElementById('profile-modal').classList.remove('hidden'));
         document.getElementById('close-profile').addEventListener('click', () => document.getElementById('profile-modal').classList.add('hidden'));
         document.getElementById('modal-logout').addEventListener('click', () => auth.signOut());
 
-        document.getElementById('avatar-file').addEventListener('change', e => {
-            if(e.target.files[0]) {
-                selectedAvatar = e.target.files[0];
-                document.getElementById('modal-avatar').src = URL.createObjectURL(selectedAvatar);
-            }
+        document.getElementById('save-profile').addEventListener('click', () => {
+            const newName = document.getElementById('edit-name').value.trim();
+            const newAvatar = document.getElementById('edit-avatar').value.trim();
+            if(!newName) return alert("İsim boş olamaz!");
+
+            localStorage.setItem('wrts_name_' + currentUser.uid, newName);
+            if(newAvatar) localStorage.setItem('wrts_avatar_' + currentUser.uid, newAvatar);
+
+            document.getElementById('user-display').textContent = newName;
+            if(newAvatar) document.getElementById('header-avatar').src = newAvatar;
+            document.getElementById('profile-modal').classList.add('hidden');
         });
 
-        document.getElementById('save-profile').addEventListener('click', async () => {
-            try {
-                let photoURL = currentUser.photoURL;
-                if(selectedAvatar) {
-                    uploadStatus.classList.remove('hidden');
-                    const ref = storage.ref(`avatars/${currentUser.uid}`);
-                    await ref.put(selectedAvatar);
-                    photoURL = await ref.getDownloadURL();
-                    uploadStatus.classList.add('hidden');
-                }
-                const newName = document.getElementById('edit-name').value.trim();
-                await currentUser.updateProfile({ displayName: newName, photoURL: photoURL });
-                updateUserUI();
-                document.getElementById('profile-modal').classList.add('hidden');
-                selectedAvatar = null;
-            } catch(err) {
-                alert("Profil güncellenemedi: " + err.message);
-                uploadStatus.classList.add('hidden');
-            }
-        });
-
-        // Google ve E-posta Giriş
+        // Giriş İşlemleri
         function showError(msg) { authError.textContent = msg; authError.classList.remove('hidden'); }
         document.getElementById('google-btn').addEventListener('click', () => {
             auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(err => showError(err.message));
@@ -219,13 +182,12 @@
                 div.id = `msg-${key}`;
                 div.className = `flex gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'} items-end`;
 
-                let content = '';
-                if(data.type === 'image') {
-                    content = `<img src="${data.url}" class="rounded-xl max-h-48 object-cover cursor-pointer" onclick="window.open('${data.url}', '_blank')">`;
-                } else if(data.type === 'audio') {
-                    content = `<audio controls src="${data.url}" class="h-9 max-w-[200px]"></audio>`;
-                } else {
-                    content = `<p class="text-sm break-words">${data.mesaj}</p>`;
+                // Emojileri hazırla
+                let reactionsHTML = '';
+                if(data.reactions) {
+                    Object.values(data.reactions).forEach(emoji => {
+                        reactionsHTML += `<span class="bg-slate-900/80 text-xs px-1.5 py-0.5 rounded-full border border-slate-700">${emoji}</span>`;
+                    });
                 }
 
                 div.innerHTML = `
@@ -233,9 +195,17 @@
                     <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[75%]">
                         <span class="text-[10px] text-slate-400 mb-0.5 px-1">${data.isim}</span>
                         <div class="relative group ${isMe ? 'bg-indigo-600' : 'bg-slate-800'} px-3.5 py-2 rounded-2xl shadow">
-                            ${content}
-                            ${isMe ? `<button onclick="deleteMsg('${room}', '${key}')" class="absolute -top-2 -left-2 bg-red-600 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition shadow">×</button>` : ''}
+                            <p class="text-sm break-words">${data.mesaj}</p>
+                            
+                            <!-- Emoji Ekleme ve Silme Butonları -->
+                            <div class="absolute -bottom-3 ${isMe ? 'right-2' : 'left-2'} flex gap-1 items-center opacity-0 group-hover:opacity-100 transition">
+                                <button onclick="addReaction('${room}', '${key}', '👍')" class="bg-slate-800 hover:bg-slate-700 text-xs px-1 rounded shadow">👍</button>
+                                <button onclick="addReaction('${room}', '${key}', '❤️')" class="bg-slate-800 hover:bg-slate-700 text-xs px-1 rounded shadow">❤️</button>
+                                <button onclick="addReaction('${room}', '${key}', '🔥')" class="bg-slate-800 hover:bg-slate-700 text-xs px-1 rounded shadow">🔥</button>
+                                ${isMe ? `<button onclick="deleteMsg('${room}', '${key}')" class="bg-red-600 text-white rounded-full w-4 h-4 text-[10px] flex items-center justify-center shadow ml-1">×</button>` : ''}
+                            </div>
                         </div>
+                        <div class="flex gap-1 mt-1 flex-wrap">${reactionsHTML}</div>
                     </div>
                 `;
                 messagesDiv.appendChild(div);
@@ -250,94 +220,33 @@
             }
         };
 
-        // Mesaj Gönderme (Metin)
+        window.addReaction = function(room, key, emoji) {
+            if(!currentUser) return;
+            db.ref(`odalar/${room}/${key}/reactions/${currentUser.uid}`).set(emoji);
+        };
+
+        // Realtime Tepki Dinleyici
+        // (Tepki eklendiğinde mesajı günceller)
+        // ... (Veritabanı zaten anlık senkronizedir)
+
+        // Mesaj Gönderme
         document.getElementById('msg-form').addEventListener('submit', e => {
             e.preventDefault();
             const input = document.getElementById('msg-input');
             const text = input.value.trim();
             if(!text || !currentUser) return;
 
+            const currentName = localStorage.getItem('wrts_name_' + currentUser.uid) || currentUser.displayName || currentUser.email.split('@')[0];
+            const currentAvatar = localStorage.getItem('wrts_avatar_' + currentUser.uid) || currentUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentName)}&background=4f46e5&color=fff`;
+
             db.ref('odalar/' + currentRoom).push({
                 uid: currentUser.uid,
-                isim: currentUser.displayName || currentUser.email.split('@')[0],
-                avatar: currentUser.photoURL || '',
+                isim: currentName,
+                avatar: currentAvatar,
                 mesaj: text,
-                type: 'text',
                 zaman: Date.now()
             });
             input.value = '';
-        });
-
-        // Fotoğraf Gönderme
-        document.getElementById('img-file').addEventListener('change', async e => {
-            const file = e.target.files[0];
-            if(!file || !currentUser) return;
-            uploadStatus.classList.remove('hidden');
-            try {
-                const ref = storage.ref(`images/${Date.now()}_${file.name}`);
-                await ref.put(file);
-                const url = await ref.getDownloadURL();
-                
-                db.ref('odalar/' + currentRoom).push({
-                    uid: currentUser.uid,
-                    isim: currentUser.displayName || currentUser.email.split('@')[0],
-                    avatar: currentUser.photoURL || '',
-                    url: url,
-                    type: 'image',
-                    zaman: Date.now()
-                });
-            } catch(err) {
-                alert("Fotoğraf yüklenemedi: " + err.message);
-            } finally {
-                uploadStatus.classList.add('hidden');
-                e.target.value = '';
-            }
-        });
-
-        // Ses Kaydı
-        let mediaRecorder;
-        let audioChunks = [];
-        const recordBtn = document.getElementById('record-btn');
-
-        recordBtn.addEventListener('click', async () => {
-            if(!mediaRecorder || mediaRecorder.state === "inactive") {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorder = new MediaRecorder(stream);
-                    audioChunks = [];
-                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-                    mediaRecorder.onstop = async () => {
-                        const blob = new Blob(audioChunks, { type: 'audio/webm' });
-                        uploadStatus.classList.remove('hidden');
-                        try {
-                            const ref = storage.ref(`audios/${Date.now()}.webm`);
-                            await ref.put(blob);
-                            const url = await ref.getDownloadURL();
-                            
-                            db.ref('odalar/' + currentRoom).push({
-                                uid: currentUser.uid,
-                                isim: currentUser.displayName || currentUser.email.split('@')[0],
-                                avatar: currentUser.photoURL || '',
-                                url: url,
-                                type: 'audio',
-                                zamaan: Date.now()
-                            });
-                        } catch(err) {
-                            alert("Ses gönderilemedi.");
-                        } finally {
-                            uploadStatus.classList.add('hidden');
-                            stream.getTracks().forEach(t => t.stop());
-                        }
-                    };
-                    mediaRecorder.start();
-                    recordBtn.classList.add('bg-rose-600', 'text-white', 'animate-pulse');
-                } catch(e) {
-                    alert("Mikrofon izni alınamadı.");
-                }
-            } else {
-                mediaRecorder.stop();
-                recordBtn.classList.remove('bg-rose-600', 'text-white', 'animate-pulse');
-            }
         });
     </script>
 </body>
