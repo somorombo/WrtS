@@ -12,8 +12,6 @@
         body { 
             overscroll-behavior-y: none; 
             background-color: #030712;
-            background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
-            background-size: 20px 20px;
         }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -22,28 +20,15 @@
         pre code { font-family: 'Courier New', Courier, monospace; }
         @keyframes snowfall {
             0% { transform: translateY(-10px) translateX(0); opacity: 0.7; }
-            100% { transform: translateY(100vh) translateX(15px); opacity: 0.2; }
+            100% { transform: translateY(100%) translateX(10px); opacity: 0.2; }
         }
         .snowflake {
-            position: fixed; top: -10px; background: white; border-radius: 50%; pointer-events: none; z-index: 9999;
+            position: absolute; top: -10px; background: white; border-radius: 50%; pointer-events: none; z-index: 5;
             animation: snowfall linear infinite;
         }
     </style>
 </head>
 <body id="app-body" class="text-white h-[100dvh] w-full overflow-hidden flex flex-col justify-between relative">
-
-    <script>
-        for (let i = 0; i < 25; i++) {
-            const flake = document.createElement('div');
-            flake.className = 'snowflake';
-            flake.style.left = Math.random() * 100 + 'vw';
-            flake.style.width = (Math.random() * 3 + 2) + 'px';
-            flake.style.height = flake.style.width;
-            flake.style.animationDuration = (Math.random() * 6 + 4) + 's';
-            flake.style.animationDelay = (Math.random() * 5) + 's';
-            document.body.appendChild(flake);
-        }
-    </script>
 
     <!-- GİRİŞ EKRANI -->
     <div id="login-screen" class="fixed inset-0 bg-slate-950/95 z-50 flex items-center justify-center p-4 overflow-y-auto">
@@ -64,7 +49,7 @@
     </div>
 
     <!-- ÜST BAR -->
-    <header id="main-header" class="bg-slate-900/90 backdrop-blur border-b border-slate-800 px-3 py-2.5 flex items-center justify-between gap-2 shrink-0">
+    <header id="main-header" class="bg-slate-900/90 backdrop-blur border-b border-slate-800 px-3 py-2.5 flex items-center justify-between gap-2 shrink-0 z-20">
         <div class="flex items-center gap-2 shrink-0">
             <button onclick="openModal('menu-drawer-modal')" class="bg-slate-800 hover:bg-slate-700 text-cyan-400 p-2 rounded-xl text-base font-bold flex items-center justify-center" title="Menü">☰</button>
             <span class="font-black text-base text-cyan-400">WrtS</span>
@@ -92,19 +77,22 @@
     </header>
 
     <!-- MESAJ ARAMA ÇUBUĞU -->
-    <div id="search-bar" class="hidden bg-slate-900 border-b border-slate-800 px-4 py-2 flex items-center gap-2 w-full mx-auto shrink-0">
+    <div id="search-bar" class="hidden bg-slate-900 border-b border-slate-800 px-4 py-2 flex items-center gap-2 w-full mx-auto shrink-0 z-20">
         <input type="text" id="msg-search-input" placeholder="Sohbette ara..." class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs focus:outline-none">
         <button onclick="toggleSearchBar()" class="text-xs text-slate-400 hover:text-white px-2">Kapat</button>
     </div>
 
-    <!-- MESAJ ALANI -->
-    <main id="messages" class="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 w-full max-w-4xl mx-auto"></main>
+    <!-- MESAJ ALANI VE KAR YAĞIŞI -->
+    <div class="flex-1 relative overflow-hidden flex flex-col">
+        <div id="snow-container" class="absolute inset-0 pointer-events-none overflow-hidden z-0"></div>
+        <main id="messages" class="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 w-full max-w-4xl mx-auto z-10 relative"></main>
+    </div>
 
     <!-- YAZIYOR BİLGİSİ -->
-    <div id="typing-indicator" class="px-4 py-0.5 text-[11px] text-slate-400 italic w-full max-w-4xl mx-auto h-5 shrink-0"></div>
+    <div id="typing-indicator" class="px-4 py-0.5 text-[11px] text-slate-400 italic w-full max-w-4xl mx-auto h-5 shrink-0 z-20"></div>
 
     <!-- YANITLANAN VEYA DÜZENLENEN ÖNİZLEME -->
-    <div id="reply-preview-bar" class="hidden w-full max-w-4xl mx-auto px-4 py-1.5 bg-slate-900 border-t border-slate-800 flex justify-between items-center shrink-0">
+    <div id="reply-preview-bar" class="hidden w-full max-w-4xl mx-auto px-4 py-1.5 bg-slate-900 border-t border-slate-800 flex justify-between items-center shrink-0 z-20">
         <div class="flex items-center gap-2 truncate text-xs">
             <span id="preview-mode-title" class="text-cyan-400 font-bold">Yanıtlanıyor:</span>
             <span id="reply-preview-text" class="text-slate-300 truncate"></span>
@@ -113,17 +101,16 @@
     </div>
 
     <!-- EKSTRA ARAÇ ÇEKMECESİ (+ BUTONU) -->
-    <div id="tools-drawer" class="hidden bg-slate-900 border-t border-slate-800 p-2.5 w-full max-w-4xl mx-auto grid grid-cols-4 sm:grid-cols-6 gap-2 shrink-0">
+    <div id="tools-drawer" class="hidden bg-slate-900 border-t border-slate-800 p-2.5 w-full max-w-4xl mx-auto grid grid-cols-5 gap-2 shrink-0 z-20">
         <button type="button" onclick="document.getElementById('img-file').click(); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-slate-950 p-2 rounded-xl border border-slate-800 text-xs"><span>🖼️</span><span class="text-[10px]">Fotoğraf</span></button>
         <button type="button" onclick="openModal('gif-modal'); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-slate-950 p-2 rounded-xl border border-slate-800 text-xs"><span>🎞️</span><span class="text-[10px]">GIF</span></button>
         <button type="button" onclick="openModal('sticker-modal'); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-slate-950 p-2 rounded-xl border border-slate-800 text-xs"><span>✨</span><span class="text-[10px]">Sticker</span></button>
-        <button type="button" onclick="openModal('code-modal'); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-slate-950 p-2 rounded-xl border border-slate-800 text-xs"><span>💻</span><span class="text-[10px]">Kod Bloğu</span></button>
+        <button type="button" onclick="openModal('code-modal'); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-slate-950 p-2 rounded-xl border border-slate-800 text-xs"><span>💻</span><span class="text-[10px]">Kod</span></button>
         <button type="button" onclick="openModal('poll-modal'); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-slate-950 p-2 rounded-xl border border-slate-800 text-xs"><span>📊</span><span class="text-[10px]">Anket</span></button>
-        <button type="button" onclick="openModal('soundboard-modal'); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-slate-950 p-2 rounded-xl border border-slate-800 text-xs"><span>🔊</span><span class="text-[10px]">Ses Efekti</span></button>
     </div>
 
     <!-- ALT MESAJ ÇUBUĞU -->
-    <footer id="main-footer" class="bg-slate-900 border-t border-slate-800 p-2 sm:p-3 w-full max-w-4xl mx-auto shrink-0">
+    <footer id="main-footer" class="bg-slate-900 border-t border-slate-800 p-2 sm:p-3 w-full max-w-4xl mx-auto shrink-0 z-20">
         <form id="msg-form" class="flex items-center gap-1.5 w-full">
             <button type="button" onclick="toggleToolsDrawer()" class="w-9 h-9 rounded-full bg-slate-800 hover:bg-slate-700 text-cyan-400 font-black text-lg flex items-center justify-center shrink-0" title="Ekstra Araçlar">+</button>
             <button type="button" id="record-btn" class="w-9 h-9 rounded-full bg-slate-800 hover:bg-slate-700 text-rose-400 flex items-center justify-center shrink-0" title="Ses Kaydet">🎙️</button>
@@ -156,6 +143,14 @@
         </div>
     </div>
 
+    <!-- GIF SEÇİCİ MODALI (TEKİL KOPYA) -->
+    <div id="gif-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-md space-y-3 max-h-[85vh] flex flex-col">
+            <div class="flex justify-between items-center"><h3 class="font-bold text-cyan-400">🎞️ GIF Seç</h3><button onclick="closeModal('gif-modal')">✕</button></div>
+            <div id="gif-grid" class="grid grid-cols-2 gap-2 overflow-y-auto max-h-64 p-1"></div>
+        </div>
+    </div>
+
     <!-- SKOR TABLOSU -->
     <div id="leaderboard-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-sm space-y-4 max-h-[85vh] overflow-y-auto">
@@ -168,40 +163,26 @@
         </div>
     </div>
 
-    <!-- GIF SEÇİCİ -->
-    <div id="gif-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-md space-y-3 max-h-[85vh] flex flex-col">
-            <div class="flex justify-between items-center"><h3 class="font-bold text-cyan-400">🎞️ Eğlenceli GIF Havuzu</h3><button onclick="closeModal('gif-modal')">✕</button></div>
-            <div class="flex gap-1 overflow-x-auto no-scrollbar shrink-0 py-1">
-                <button onclick="filterGifCategory('all')" class="bg-cyan-600 text-xs px-3 py-1 rounded-lg font-bold shrink-0">Tümü</button>
-                <button onclick="filterGifCategory('funny')" class="bg-pink-600 text-xs px-3 py-1 rounded-lg font-bold shrink-0">😂 Komik</button>
-                <button onclick="filterGifCategory('gaming')" class="bg-purple-600 text-xs px-3 py-1 rounded-lg font-bold shrink-0">🎮 Oyun</button>
-                <button onclick="filterGifCategory('anime')" class="bg-cyan-600 text-xs px-3 py-1 rounded-lg font-bold shrink-0">⚡ Anime</button>
-                <button onclick="filterGifCategory('winter')" class="bg-indigo-600 text-xs px-3 py-1 rounded-lg font-bold shrink-0">❄️ Kış</button>
-            </div>
-            <div id="gif-grid" class="grid grid-cols-2 gap-2 overflow-y-auto max-h-64 p-1"></div>
-        </div>
-    </div>
-
-    <!-- CANLI ORTAK ÇİZİM TAHTASI -->
+    <!-- CANLI ORTAK ÇİZİM TAHTASI (RENKLER, SİLGİ VE HERKES İÇİN ORTAK) -->
     <div id="whiteboard-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-3">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 w-full max-w-md space-y-3">
-            <div class="flex justify-between items-center"><h3 class="font-bold text-cyan-400">🎨 Canlı Ortak Çizim Tahtası</h3><button onclick="closeModal('whiteboard-modal')">✕</button></div>
-            <div class="flex items-center justify-between gap-2 bg-slate-950 p-2 rounded-xl border border-slate-800">
-                <div class="flex gap-1.5">
-                    <button onclick="wbColor='#38bdf8'" class="w-6 h-6 rounded-full bg-sky-400"></button>
-                    <button onclick="wbColor='#f43f5e'" class="w-6 h-6 rounded-full bg-rose-500"></button>
-                    <button onclick="wbColor='#facc15'" class="w-6 h-6 rounded-full bg-yellow-400"></button>
-                    <button onclick="wbColor='#4ade80'" class="w-6 h-6 rounded-full bg-green-400"></button>
-                    <button onclick="wbColor='#ffffff'" class="w-6 h-6 rounded-full bg-white"></button>
+            <div class="flex justify-between items-center"><h3 class="font-bold text-cyan-400">🎨 Canlı Ortak Tahta</h3><button onclick="closeModal('whiteboard-modal')">✕</button></div>
+            <div class="flex items-center justify-between gap-2 bg-slate-950 p-2 rounded-xl border border-slate-800 flex-wrap">
+                <div class="flex gap-1.5 items-center">
+                    <button onclick="wbColor='#38bdf8'; wbIsEraser=false;" class="w-6 h-6 rounded-full bg-sky-400 border border-white/20"></button>
+                    <button onclick="wbColor='#f43f5e'; wbIsEraser=false;" class="w-6 h-6 rounded-full bg-rose-500 border border-white/20"></button>
+                    <button onclick="wbColor='#facc15'; wbIsEraser=false;" class="w-6 h-6 rounded-full bg-yellow-400 border border-white/20"></button>
+                    <button onclick="wbColor='#4ade80'; wbIsEraser=false;" class="w-6 h-6 rounded-full bg-green-400 border border-white/20"></button>
+                    <button onclick="wbColor='#ffffff'; wbIsEraser=false;" class="w-6 h-6 rounded-full bg-white border border-white/20"></button>
+                    <button onclick="wbIsEraser=true;" class="bg-slate-800 text-slate-200 px-2 py-1 rounded-lg text-xs font-bold border border-slate-700">🧹 Silgi</button>
                 </div>
-                <button onclick="clearWhiteboard()" class="bg-red-500/20 text-red-400 px-2.5 py-1 rounded-lg text-xs font-bold">Temizle</button>
+                <button onclick="clearWhiteboard()" class="bg-red-500/20 text-red-400 px-2.5 py-1 rounded-lg text-xs font-bold">Hepsini Temizle</button>
             </div>
-            <canvas id="wb-canvas" width="340" height="300" class="w-full bg-slate-950 border border-slate-700 rounded-2xl touch-none cursor-crosshair"></canvas>
+            <canvas id="wb-canvas" width="340" height="280" class="w-full bg-slate-950 border border-slate-700 rounded-2xl touch-none cursor-crosshair"></canvas>
         </div>
     </div>
 
-    <!-- MÜZİK ODASI (ŞARKI SİLME / KALDIRMA ÖZELLİKLİ) -->
+    <!-- MÜZİK ODASI -->
     <div id="music-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-md space-y-3">
             <div class="flex justify-between items-center"><h3 class="font-bold text-rose-400">🎵 Ortak Müzik & YouTube Odası</h3><button onclick="closeModal('music-modal')">✕</button></div>
@@ -248,19 +229,6 @@
             <input type="text" id="poll-opt1" placeholder="1. Seçenek" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs">
             <input type="text" id="poll-opt2" placeholder="2. Seçenek" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs">
             <button onclick="createPoll()" class="w-full bg-emerald-600 py-2.5 rounded-xl text-xs font-bold">Başlat</button>
-        </div>
-    </div>
-
-    <!-- SOUNDBOARD -->
-    <div id="soundboard-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-sm space-y-3 text-center">
-            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">🔊 Soundboard</h3><button onclick="closeModal('soundboard-modal')">✕</button></div>
-            <div class="grid grid-cols-2 gap-2">
-                <button onclick="triggerSoundboard('airhorn', '📢 Airhorn')" class="bg-rose-600/20 border border-rose-500/40 py-3 rounded-xl text-xs font-bold">📢 Airhorn</button>
-                <button onclick="triggerSoundboard('win', '🏆 Zafer')" class="bg-emerald-600/20 border border-emerald-500/40 py-3 rounded-xl text-xs font-bold">🏆 Zafer Sesi</button>
-                <button onclick="triggerSoundboard('sad', '🎻 Hüzünlü')" class="bg-indigo-600/20 border border-indigo-500/40 py-3 rounded-xl text-xs font-bold">🎻 Hüzünlü Keman</button>
-                <button onclick="triggerSoundboard('laser', '⚡ Lazer')" class="bg-amber-600/20 border border-amber-500/40 py-3 rounded-xl text-xs font-bold">⚡ Lazer</button>
-            </div>
         </div>
     </div>
 
@@ -429,6 +397,19 @@
         let roomRoles = {};
         let mutedUsers = {};
 
+        // SADECE MESAJ ALANINDA KAR YAĞIŞI
+        const snowContainer = document.getElementById('snow-container');
+        for (let i = 0; i < 20; i++) {
+            const flake = document.createElement('div');
+            flake.className = 'snowflake';
+            flake.style.left = Math.random() * 100 + '%';
+            flake.style.width = (Math.random() * 3 + 2) + 'px';
+            flake.style.height = flake.style.width;
+            flake.style.animationDuration = (Math.random() * 5 + 3) + 's';
+            flake.style.animationDelay = (Math.random() * 5) + 's';
+            snowContainer.appendChild(flake);
+        }
+
         window.openModal = id => document.getElementById(id).classList.remove('hidden');
         window.closeModal = id => document.getElementById(id).classList.add('hidden');
         window.toggleToolsDrawer = () => document.getElementById('tools-drawer').classList.toggle('hidden');
@@ -446,12 +427,6 @@
                     osc.start(now); osc.stop(now + 0.25);
                 }
             } catch(e) {}
-        }
-
-        window.triggerSoundboard = function(effect, label) {
-            if (!currentUser) return;
-            db.ref(`soundboard/${currentRoom}`).set({ effect, label, by: getMyData().name, time: Date.now() });
-            closeModal('soundboard-modal');
         }
 
         window.addScorePoints = function(pts) {
@@ -487,19 +462,19 @@
             });
         }
 
-        const gifDatabase = {
-            funny: ["https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif", "https://media.giphy.com/media/13HgwGsXF0aiGY/giphy.gif", "https://media.giphy.com/media/9uIZuMGuWExxBLagNa/giphy.gif"],
-            gaming: ["https://media.giphy.com/media/mlvseq9yvZhba/giphy.gif", "https://media.giphy.com/media/3o7abKhOpu0NwenH3O/giphy.gif"],
-            anime: ["https://media.giphy.com/media/26n6WUWwSPpWhkMGY/giphy.gif", "https://media.giphy.com/media/12XMGIW6HBe5eM/giphy.gif"],
-            winter: ["https://media.giphy.com/media/3ov9jV81rK93E9Vz5S/giphy.gif", "https://media.giphy.com/media/l0HlvtIPzPdt2usKs/giphy.gif"]
-        };
-
-        window.filterGifCategory = function(cat) {
-            const grid = document.getElementById('gif-grid');
-            let list = cat === 'all' ? [...gifDatabase.funny, ...gifDatabase.gaming, ...gifDatabase.anime, ...gifDatabase.winter] : (gifDatabase[cat] || []);
-            grid.innerHTML = list.map(url => `<img src="${url}" class="w-full h-24 object-cover rounded-xl cursor-pointer hover:opacity-80 transition" onclick="sendGIF('${url}')">`).join('');
+        // TEKİLLEŞTİRİLMİŞ TEMİZ GIF LİSTESİ
+        const gifList = [
+            "https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif",
+            "https://media.giphy.com/media/13HgwGsXF0aiGY/giphy.gif",
+            "https://media.giphy.com/media/9uIZuMGuWExxBLagNa/giphy.gif",
+            "https://media.giphy.com/media/mlvseq9yvZhba/giphy.gif",
+            "https://media.giphy.com/media/3o7abKhOpu0NwenH3O/giphy.gif",
+            "https://media.giphy.com/media/26n6WUWwSPpWhkMGY/giphy.gif"
+        ];
+        function renderGifs() {
+            document.getElementById('gif-grid').innerHTML = gifList.map(url => `<img src="${url}" class="w-full h-24 object-cover rounded-xl cursor-pointer hover:opacity-80 transition" onclick="sendGIF('${url}')">`).join('');
         }
-        setTimeout(() => filterGifCategory('all'), 100);
+        setTimeout(renderGifs, 100);
 
         window.sendGIF = url => {
             const md = getMyData();
@@ -507,7 +482,9 @@
             closeModal('gif-modal');
         };
 
+        // CANLI ORTAK ÇİZİM TAHTASI (RENKLER, SİLGİ VE HERKES İÇİN SENKRON)
         let wbColor = '#38bdf8';
+        let wbIsEraser = false;
         let wbDrawing = false;
         let wbInitialized = false;
         window.initWhiteboard = function() {
@@ -521,21 +498,30 @@
                     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
                     return { x: (clientX - rect.left) * (canvas.width / rect.width), y: (clientY - rect.top) * (canvas.height / rect.height) };
                 };
-                const drawDot = (x, y, color, sync = true) => {
-                    ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.fill();
-                    if (sync) db.ref(`whiteboard/${currentRoom}`).push({ x, y, color });
+                const drawDot = (x, y, color, isEraser, sync = true) => {
+                    ctx.fillStyle = isEraser ? '#030712' : color;
+                    ctx.beginPath(); 
+                    ctx.arc(x, y, isEraser ? 10 : 3, 0, Math.PI * 2); 
+                    ctx.fill();
+                    if (sync) db.ref(`whiteboard/${currentRoom}`).push({ x, y, color: isEraser ? '#030712' : color, isEraser });
                 };
-                canvas.addEventListener('mousedown', e => { wbDrawing = true; const p = getPos(e); drawDot(p.x, p.y, wbColor); });
-                canvas.addEventListener('mousemove', e => { if (wbDrawing) { const p = getPos(e); drawDot(p.x, p.y, wbColor); } });
+                canvas.addEventListener('mousedown', e => { wbDrawing = true; const p = getPos(e); drawDot(p.x, p.y, wbColor, wbIsEraser); });
+                canvas.addEventListener('mousemove', e => { if (wbDrawing) { const p = getPos(e); drawDot(p.x, p.y, wbColor, wbIsEraser); } });
                 window.addEventListener('mouseup', () => wbDrawing = false);
-                canvas.addEventListener('touchstart', e => { e.preventDefault(); wbDrawing = true; const p = getPos(e); drawDot(p.x, p.y, wbColor); });
-                canvas.addEventListener('touchmove', e => { e.preventDefault(); if (wbDrawing) { const p = getPos(e); drawDot(p.x, p.y, wbColor); } });
+                canvas.addEventListener('touchstart', e => { e.preventDefault(); wbDrawing = true; const p = getPos(e); drawDot(p.x, p.y, wbColor, wbIsEraser); });
+                canvas.addEventListener('touchmove', e => { e.preventDefault(); if (wbDrawing) { const p = getPos(e); drawDot(p.x, p.y, wbColor, wbIsEraser); } });
                 canvas.addEventListener('touchend', () => wbDrawing = false);
             }
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             db.ref(`whiteboard/${currentRoom}`).off();
             db.ref(`whiteboard/${currentRoom}`).on('child_added', snap => {
-                const d = snap.val(); if (d) { ctx.fillStyle = d.color; ctx.beginPath(); ctx.arc(d.x, d.y, 3, 0, Math.PI * 2); ctx.fill(); }
+                const d = snap.val(); 
+                if (d) { 
+                    ctx.fillStyle = d.color; 
+                    ctx.beginPath(); 
+                    ctx.arc(d.x, d.y, d.isEraser ? 10 : 3, 0, Math.PI * 2); 
+                    ctx.fill(); 
+                }
             });
             db.ref(`whiteboard/${currentRoom}`).on('child_removed', () => ctx.clearRect(0, 0, canvas.width, canvas.height));
         }
@@ -600,9 +586,17 @@
         }
         window.votePoll = (room, key, choice) => { if (currentUser) db.ref(`odalar/${room}/${key}/votes/${currentUser.uid}`).set(choice); };
 
+        // EMOJI BIRAKMA VE GERİ ÇEKME (TOGGLE MANTIĞI)
         window.reactToMessage = function(room, key, emoji) {
             if (!currentUser) return;
-            db.ref(`odalar/${room}/${key}/reactions/${currentUser.uid}`).set(emoji);
+            const ref = db.ref(`odalar/${room}/${key}/reactions/${currentUser.uid}`);
+            ref.once('value', snap => {
+                if (snap.val() === emoji) {
+                    ref.remove(); // Zaten aynıysa geri çek
+                } else {
+                    ref.set(emoji); // Değilse bas
+                }
+            });
         }
 
         function renderStickers() {
@@ -755,6 +749,7 @@
             });
         }
 
+        // DM'LER KESİNLİKLE GENEL ODALARA KARIŞMAZ (İZOLASYON)
         window.startDM = function(targetUid, encName) {
             const targetName = decodeURIComponent(encName);
             const ids = [currentUser.uid, targetUid].sort();
@@ -871,7 +866,6 @@
             db.ref(`room_roles/${room}`).on('value', s => { roomRoles = s.val() || {}; updateRoomRoleButton(); });
             db.ref(`room_mutes/${room}`).on('value', s => { mutedUsers = s.val() || {}; });
 
-            db.ref(`soundboard/${room}`).on('value', s => { const d = s.val(); if (d && Date.now() - d.time < 4000) playSoundEffect(d.effect); });
             db.ref(`music_sync/${room}`).on('value', s => {
                 const d = s.val(); 
                 if (d && d.videoId) {
@@ -888,7 +882,7 @@
             roomRef.on('child_added', snap => {
                 const d = snap.val(); messagesDiv.appendChild(createMessageElement(snap, room));
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
-                if (!isInitialLoad && currentUser && d.uid !== currentUser.uid) playSoundEffect('notify');
+                if (!isInitialLoad && currentUser && d.uid !== currentUser.uid) playSoundEffect('notify'); // BİLDİRİM SESİ AKTİF
             });
             roomRef.on('child_changed', snap => { const el = document.getElementById(`msg-${snap.key}`); if (el) el.replaceWith(createMessageElement(snap, room)); });
             roomRef.on('child_removed', snap => document.getElementById(`msg-${snap.key}`)?.remove());
@@ -984,14 +978,17 @@
             auth.signInWithEmailAndPassword(em, pw).catch(() => auth.createUserWithEmailAndPassword(em, pw).catch(err => alert(err.message)));
         };
 
-        // GÜVENLİ ÇIKIŞ
+        // GÜVENLİ ÇIKIŞ (TAM TEMİZLİK İLE GİRİŞ EKRANINA ATMA)
         document.getElementById('modal-logout').onclick = () => {
             if (confirm("Güvenli çıkış yapmak istiyor musun?")) {
-                db.ref('status/' + currentUser.uid).set({ state: 'offline', lastSeen: Date.now() }).then(() => auth.signOut());
+                db.ref('status/' + currentUser.uid).set({ state: 'offline', lastSeen: Date.now() }).then(() => {
+                    auth.signOut().then(() => {
+                        window.location.reload(); // Her şeyi temizleyip giriş ekranına atar
+                    });
+                });
             }
         };
 
-        // 2 ADIMLI DOĞRULAMALI HESAP SİLME
         window.requestAccountDeletion = async function() {
             const pwdInput = document.getElementById('delete-confirm-password').value;
             if (!pwdInput) return alert("Lütfen şifreni gir!");
@@ -1002,7 +999,6 @@
                 const cred = firebase.auth.EmailAuthProvider.credential(currentUser.email, pwdInput);
                 await currentUser.reauthenticateWithCredential(cred);
                 
-                // Ekstra 2. Adım Doğrulama Onayı
                 const codeCheck = prompt("2. Adım Güvenlik Doğrulaması: Hesabını silmek için ekrana 'SIL' yaz:");
                 if (codeCheck !== "SIL") return alert("Doğrulama kodu hatalı! Hesap silme iptal edildi.");
 
@@ -1010,6 +1006,7 @@
                 await db.ref('users_registry/' + currentUser.uid).remove();
                 await currentUser.delete();
                 alert("Hesabın başarıyla silindi.");
+                window.location.reload();
             } catch (err) {
                 alert("Hata: " + err.message);
             }
