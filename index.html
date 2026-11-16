@@ -19,16 +19,7 @@
     <!-- BİLDİRİM BALONU KAPSAYICISI -->
     <div id="notification-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-    <!-- GİZLİLİK / PANIC SCREEN (Baban Yakalarsa Ekranı Değiştirme) -->
-    <div id="panic-screen" class="fixed inset-0 bg-white text-black z-[100] hidden flex flex-col p-6 font-mono">
-        <div class="flex justify-between items-center border-b pb-2 mb-4">
-            <h1 class="text-xl font-bold">Not Defteri - Ders Çalışma Notları</h1>
-            <button onclick="togglePanicMode()" class="text-xs bg-gray-200 px-3 py-1 rounded">Normal Ekrana Dön</button>
-        </div>
-        <textarea class="w-full h-full resize-none focus:outline-none text-sm" placeholder="Fizik formülleri ve özetler buraya yazılır..."></textarea>
-    </div>
-
-    <!-- GİRİŞ EKRANI (Asla Bozmadığımız Orijinal Sağlam Akış) -->
+    <!-- GİRİŞ EKRANI (Orijinal ve Sağlam) -->
     <div id="login-screen" class="fixed inset-0 bg-slate-950 z-50 flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-2xl w-full max-w-sm space-y-5 shadow-2xl">
             <h1 class="text-3xl font-black text-center text-indigo-400">WrtS</h1>
@@ -59,7 +50,7 @@
             </div>
             <hr class="border-slate-800">
             <div>
-                <h4 class="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-2">👥 Tüm Kullanıcılar (Çevrimdışı Dahil)</h4>
+                <h4 class="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-2">👥 Tüm Kullanıcılar</h4>
                 <div id="all-users-list" class="space-y-2"><p class="text-xs text-slate-500 italic">Yükleniyor...</p></div>
             </div>
         </div>
@@ -93,7 +84,61 @@
         </div>
     </div>
 
-    <!-- AYARLAR & PROFİL MODALI (Kişiselleştirme 1 & 4 burada!) -->
+    <!-- MİNİ OYUNLAR MODALI (GERÇEK XOX OYUNU İLE) -->
+    <div id="games-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-sm space-y-4 shadow-2xl text-center">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                <h3 class="text-lg font-bold text-amber-400">❌ XOX (Tic-Tac-Toe)</h3>
+                <button onclick="document.getElementById('games-modal').classList.add('hidden')" class="text-slate-400 hover:text-white font-bold">✕</button>
+            </div>
+            <p id="xox-status" class="text-xs text-slate-300">Sıra sende (X)</p>
+            <div class="grid grid-cols-3 gap-2 w-48 mx-auto py-2">
+                <button onclick="makeMove(0)" id="cell-0" class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-xl text-xl font-bold text-indigo-400 hover:border-indigo-500"></button>
+                <button onclick="makeMove(1)" id="cell-1" class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-xl text-xl font-bold text-indigo-400 hover:border-indigo-500"></button>
+                <button onclick="makeMove(2)" id="cell-2" class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-xl text-xl font-bold text-indigo-400 hover:border-indigo-500"></button>
+                <button onclick="makeMove(3)" id="cell-3" class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-xl text-xl font-bold text-indigo-400 hover:border-indigo-500"></button>
+                <button onclick="makeMove(4)" id="cell-4" class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-xl text-xl font-bold text-indigo-400 hover:border-indigo-500"></button>
+                <button onclick="makeMove(5)" id="cell-5" class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-xl text-xl font-bold text-indigo-400 hover:border-indigo-500"></button>
+                <button onclick="makeMove(6)" id="cell-6" class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-xl text-xl font-bold text-indigo-400 hover:border-indigo-500"></button>
+                <button onclick="makeMove(7)" id="cell-7" class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-xl text-xl font-bold text-indigo-400 hover:border-indigo-500"></button>
+                <button onclick="makeMove(8)" id="cell-8" class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-xl text-xl font-bold text-indigo-400 hover:border-indigo-500"></button>
+            </div>
+            <button onclick="resetXOX()" class="w-full bg-slate-800 hover:bg-slate-700 py-2 rounded-xl text-xs font-bold transition">Oyunu Sıfırla</button>
+        </div>
+    </div>
+
+    <!-- SESLİ SOHBET MODALI -->
+    <div id="voice-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-sm space-y-4 shadow-2xl text-center">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                <h3 class="text-lg font-bold text-emerald-400">🎙️ Sesli Sohbet Odası</h3>
+                <button onclick="closeVoiceChat()" class="text-slate-400 hover:text-white font-bold">✕</button>
+            </div>
+            <div class="py-6 flex flex-col items-center gap-3">
+                <div id="voice-pulse" class="w-20 h-20 rounded-full bg-emerald-600/30 border-2 border-emerald-500 flex items-center justify-center text-2xl animate-pulse">🎙️</div>
+                <p id="voice-status" class="text-xs text-slate-300">Sesli sohbete bağlı değilsin.</p>
+            </div>
+            <div class="flex gap-2">
+                <button id="join-voice-btn" onclick="toggleVoiceChat()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 py-2.5 rounded-xl text-sm font-bold transition">Mikrofonu Aç / Bağlan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GIF SEÇME MODALI -->
+    <div id="gif-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-md space-y-4 shadow-2xl max-h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-bold">GIF Seç</h3>
+                <button id="close-gif-modal" class="text-slate-400 hover:text-white font-bold">✕</button>
+            </div>
+            <input type="text" id="gif-search-input" placeholder="GIF ara (örn: cat, happy, dance)..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
+            <div id="gif-results" class="grid grid-cols-2 gap-2 overflow-y-auto max-h-60 p-1">
+                <p class="text-xs text-slate-500 col-span-2 text-center py-4">GIF'ler yükleniyor...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- AYARLAR & PROFİL MODALI -->
     <div id="profile-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-sm space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center sticky top-0 bg-slate-900 pb-2 border-b border-slate-800">
@@ -118,7 +163,6 @@
 
             <hr class="border-slate-800">
 
-            <!-- KİŞİSELLEŞTİRME: TEMA VE DUVAR KAĞIDI SEÇENEKLERİ -->
             <div class="space-y-3">
                 <h4 class="text-xs font-bold text-indigo-400 uppercase tracking-wider">Kişiselleştirme Ayarları</h4>
                 <div class="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-slate-800">
@@ -126,14 +170,6 @@
                     <select id="theme-select" class="bg-slate-900 border border-slate-700 text-xs rounded-lg px-2 py-1 text-indigo-300 focus:outline-none">
                         <option value="dark">Karanlık Mod</option>
                         <option value="light">Aydınlık Mod</option>
-                    </select>
-                </div>
-                <div class="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-slate-800">
-                    <span class="text-xs font-medium">Sohbet Arka Planı (Duvar Kağıdı)</span>
-                    <select id="bg-select" class="bg-slate-900 border border-slate-700 text-xs rounded-lg px-2 py-1 text-indigo-300 focus:outline-none">
-                        <option value="default">Varsayılan (Düz)</option>
-                        <option value="matrix">Matris Koyu</option>
-                        <option value="gradient">Şık Gradyan</option>
                     </select>
                 </div>
             </div>
@@ -145,40 +181,11 @@
         </div>
     </div>
 
-    <!-- GIF SEÇME MODALI -->
-    <div id="gif-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-md space-y-4 shadow-2xl max-h-[80vh] flex flex-col">
-            <div class="flex justify-between items-center">
-                <h3 class="text-lg font-bold">GIF Seç</h3>
-                <button id="close-gif-modal" class="text-slate-400 hover:text-white font-bold">✕</button>
-            </div>
-            <input type="text" id="gif-search-input" placeholder="GIF ara (örn: cat, happy, dance)..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
-            <div id="gif-results" class="grid grid-cols-2 gap-2 overflow-y-auto max-h-60 p-1">
-                <p class="text-xs text-slate-500 col-span-2 text-center py-4">GIF'ler yükleniyor...</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- MİNİ OYUNLAR MODALI (Eğlence 5) -->
-    <div id="games-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-md space-y-4 shadow-2xl text-center">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                <h3 class="text-lg font-bold text-amber-400">🎮 WrtS Mini Oyunlar & Eğlence</h3>
-                <button onclick="document.getElementById('games-modal').classList.add('hidden')" class="text-slate-400 hover:text-white font-bold">✕</button>
-            </div>
-            <p class="text-xs text-slate-300">Arkadaşlarınla kapışabileceğin mini oyun alanı:</p>
-            <div class="grid grid-cols-2 gap-3 py-4">
-                <button onclick="alert('XOX Oyunu yakında aktifleşecek!')" class="bg-slate-950 border border-slate-800 p-4 rounded-xl hover:border-amber-500 transition font-bold text-sm">❌ Tic-Tac-Toe (XOX)</button>
-                <button onclick="alert('Kelime tahmin oyunu yakında!')" class="bg-slate-950 border border-slate-800 p-4 rounded-xl hover:border-amber-500 transition font-bold text-sm">🔤 Kelime Bulmaca</button>
-            </div>
-        </div>
-    </div>
-
     <!-- ÜST BAR VE ODALAR -->
     <header class="bg-slate-900 border-b border-slate-800 px-3 py-3 sm:p-4 flex justify-between items-center gap-2 shrink-0 transition-colors duration-300" id="main-header">
         <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
             <span class="font-black text-lg sm:text-xl text-indigo-400 shrink-0">WrtS</span>
-            <select id="room-select" class="bg-slate-950 border border-slate-800 text-xs sm:text-sm rounded-lg px-2 py-1.5 text-indigo-300 font-semibold focus:outline-none truncate max-w-[110px] sm:max-w-[130px]">
+            <select id="room-select" class="bg-slate-950 border border-slate-800 text-xs sm:text-sm rounded-lg px-2 py-1.5 text-indigo-300 font-semibold focus:outline-none truncate max-w-[100px] sm:max-w-[120px]">
                 <option value="genel"># Genel</option>
                 <option value="sohbet"># Muhabbet</option>
                 <option value="oyun"># Oyun</option>
@@ -188,15 +195,15 @@
             <button id="delete-room-btn" class="hidden bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 w-7 h-7 rounded-lg flex items-center justify-center text-xs shrink-0 transition" title="Bu Odayı Sil">🗑️</button>
         </div>
         <div class="flex items-center gap-1.5 sm:gap-2">
-            <!-- Panic Button (Gizlilik Düğmesi) -->
-            <button onclick="togglePanicMode()" class="bg-red-600/20 hover:bg-red-600/40 text-red-400 border border-red-500/30 px-2 py-1.5 rounded-lg text-xs font-bold shrink-0" title="Panik Modu (Ekranı Gizle)">🛡️ Gizle</button>
-            <!-- Eğlence / Mini Oyunlar Butonu -->
-            <button onclick="document.getElementById('games-modal').classList.remove('hidden')" class="bg-amber-600/20 hover:bg-amber-600/40 text-amber-400 border border-amber-500/30 px-2 py-1.5 rounded-lg text-xs font-bold shrink-0">🎮 Oyun</button>
+            <!-- Sesli Sohbet Butonu -->
+            <button onclick="document.getElementById('voice-modal').classList.remove('hidden')" class="bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 border border-emerald-500/30 px-2 py-1.5 rounded-lg text-xs font-bold shrink-0" title="Sesli Sohbet Odası">🎙️ Ses</button>
+            <!-- Oyunlar Butonu -->
+            <button onclick="document.getElementById('games-modal').classList.remove('hidden')" class="bg-amber-600/20 hover:bg-amber-600/40 text-amber-400 border border-amber-500/30 px-2 py-1.5 rounded-lg text-xs font-bold shrink-0" title="Mini Oyunlar">🎮 Oyun</button>
             <button id="open-users-btn" class="bg-slate-800/60 hover:bg-slate-800 px-2 py-1.5 rounded-full border border-slate-700 text-xs text-emerald-400 flex items-center gap-1 shrink-0" title="Aktif Kullanıcılar">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 <span id="online-count">1</span>
             </button>
-            <button id="open-profile" class="flex items-center gap-2 bg-slate-800/60 hover:bg-slate-800 px-2.5 py-1.5 rounded-full border border-slate-700 transition max-w-[100px] sm:max-w-[130px] shrink-0">
+            <button id="open-profile" class="flex items-center gap-2 bg-slate-800/60 hover:bg-slate-800 px-2 py-1.5 rounded-full border border-slate-700 transition max-w-[90px] sm:max-w-[120px] shrink-0">
                 <div class="relative shrink-0">
                     <img id="header-avatar" src="" class="w-5 h-5 rounded-full object-cover">
                     <span id="header-status-dot" class="absolute bottom-0 right-0 w-2 h-2 bg-emerald-500 rounded-full border border-slate-900"></span>
@@ -214,7 +221,7 @@
     <div id="typing-indicator" class="px-4 py-1 text-[11px] text-slate-400 italic max-w-2xl w-full mx-auto h-5 shrink-0">
     </div>
 
-    <!-- YANITLANAN MESAJ ÖNİZLEME ÇUBUĞU (Mesajlaşma 1) -->
+    <!-- YANITLANAN MESAJ ÖNİZLEME ÇUBUĞU -->
     <div id="reply-preview-bar" class="hidden max-w-2xl w-full mx-auto px-4 py-1.5 bg-slate-900/90 border-t border-slate-800 flex justify-between items-center shrink-0">
         <div class="flex items-center gap-2 truncate text-xs">
             <span class="text-indigo-400 font-bold">Yanıtlanıyor:</span>
@@ -223,7 +230,7 @@
         <button onclick="cancelReply()" class="text-slate-400 hover:text-white font-bold text-xs px-2">✕</button>
     </div>
 
-    <!-- MESAJ GÖNDERME ÇUBUĞU (Tüm Eğlence ve Mesaj Araçları Burada) -->
+    <!-- MESAJ GÖNDERME ÇUBUĞU (GIF + Foto + Ses + Metin) -->
     <footer class="bg-slate-900 border-t border-slate-800 p-2.5 sm:p-4 max-w-2xl w-full mx-auto shrink-0 transition-colors duration-300" id="main-footer">
         <form id="msg-form" class="flex items-center gap-2 w-full">
             <button type="button" onclick="document.getElementById('img-file').click()" class="p-2 text-slate-400 hover:text-indigo-400 bg-slate-800/60 rounded-full transition shrink-0" title="Fotoğraf Gönder">
@@ -235,7 +242,7 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
             </button>
 
-            <!-- Eğlence 1: GIF Gönderme Butonu -->
+            <!-- GIF Gönderme Butonu -->
             <button type="button" id="open-gif-modal" class="p-2 text-slate-400 hover:text-amber-400 bg-slate-800/60 rounded-full transition shrink-0 text-xs font-extrabold" title="GIF Gönder">GIF</button>
 
             <input type="text" id="msg-input" placeholder="Bir şeyler yaz..." autocomplete="off" class="flex-1 min-w-0 bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 sm:py-3 text-base sm:text-sm focus:outline-none focus:border-indigo-500">
@@ -273,47 +280,100 @@
         let activeUsersData = {};
         let tempBase64Avatar = null;
         let typingTimeout = null;
-        let replyingTo = null; // Mesajlaşma 1 (Alıntı)
+        let replyingTo = null;
         const defaultRooms = ['genel', 'sohbet', 'oyun'];
 
-        // Panik Modu (Gizlilik Düğmesi)
-        function togglePanicMode() {
-            const p = document.getElementById('panic-screen');
-            p.classList.toggle('hidden');
+        // XOX Oyunu Mantığı
+        let xoxBoard = ['', '', '', '', '', '', '', '', ''];
+        let xoxTurn = 'X';
+        let xoxActive = true;
+
+        window.makeMove = function(index) {
+            if (!xoxActive || xoxBoard[index] !== '') return;
+            xoxBoard[index] = xoxTurn;
+            document.getElementById(`cell-${index}`).textContent = xoxTurn;
+            
+            if (checkXOXWin()) {
+                document.getElementById('xox-status').textContent = `Kazanan: ${xoxTurn} 🎉`;
+                xoxActive = false;
+                return;
+            }
+            if (!xoxBoard.includes('')) {
+                document.getElementById('xox-status').textContent = 'Berabere! 🤝';
+                xoxActive = false;
+                return;
+            }
+            xoxTurn = xoxTurn === 'X' ? 'O' : 'X';
+            document.getElementById('xox-status').textContent = `Sıra sende (${xoxTurn})`;
         }
 
-        // Kişiselleştirme Ayarlarını Uygulama (Tema ve Duvar Kağıdı)
+        function checkXOXWin() {
+            const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+            return wins.some(([a,b,c]) => xoxBoard[a] && xoxBoard[a] === xoxBoard[b] && xoxBoard[a] === xoxBoard[c]);
+        }
+
+        window.resetXOX = function() {
+            xoxBoard = ['', '', '', '', '', '', '', '', ''];
+            xoxTurn = 'X';
+            xoxActive = true;
+            document.getElementById('xox-status').textContent = 'Sıra sende (X)';
+            for(let i=0; i<9; i++) document.getElementById(`cell-${i}`).textContent = '';
+        }
+
+        // Sesli Sohbet Mantığı (Web Audio / Mikrofon Akışı)
+        let voiceConnected = false;
+        let voiceStream = null;
+        window.toggleVoiceChat = async function() {
+            const btn = document.getElementById('join-voice-btn');
+            const status = document.getElementById('voice-status');
+            const pulse = document.getElementById('voice-pulse');
+
+            if (!voiceConnected) {
+                try {
+                    voiceStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    voiceConnected = true;
+                    btn.textContent = "Sesli Sohbetten Ayrıl";
+                    btn.className = "flex-1 bg-red-600 hover:bg-red-500 py-2.5 rounded-xl text-sm font-bold transition";
+                    status.textContent = "Sesli sohbete bağlandın (Mikrofon açık).";
+                    pulse.classList.add('animate-bounce');
+                } catch(e) {
+                    alert("Mikrofon izni alınamadı.");
+                }
+            } else {
+                if (voiceStream) voiceStream.getTracks().forEach(t => t.stop());
+                voiceConnected = false;
+                btn.textContent = "Mikrofonu Aç / Bağlan";
+                btn.className = "flex-1 bg-emerald-600 hover:bg-emerald-500 py-2.5 rounded-xl text-sm font-bold transition";
+                status.textContent = "Sesli sohbete bağlı değilsin.";
+                pulse.classList.remove('animate-bounce');
+            }
+        }
+
+        window.closeVoiceChat = function() {
+            if (voiceConnected) toggleVoiceChat();
+            document.getElementById('voice-modal').classList.add('hidden');
+        }
+
+        // Tema Ayarları
         function applySettingsToUI() {
             const theme = localStorage.getItem('wrts_theme') || 'dark';
-            const bgType = localStorage.getItem('wrts_bg') || 'default';
-
             document.getElementById('theme-select').value = theme;
-            document.getElementById('bg-select').value = bgType;
-
             const body = document.getElementById('app-body');
             const header = document.getElementById('main-header');
             const footer = document.getElementById('main-footer');
 
-            let bgClass = "bg-slate-950 text-white";
             if (theme === 'light') {
-                bgClass = "bg-slate-100 text-slate-900";
-            } else {
-                if (bgType === 'matrix') bgClass = "bg-zinc-950 text-emerald-400";
-                else if (bgType === 'gradient') bgClass = "bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950 text-white";
-                else bgClass = "bg-slate-950 text-white";
-            }
-
-            body.className = `${bgClass} h-[100dvh] w-full overflow-hidden flex flex-col justify-between relative transition-colors duration-300`;
-            if (theme === 'light') {
+                body.className = "bg-slate-100 text-slate-900 h-[100dvh] w-full overflow-hidden flex flex-col justify-between relative transition-colors duration-300";
                 header.className = "bg-white border-b border-slate-200 px-3 py-3 sm:p-4 flex justify-between items-center gap-2 shrink-0 transition-colors duration-300";
                 footer.className = "bg-white border-t border-slate-200 p-2.5 sm:p-4 max-w-2xl w-full mx-auto shrink-0 transition-colors duration-300";
             } else {
+                body.className = "bg-slate-950 text-white h-[100dvh] w-full overflow-hidden flex flex-col justify-between relative transition-colors duration-300";
                 header.className = "bg-slate-900 border-b border-slate-800 px-3 py-3 sm:p-4 flex justify-between items-center gap-2 shrink-0 transition-colors duration-300";
                 footer.className = "bg-slate-900 border-t border-slate-800 p-2.5 sm:p-4 max-w-2xl w-full mx-auto shrink-0 transition-colors duration-300";
             }
         }
 
-        // Orijinal Güvenli Giriş Akışı
+        // Giriş Akışı
         auth.onAuthStateChanged(user => {
             if (user) {
                 currentUser = user;
@@ -384,7 +444,6 @@
             reader.readAsDataURL(file);
         });
 
-        // Profil & Ayarlar Modalı Kaydetme
         document.getElementById('open-profile').addEventListener('click', () => document.getElementById('profile-modal').classList.remove('hidden'));
         document.getElementById('close-profile').addEventListener('click', () => document.getElementById('profile-modal').classList.add('hidden'));
         document.getElementById('modal-logout').addEventListener('click', () => {
@@ -395,14 +454,11 @@
             const newName = document.getElementById('edit-name').value.trim();
             const newBio = document.getElementById('edit-bio').value.trim();
             const themeVal = document.getElementById('theme-select').value;
-            const bgVal = document.getElementById('bg-select').value;
-
             if(!newName) return alert("İsim boş olamaz!");
 
             localStorage.setItem('wrts_name_' + currentUser.uid, newName);
             localStorage.setItem('wrts_bio_' + currentUser.uid, newBio || 'WrtS kullanıcısı.');
             localStorage.setItem('wrts_theme', themeVal);
-            localStorage.setItem('wrts_bg', bgVal);
             if(tempBase64Avatar) localStorage.setItem('wrts_avatar_' + currentUser.uid, tempBase64Avatar);
 
             loadUserDataToUI();
@@ -413,7 +469,6 @@
             db.ref('users_registry/' + currentUser.uid).update({ name: md.name, avatar: md.avatar, bio: md.bio });
         });
 
-        // Çevrimiçi & Çevrimdışı DM Listesi
         function updateOnlineCountAndDots() {
             let onlineCount = 0;
             const onlineListDiv = document.getElementById('online-users-list');
@@ -477,15 +532,12 @@
         document.getElementById('open-users-btn').addEventListener('click', () => document.getElementById('users-modal').classList.remove('hidden'));
         document.getElementById('close-users-modal').addEventListener('click', () => document.getElementById('users-modal').classList.add('hidden'));
 
-        // Gizli DM Sistemi
         window.startDM = function(targetUid, encodedTargetName) {
             const targetName = decodeURIComponent(encodedTargetName);
             const ids = [currentUser.uid, targetUid].sort();
             const dmRoomId = `dm_${ids[0]}_${ids[1]}`;
-            
             db.ref('gizli_dm_listesi/' + currentUser.uid + '/' + dmRoomId).set({ targetUid, targetName, createdAt: Date.now() });
             db.ref('gizli_dm_listesi/' + targetUid + '/' + dmRoomId).set({ targetUid: currentUser.uid, targetName: getMyData().name, createdAt: Date.now() });
-
             currentRoom = dmRoomId;
             roomSelect.value = "genel";
             document.getElementById('users-modal').classList.add('hidden');
@@ -530,7 +582,6 @@
 
         document.getElementById('close-dm-list-modal').addEventListener('click', () => document.getElementById('dm-list-modal').classList.add('hidden'));
 
-        // Normal Odalar
         function listenRooms() {
             db.ref('oda_listesi').on('value', snap => {
                 customRoomsData = snap.val() || {};
@@ -581,7 +632,6 @@
             }
         });
 
-        // Giriş Akışı
         function showError(msg) { authError.textContent = msg; authError.classList.remove('hidden'); }
         document.getElementById('google-btn').addEventListener('click', () => {
             auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(err => showError(err.message));
@@ -597,7 +647,6 @@
 
         roomSelect.addEventListener('change', e => { currentRoom = e.target.value; updateDeleteRoomButton(); loadRoom(currentRoom); });
 
-        // Yazıyor... Sistemi
         const msgInput = document.getElementById('msg-input');
         msgInput.addEventListener('input', () => {
             if(!currentUser) return;
@@ -617,7 +666,6 @@
             });
         }
 
-        // Mesajlaşma 1: Alıntılama (Reply)
         window.setReplyTo = function(key, name, text) {
             replyingTo = { key, name, text: text || 'Medya' };
             document.getElementById('reply-preview-text').textContent = `${name}: ${replyingTo.text}`;
@@ -630,7 +678,6 @@
             document.getElementById('reply-preview-bar').classList.add('hidden');
         };
 
-        // Mesajlaşma 2: Düzenleme ve Silme
         window.editMsgPrompt = function(room, key, oldText) {
             const newText = prompt("Mesajı düzenle:", oldText);
             if (newText !== null && newText.trim() !== "") {
@@ -690,7 +737,6 @@
                 `;
             }
 
-            // Mesajlaşma 3: Okundu / Görüldü Mantığı (Çift tik işareti)
             const seenHTML = isMe ? `<span class="text-[9px] text-indigo-200">✓✓</span>` : '';
 
             div.innerHTML = `
@@ -770,7 +816,6 @@
             document.getElementById(`menu-${key}`)?.classList.add('hidden');
         };
 
-        // Metin Gönderme
         document.getElementById('msg-form').addEventListener('submit', e => {
             e.preventDefault();
             const input = document.getElementById('msg-input');
@@ -799,7 +844,6 @@
             input.value = '';
         });
 
-        // Fotoğraf Gönderme
         document.getElementById('img-file').addEventListener('change', e => {
             const file = e.target.files[0];
             if(!file || !currentUser) return;
@@ -835,7 +879,7 @@
             e.target.value = '';
         });
 
-        // Eğlence 1: GIF Modalı ve Tenor API
+        // GIF Arama ve Tenor API Entegrasyonu
         const gifModal = document.getElementById('gif-modal');
         document.getElementById('open-gif-modal').addEventListener('click', () => {
             gifModal.classList.remove('hidden');
