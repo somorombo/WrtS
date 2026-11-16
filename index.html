@@ -34,17 +34,31 @@
         </div>
     </div>
 
-    <!-- TÜM KULLANICILAR / DM LİSTESİ MODALI -->
+    <!-- KULLANICILAR VE ÇEVRİMİÇİLER MODALI -->
     <div id="users-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-sm space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-center sticky top-0 bg-slate-950/80 backdrop-blur pb-2">
                 <h3 class="text-lg font-bold">Kullanıcılar & DM</h3>
-                <button id="close-users-modal" class="text-slate-400 hover:text-white">✕</button>
+                <button id="close-users-modal" class="text-slate-400 hover:text-white font-bold px-2 py-1">✕</button>
             </div>
-            <div id="all-users-list" class="space-y-2 max-h-60 overflow-y-auto">
-                <!-- Dinamik dolacak -->
+            
+            <!-- Çevrimiçi Olanlar Bölümü -->
+            <div>
+                <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">🟢 Çevrimiçi Olanlar</h4>
+                <div id="online-users-list" class="space-y-2">
+                    <!-- Dinamik dolacak -->
+                </div>
             </div>
-            <p class="text-[11px] text-slate-500 text-center">İstediğin kullanıcıya tıklayarak özel mesaj (DM) odası açabilirsin.</p>
+
+            <hr class="border-slate-800">
+
+            <!-- Tüm Kullanıcılar (DM Listesi) Bölümü -->
+            <div>
+                <h4 class="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-2">👥 Tüm Kullanıcılar (DM Başlat)</h4>
+                <div id="all-users-list" class="space-y-2">
+                    <!-- Dinamik dolacak -->
+                </div>
+            </div>
         </div>
     </div>
 
@@ -105,7 +119,7 @@
             <button id="delete-room-btn" class="hidden bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 w-7 h-7 rounded-lg flex items-center justify-center text-xs shrink-0 transition" title="Bu Odayı Sil">🗑️</button>
         </div>
         <div class="flex items-center gap-2">
-            <button id="open-users-btn" class="bg-slate-800/60 hover:bg-slate-800 px-2 py-1.5 rounded-full border border-slate-700 text-xs text-indigo-300 flex items-center gap-1 shrink-0" title="Tüm Kullanıcılar">
+            <button id="open-users-btn" class="bg-slate-800/60 hover:bg-slate-800 px-2.5 py-1.5 rounded-full border border-slate-700 text-xs text-indigo-300 flex items-center gap-1.5 shrink-0" title="Kullanıcılar">
                 👥 <span id="online-count">1</span>
             </button>
             <button id="open-profile" class="flex items-center gap-2 bg-slate-800/60 hover:bg-slate-800 px-2.5 py-1.5 rounded-full border border-slate-700 transition max-w-[120px] sm:max-w-[150px] shrink-0">
@@ -185,8 +199,6 @@
                 loginScreen.classList.add('hidden');
                 
                 const md = getMyData();
-                
-                // Arka planda güvenli kayıt (Hata verse bile girişi engellemez)
                 try {
                     db.ref('status/' + user.uid).set({ state: 'online', name: md.name, avatar: md.avatar, bio: md.bio, lastChanged: firebase.database.ServerValue.TIMESTAMP });
                     db.ref('status/' + user.uid).onDisconnect().set({ state: 'offline' });
@@ -195,12 +207,12 @@
 
                 db.ref('status').on('value', snap => {
                     activeUsersData = snap.val() || {};
-                    updateOnlineCountAndDots();
+                    updateUILists();
                 });
 
                 db.ref('users_registry').on('value', snap => {
                     allUsersRegistry = snap.val() || {};
-                    updateAllUsersList();
+                    updateUILists();
                 });
 
                 loadUserDataToUI();
@@ -274,13 +286,60 @@
             db.ref('users_registry/' + currentUser.uid).set({ name: md.name, avatar: md.avatar, bio: md.bio });
         });
 
-        function updateOnlineCountAndDots() {
+        // Çevrimiçi ve Tüm Kullanıcılar Listelerini Güncelle
+        function updateUILists() {
             let onlineCount = 0;
-            Object.entries(activeUsersData).forEach(([_, info]) => {
-                if (info.state === 'online') onlineCount++;
+            const onlineDiv = document.getElementById('online-users-list');
+            const allDiv = document.getElementById('all-users-list');
+            onlineDiv.innerHTML = '';
+            allDiv.innerHTML = '';
+
+            // 1. Çevrimiçi Olanlar Listesi
+            Object.entries(activeUsersData).forEach(([uid, info]) => {
+                if (info.state === 'online') {
+                    onlineCount++;
+                    const item = document.createElement('div');
+                    item.className = "flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800";
+                    item.innerHTML = `
+                        <div class="flex items-center gap-2.5">
+                            <div class="relative shrink-0">
+                                <img src="${info.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-7 h-7 rounded-full object-cover">
+                                <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-500 border border-slate-900"></span>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-slate-200">${info.name || 'Kullanıcı'}</p>
+                                <span class="text-[10px] text-slate-400 truncate max-w-[140px] block">${info.bio || ''}</span>
+                            </div>
+                        </div>
+                        ${uid !== currentUser.uid ? `<button onclick="startDM('${uid}', '${encodeURIComponent(info.name)}')" class="text-xs bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 px-2.5 py-1 rounded-lg border border-indigo-500/30 font-bold transition">DM Başlat</button>` : ''}
+                    `;
+                    onlineDiv.appendChild(item);
+                }
             });
             document.getElementById('online-count').textContent = onlineCount;
 
+            // 2. Tüm Kullanıcılar (DM Listesi)
+            Object.entries(allUsersRegistry).forEach(([uid, info]) => {
+                const isOnline = activeUsersData[uid] && activeUsersData[uid].state === 'online';
+                const item = document.createElement('div');
+                item.className = "flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800 hover:border-indigo-500 transition";
+                item.innerHTML = `
+                    <div class="flex items-center gap-2.5">
+                        <div class="relative shrink-0">
+                            <img src="${info.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-7 h-7 rounded-full object-cover">
+                            <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full border border-slate-900 ${isOnline ? 'bg-emerald-500' : 'bg-slate-500'}"></span>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-200">${info.name || 'Kullanıcı'}</p>
+                            <span class="text-[10px] ${isOnline ? 'text-emerald-400 font-semibold' : 'text-slate-500'}">${isOnline ? 'Çevrimiçi' : 'Çevrimdışı'}</span>
+                        </div>
+                    </div>
+                    ${uid !== currentUser.uid ? `<button onclick="startDM('${uid}', '${encodeURIComponent(info.name)}')" class="text-xs bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 px-2.5 py-1 rounded-lg border border-indigo-500/30 font-bold transition">DM Başlat</button>` : '<span class="text-[10px] text-slate-500 italic">Sen</span>'}
+                `;
+                allDiv.appendChild(item);
+            });
+
+            // Mesaj balonlarındaki yeşil/gri noktaları da güncelle
             document.querySelectorAll('[data-uid]').forEach(el => {
                 const uid = el.getAttribute('data-uid');
                 const isOnline = activeUsersData[uid] && activeUsersData[uid].state === 'online';
@@ -288,38 +347,12 @@
             });
         }
 
-        function updateAllUsersList() {
-            const listDiv = document.getElementById('all-users-list');
-            listDiv.innerHTML = '';
-
-            Object.entries(allUsersRegistry).forEach(([uid, info]) => {
-                if (uid === currentUser.uid) return;
-                const isOnline = activeUsersData[uid] && activeUsersData[uid].state === 'online';
-
-                const item = document.createElement('div');
-                item.className = "flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800 hover:border-indigo-500 cursor-pointer transition";
-                item.innerHTML = `
-                    <div class="flex items-center gap-2.5">
-                        <div class="relative shrink-0">
-                            <img src="${info.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-8 h-8 rounded-full object-cover">
-                            <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full border border-slate-900 ${isOnline ? 'bg-emerald-500' : 'bg-slate-500'}"></span>
-                        </div>
-                        <div>
-                            <p class="text-sm font-bold text-slate-200">${info.name || 'Kullanıcı'}</p>
-                            <span class="text-[10px] ${isOnline ? 'text-emerald-400 font-semibold' : 'text-slate-500'}">${isOnline ? 'Çevrimiçi' : 'Çevrimdışı'}</span>
-                        </div>
-                    </div>
-                    <button class="text-xs bg-indigo-600/20 text-indigo-400 px-3 py-1.5 rounded-lg border border-indigo-500/30 font-bold">DM Başlat</button>
-                `;
-                item.addEventListener('click', () => startDM(uid, info.name));
-                listDiv.appendChild(item);
-            });
-        }
-
         document.getElementById('open-users-btn').addEventListener('click', () => document.getElementById('users-modal').classList.remove('hidden'));
         document.getElementById('close-users-modal').addEventListener('click', () => document.getElementById('users-modal').classList.add('hidden'));
 
-        function startDM(targetUid, targetName) {
+        // DM Başlatma Fonksiyonu (Global)
+        window.startDM = function(targetUid, encodedTargetName) {
+            const targetName = decodeURIComponent(encodedTargetName);
             const ids = [currentUser.uid, targetUid].sort();
             const dmRoomId = `dm_${ids[0]}_${ids[1]}`;
             
@@ -470,206 +503,4 @@
             const key = snap.key;
             const isMe = currentUser && data.uid === currentUser.uid;
             
-            const div = document.createElement('div');
-            div.id = `msg-${key}`;
-            div.className = `flex gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'} items-end`;
-
-            const reactionsHTML = renderReactionsHTML(data.reactions, room, key);
-            const isOnline = activeUsersData[data.uid] && activeUsersData[data.uid].state === 'online';
-            const timeStr = new Date(data.zaman || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-            let content = '';
-            if (data.type === 'image') {
-                content = `<img src="${data.url}" class="rounded-xl max-h-48 object-cover cursor-pointer" onclick="window.open('${data.url}', '_blank')">`;
-            } else if (data.type === 'audio') {
-                content = `<audio controls src="${data.url}" class="h-9 max-w-[200px]"></audio>`;
-            } else {
-                content = `<p class="text-sm break-words">${data.mesaj}</p>`;
-            }
-
-            div.innerHTML = `
-                <div class="relative shrink-0 mb-1">
-                    <img src="${data.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-6 h-6 rounded-full object-cover">
-                    <span data-uid="${data.uid}" class="absolute bottom-0 right-0 w-2 h-2 rounded-full border border-slate-900 ${isOnline ? 'bg-emerald-500' : 'bg-slate-500'}"></span>
-                </div>
-                <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[78%]">
-                    <div class="flex items-center gap-1.5 px-1 mb-0.5">
-                        <span class="text-[10px] text-slate-400">${data.isim}</span>
-                        <span class="text-[9px] text-slate-500 italic">${data.bio || ''}</span>
-                    </div>
-                    <div onclick="toggleActionMenu('${key}')" class="cursor-pointer ${isMe ? 'bg-indigo-600' : 'bg-slate-800'} px-3.5 py-2 rounded-2xl shadow">
-                        ${content}
-                        <div class="text-[9px] ${isMe ? 'text-indigo-200' : 'text-slate-400'} text-right mt-1">${timeStr}</div>
-                    </div>
-                    
-                    <div id="menu-${key}" class="hidden flex gap-1.5 items-center mt-1.5 bg-slate-900 border border-slate-800 px-2 py-1 rounded-full shadow-lg">
-                        <button onclick="toggleReaction('${room}', '${key}', '👍')" class="hover:scale-125 transition text-sm">👍</button>
-                        <button onclick="toggleReaction('${room}', '${key}', '❤️')" class="hover:scale-125 transition text-sm">❤️</button>
-                        <button onclick="toggleReaction('${room}', '${key}', '😂')" class="hover:scale-125 transition text-sm">😂</button>
-                        <button onclick="toggleReaction('${room}', '${key}', '🔥')" class="hover:scale-125 transition text-sm">🔥</button>
-                        ${isMe ? `<div class="w-[1px] h-3 bg-slate-700 mx-0.5"></div><button onclick="deleteMsg('${room}', '${key}')" class="text-red-400 hover:text-red-300 text-xs font-bold px-1">Sil</button>` : ''}
-                    </div>
-
-                    <div id="reactions-${key}" class="flex gap-1 mt-1 flex-wrap ${isMe ? 'justify-end' : 'justify-start'}">${reactionsHTML}</div>
-                </div>
-            `;
-            return div;
-        }
-
-        function loadRoom(room) {
-            if (roomRef) roomRef.off();
-            messagesDiv.innerHTML = '';
-            roomRef = db.ref('odalar/' + room).limitToLast(50);
-            
-            roomRef.on('child_added', snap => {
-                const el = createMessageElement(snap, room);
-                messagesDiv.appendChild(el);
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
-                const data = snap.val();
-                if (currentUser && data.uid !== currentUser.uid && Notification.permission === "granted") {
-                    new Notification(data.isim + " yeni mesaj gönderdi:", {
-                        body: data.type === 'text' ? data.mesaj : '[Medya/Ses]',
-                        icon: data.avatar
-                    });
-                }
-            });
-
-            roomRef.on('child_changed', snap => {
-                const data = snap.val();
-                const key = snap.key;
-                const reactionsContainer = document.getElementById(`reactions-${key}`);
-                if (reactionsContainer) {
-                    reactionsContainer.innerHTML = renderReactionsHTML(data.reactions, room, key);
-                }
-            });
-
-            roomRef.on('child_removed', snap => {
-                document.getElementById(`msg-${snap.key}`)?.remove();
-            });
-        }
-
-        window.toggleActionMenu = function(key) {
-            const menu = document.getElementById(`menu-${key}`);
-            if (!menu) return;
-            const isHidden = menu.classList.contains('hidden');
-            document.querySelectorAll('[id^="menu-"]').forEach(el => el.classList.add('hidden'));
-            if (isHidden) menu.classList.remove('hidden');
-        };
-
-        window.toggleReaction = function(room, key, emoji) {
-            if(!currentUser) return;
-            const ref = db.ref(`odalar/${room}/${key}/reactions/${currentUser.uid}`);
-            ref.once('value', snap => {
-                if (snap.val() === emoji) ref.remove();
-                else ref.set(emoji);
-            });
-            document.getElementById(`menu-${key}`)?.classList.add('hidden');
-        };
-
-        window.deleteMsg = function(room, key) {
-            if(confirm("Bu mesajı silmek istiyor musun?")) {
-                db.ref(`odalar/${room}/${key}`).remove();
-            }
-        };
-
-        document.getElementById('msg-form').addEventListener('submit', e => {
-            e.preventDefault();
-            const input = document.getElementById('msg-input');
-            const text = input.value.trim();
-            if(!text || !currentUser) return;
-
-            const myData = getMyData();
-            db.ref(`typing/${currentRoom}/${currentUser.uid}`).remove();
-
-            db.ref('odalar/' + currentRoom).push({
-                uid: currentUser.uid,
-                isim: myData.name,
-                avatar: myData.avatar,
-                bio: myData.bio,
-                mesaj: text,
-                type: 'text',
-                zaman: Date.now()
-            });
-            input.value = '';
-        });
-
-        document.getElementById('img-file').addEventListener('change', e => {
-            const file = e.target.files[0];
-            if(!file || !currentUser) return;
-
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    const MAX = 600;
-                    let w = img.width, h = img.height;
-                    if (w > h) { if (w > MAX) { h *= MAX / w; w = MAX; } }
-                    else { if (h > MAX) { w *= MAX / h; h = MAX; } }
-                    canvas.width = w; canvas.height = h;
-                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                    
-                    const base64Url = canvas.toDataURL('image/jpeg', 0.6);
-                    const myData = getMyData();
-
-                    db.ref('odalar/' + currentRoom).push({
-                        uid: currentUser.uid,
-                        isim: myData.name,
-                        avatar: myData.avatar,
-                        bio: myData.bio,
-                        url: base64Url,
-                        type: 'image',
-                        zaman: Date.now()
-                    });
-                }
-                img.src = event.target.result;
-            }
-            reader.readAsDataURL(file);
-            e.target.value = '';
-        });
-
-        let mediaRecorder;
-        let audioChunks = [];
-        const recordBtn = document.getElementById('record-btn');
-
-        recordBtn.addEventListener('click', async () => {
-            if(!mediaRecorder || mediaRecorder.state === "inactive") {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorder = new MediaRecorder(stream);
-                    audioChunks = [];
-                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-                    mediaRecorder.onstop = async () => {
-                        const blob = new Blob(audioChunks, { type: 'audio/webm' });
-                        const reader = new FileReader();
-                        reader.onloadend = function() {
-                            const base64Audio = reader.result;
-                            const myData = getMyData();
-
-                            db.ref('odalar/' + currentRoom).push({
-                                uid: currentUser.uid,
-                                isim: myData.name,
-                                avatar: myData.avatar,
-                                bio: myData.bio,
-                                url: base64Audio,
-                                type: 'audio',
-                                zaman: Date.now()
-                            });
-                        }
-                        reader.readAsDataURL(blob);
-                        stream.getTracks().forEach(t => t.stop());
-                    };
-                    mediaRecorder.start();
-                    recordBtn.classList.add('bg-rose-600', 'text-white', 'animate-pulse');
-                } catch(e) {
-                    alert("Mikrofon izni alınamadı.");
-                }
-            } else {
-                mediaRecorder.stop();
-                recordBtn.classList.remove('bg-rose-600', 'text-white', 'animate-pulse');
-            }
-        });
-    </script>
-</body>
-</html>
+            const div = document.createElement('
