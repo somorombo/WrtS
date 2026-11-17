@@ -59,7 +59,6 @@
             </form>
             <div class="text-center text-xs text-rose-300/50">veya</div>
             <button id="google-btn" type="button" class="w-full bg-white text-slate-900 hover:bg-rose-50 py-3 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2">
-                <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
                 <span>Google ile Giriş Yap</span>
             </button>
         </div>
@@ -128,13 +127,13 @@
     <!-- YAZIYOR BİLGİSİ -->
     <div id="typing-indicator" class="px-4 py-1 text-[11px] text-amber-300/80 italic w-full max-w-4xl mx-auto h-6 shrink-0 z-20"></div>
 
-    <!-- YANITLANAN ÖNİZLEME -->
+    <!-- YANITLANAN VEYA DÜZENLENEN ÖNİZLEME -->
     <div id="reply-preview-bar" class="hidden w-full max-w-4xl mx-auto px-4 py-1.5 bg-[#1a070e] border-t border-rose-900/60 flex justify-between items-center shrink-0 z-20">
         <div class="flex items-center gap-2 truncate text-xs">
-            <span class="text-amber-400 font-bold">Yanıtlanıyor:</span>
+            <span id="preview-mode-title" class="text-amber-400 font-bold">Yanıtlanıyor:</span>
             <span id="reply-preview-text" class="text-rose-200 truncate"></span>
         </div>
-        <button onclick="cancelReply()" class="text-rose-300 font-bold text-xs px-2">✕</button>
+        <button onclick="cancelReplyOrEdit()" class="text-rose-300 font-bold text-xs px-2">✕</button>
     </div>
 
     <!-- ETİKETLENECEK KULLANICILAR -->
@@ -202,17 +201,19 @@
             <div class="bg-[#120409] p-3.5 rounded-2xl border border-rose-900/50 space-y-2.5 text-left text-xs">
                 <div class="flex justify-between items-center"><span class="text-rose-300/70">Durum:</span><span id="up-status-text" class="font-bold text-emerald-400">Çevrimiçi</span></div>
                 <div class="flex justify-between items-center"><span class="text-rose-300/70">Son Görülme:</span><span id="up-last-seen" class="text-rose-100">Az önce</span></div>
-                <div class="flex justify-between items-center"><span class="text-rose-300/70">Üyelik Tarihi:</span><span id="up-joined" class="text-amber-400 font-bold">Bilinmiyor</span></div>
             </div>
             <div id="up-actions" class="flex gap-2 pt-1"></div>
         </div>
     </div>
 
-    <!-- ORTAK SİNEMA (SENKRONİZE OYNATICI + REKLAM BEKLEME SENKRONU) -->
+    <!-- ORTAK SİNEMA (BİLDİRİMLERİ KAPAT TUŞU EKLENDİ) -->
     <div id="music-modal" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center p-3">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-4 w-full max-w-md space-y-2.5 max-h-[95vh] flex flex-col">
             <div class="flex justify-between items-center shrink-0">
-                <h3 class="font-bold text-amber-400 text-sm">🎬 Ortak Sinema Salonu</h3>
+                <div class="flex items-center gap-2">
+                    <h3 class="font-bold text-amber-400 text-sm">🎬 Ortak Sinema</h3>
+                    <button id="cinema-mute-btn" onclick="toggleCinemaMute()" class="bg-rose-950 text-rose-300 border border-rose-700/50 px-2 py-0.5 rounded-lg text-[10px] font-bold">🔕 Bildirimleri Kapat</button>
+                </div>
                 <button onclick="closeModal('music-modal')" class="text-rose-300 font-bold">✕</button>
             </div>
             <div class="flex gap-1.5 shrink-0">
@@ -224,17 +225,12 @@
             </div>
             <div class="flex items-center justify-between gap-1 shrink-0">
                 <p id="music-sync-info" class="text-[11px] text-rose-200/70 truncate flex-1">Sinema salonu boş.</p>
-                <button onclick="forceSyncAllToMyTime()" class="bg-amber-600/30 text-amber-300 border border-amber-500/40 px-2 py-1 rounded-lg text-[10px] font-bold shrink-0">🔄 Herkesi Bana Eşitle</button>
+                <button onclick="forceSyncAllToMyTime()" class="bg-amber-600/30 text-amber-300 border border-amber-500/40 px-2 py-1 rounded-lg text-[10px] font-bold shrink-0">🔄 Senkronize Et</button>
                 <button onclick="stopAndDeleteMusic()" class="bg-rose-950 text-rose-300 border border-rose-700/50 px-2 py-1 rounded-lg text-[10px] font-bold shrink-0">Kapat</button>
             </div>
-            <div class="flex-1 bg-[#120409] border border-rose-900/50 rounded-2xl p-2.5 flex flex-col min-h-[130px] max-h-[160px]">
+            <div class="flex-1 bg-[#120409] border border-rose-900/50 rounded-2xl p-2.5 flex flex-col min-h-[120px] max-h-[150px]">
                 <div class="flex justify-between items-center border-b border-rose-900/40 pb-1 mb-1">
                     <span class="text-[10px] text-amber-400 font-bold">🍿 Sinema Sohbeti</span>
-                    <div class="flex gap-1">
-                        <button onclick="sendCinemaSticker('🍿')" class="text-sm">🍿</button>
-                        <button onclick="sendCinemaSticker('🎬')" class="text-sm">🎬</button>
-                        <button onclick="sendCinemaSticker('😂')" class="text-sm">😂</button>
-                    </div>
                 </div>
                 <div id="cinema-messages" class="flex-1 overflow-y-auto space-y-1.5 pr-1 text-xs"></div>
                 <form onsubmit="sendCinemaMessage(event)" class="flex gap-1 mt-1.5 shrink-0">
@@ -245,7 +241,7 @@
         </div>
     </div>
 
-    <!-- KULLANICILAR & ARKADAŞLIK SİSTEMİ -->
+    <!-- KULLANICILAR & ARKADAŞLAR -->
     <div id="users-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-4 max-h-[85vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">Kullanıcılar & Arkadaşlar</h3><button onclick="closeModal('users-modal')">✕</button></div>
@@ -281,18 +277,19 @@
         </div>
     </div>
 
-    <!-- ORTAK TAHTA -->
+    <!-- ORTAK TAHTA (CANLI ÇİZİM + SİLGİ) -->
     <div id="whiteboard-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-3">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-4 w-full max-w-md space-y-3">
             <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">🎨 Ortak Tahta</h3><button onclick="closeModal('whiteboard-modal')">✕</button></div>
             <div class="flex justify-between items-center">
-                <div class="flex gap-1.5">
-                    <button onclick="wbColor='#fbbf24'" class="w-6 h-6 rounded-full bg-amber-400 border border-white"></button>
-                    <button onclick="wbColor='#f43f5e'" class="w-6 h-6 rounded-full bg-rose-500 border border-white"></button>
-                    <button onclick="wbColor='#34d399'" class="w-6 h-6 rounded-full bg-emerald-400 border border-white"></button>
-                    <button onclick="wbColor='#38bdf8'" class="w-6 h-6 rounded-full bg-sky-400 border border-white"></button>
+                <div class="flex gap-1.5 items-center">
+                    <button onclick="wbColor='#fbbf24'; wbIsEraser=false;" class="w-6 h-6 rounded-full bg-amber-400 border border-white" title="Sarı"></button>
+                    <button onclick="wbColor='#f43f5e'; wbIsEraser=false;" class="w-6 h-6 rounded-full bg-rose-500 border border-white" title="Kırmızı"></button>
+                    <button onclick="wbColor='#34d399'; wbIsEraser=false;" class="w-6 h-6 rounded-full bg-emerald-400 border border-white" title="Yeşil"></button>
+                    <button onclick="wbColor='#38bdf8'; wbIsEraser=false;" class="w-6 h-6 rounded-full bg-sky-400 border border-white" title="Mavi"></button>
+                    <button onclick="wbIsEraser=true;" class="bg-rose-900/60 border border-rose-500 px-2 py-0.5 rounded text-[10px] font-bold text-rose-200">🧹 Silgi</button>
                 </div>
-                <button onclick="clearWhiteboard()" class="bg-red-500/20 text-red-400 px-2.5 py-1 rounded-lg text-xs font-bold">Temizle</button>
+                <button onclick="clearWhiteboard()" class="bg-red-500/20 text-red-400 px-2.5 py-1 rounded-lg text-xs font-bold">Hepsini Sil</button>
             </div>
             <canvas id="wb-canvas" width="340" height="280" class="w-full bg-[#120409] border border-rose-900/60 rounded-2xl touch-none cursor-crosshair"></canvas>
         </div>
@@ -410,10 +407,6 @@
                 <input type="text" id="edit-name" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
             </div>
             <div>
-                <label class="block text-[11px] text-rose-300/70">Açıklama (Herkes İçin Sabit)</label>
-                <input type="text" value="WrtS Kullanıcısı" disabled class="w-full bg-[#120409]/60 border border-rose-900/50 rounded-xl px-3 py-2 text-xs text-amber-400/80">
-            </div>
-            <div>
                 <label class="block text-[11px] text-rose-300/70">Arka Plan Efekti</label>
                 <select id="bg-effect-select" onchange="changeBgEffect(this.value)" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs text-amber-300 font-semibold">
                     <option value="snow">❄️ Kar Yağışı</option>
@@ -451,11 +444,14 @@
         let myFriends = {};
         let tempBase64Avatar = null;
         let replyingTo = null;
+        let editingMessageKey = null;
         let isInitialLoad = true;
         let topChampionUid = null;
         let ytPlayer = null;
         let ytApiReady = false;
         let wbColor = '#fbbf24';
+        let wbIsEraser = false;
+        let cinemaMuted = false;
 
         function onYouTubeIframeAPIReady() { ytApiReady = true; }
 
@@ -472,7 +468,7 @@
             else headerAv.classList.remove('champion-ring');
         }
 
-        // ARKA PLAN EFEKTLERİ (TÜMÜ ÇALIŞIR)
+        // ARKA PLAN EFEKTLERİ
         function initBgEffect(type) {
             const c = document.getElementById('dynamic-bg-container');
             c.innerHTML = '';
@@ -523,8 +519,9 @@
         window.toggleToolsDrawer = () => document.getElementById('tools-drawer').classList.toggle('hidden');
         window.openMyProfile = function() { loadUserDataToUI(); openModal('profile-modal'); }
 
-        // WHATSAPP TARZI SES EFEKTİ (HERKES İÇİN AYNI)
+        // SES EFEKTİ
         function playWhatsAppSound(type) {
+            if(cinemaMuted && type === 'receive') return; // Sinemada bildirimler kapalıysa çalma
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
                 const osc = ctx.createOscillator();
@@ -532,26 +529,16 @@
                 osc.connect(gain); gain.connect(ctx.destination);
                 const now = ctx.currentTime;
                 if (type === 'send') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(750, now);
-                    osc.frequency.exponentialRampToValueAtTime(1150, now + 0.08);
-                    gain.gain.setValueAtTime(0.12, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(750, now); osc.frequency.exponentialRampToValueAtTime(1150, now + 0.08);
+                    gain.gain.setValueAtTime(0.12, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
                     osc.start(now); osc.stop(now + 0.11);
                 } else if (type === 'receive') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(1150, now);
-                    osc.frequency.exponentialRampToValueAtTime(850, now + 0.09);
-                    gain.gain.setValueAtTime(0.12, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(1150, now); osc.frequency.exponentialRampToValueAtTime(850, now + 0.09);
+                    gain.gain.setValueAtTime(0.12, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
                     osc.start(now); osc.stop(now + 0.14);
                 } else if (type === 'win') {
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(523.25, now);
-                    osc.frequency.setValueAtTime(659.25, now + 0.1);
-                    osc.frequency.setValueAtTime(783.99, now + 0.2);
-                    gain.gain.setValueAtTime(0.15, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+                    osc.type = 'triangle'; osc.frequency.setValueAtTime(523.25, now); osc.frequency.setValueAtTime(659.25, now + 0.1); osc.frequency.setValueAtTime(783.99, now + 0.2);
+                    gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
                     osc.start(now); osc.stop(now + 0.4);
                 }
             } catch(e) {}
@@ -568,8 +555,19 @@
         }
         window.deleteAnnouncement = () => db.ref(`announcements/${currentRoom}`).remove();
 
-        // ORTAK SİNEMA (REKLAM SONRASI OTOMATİK ZAMAN SENKRONİZASYONU)
+        // ORTAK SİNEMA & BİLDİRİMLERİ KAPAT
         window.openCinemaModal = () => openModal('music-modal');
+        window.toggleCinemaMute = function() {
+            cinemaMuted = !cinemaMuted;
+            const btn = document.getElementById('cinema-mute-btn');
+            if(cinemaMuted) {
+                btn.textContent = "🔔 Bildirimleri Aç";
+                btn.className = "bg-amber-600/30 text-amber-300 border border-amber-500/50 px-2 py-0.5 rounded-lg text-[10px] font-bold";
+            } else {
+                btn.textContent = "🔕 Bildirimleri Kapat";
+                btn.className = "bg-rose-950 text-rose-300 border border-rose-700/50 px-2 py-0.5 rounded-lg text-[10px] font-bold";
+            }
+        }
         window.sendCinemaMessage = function(e) {
             e.preventDefault();
             const inp = document.getElementById('cinema-msg-input');
@@ -584,13 +582,13 @@
             const url = document.getElementById('yt-url-input').value.trim();
             const match = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
             if (!match) return alert("Geçerli YouTube linki gir!");
-            db.ref('global_cinema').set({ videoId: match[1], by: getMyData().name, startTime: Date.now(), seekSec: 0, forceTick: Date.now() });
+            db.ref('global_cinema').set({ videoId: match[1], by: getMyData().name, startTime: Date.now(), seekSec: 0 });
             document.getElementById('yt-url-input').value = '';
         }
         window.forceSyncAllToMyTime = function() {
             if(ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
                 const sec = Math.floor(ytPlayer.getCurrentTime());
-                db.ref('global_cinema').update({ seekSec: sec, startTime: Date.now(), forceTick: Date.now() });
+                db.ref('global_cinema').update({ seekSec: sec, startTime: Date.now() });
             }
         }
         window.stopAndDeleteMusic = () => db.ref('global_cinema').remove();
@@ -607,23 +605,7 @@
                         container.innerHTML = '<div id="yt-api-target"></div>';
                         ytPlayer = new YT.Player('yt-api-target', {
                             height: '100%', width: '100%', videoId: d.videoId,
-                            playerVars: { autoplay: 1, start: elapsed, playsinline: 1 },
-                            events: {
-                                onStateChange: (ev) => {
-                                    // Reklam bitip video başladığında (PLAYING = 1), herkesin ortak zamanına atla
-                                    if (ev.data === 1) {
-                                        db.ref('global_cinema').once('value', snap => {
-                                            const cur = snap.val();
-                                            if(cur) {
-                                                const targetSec = Math.floor((Date.now() - cur.startTime) / 1000) + (cur.seekSec || 0);
-                                                if(Math.abs(ytPlayer.getCurrentTime() - targetSec) > 3) {
-                                                    ytPlayer.seekTo(targetSec, true);
-                                                }
-                                            }
-                                        });
-                                    }
-                                }
-                            }
+                            playerVars: { autoplay: 1, start: elapsed, playsinline: 1 }
                         });
                     } else {
                         ytPlayer.loadVideoById({ videoId: d.videoId, startSeconds: elapsed });
@@ -702,7 +684,7 @@
             closeModal('sticker-modal'); playWhatsAppSound('send');
         };
 
-        // ORTAK TAHTA (GERÇEK ZAMANLI ÇİZİM)
+        // ORTAK TAHTA (CANLI ÇİZİM + SİLGİ)
         let wbInitialized = false;
         window.initWhiteboard = function() {
             const canvas = document.getElementById('wb-canvas');
@@ -721,7 +703,9 @@
                     if(!drawing) return;
                     e.preventDefault();
                     const p = getPos(e);
-                    db.ref(`wb_strokes/${currentRoom}`).push({ x1: lastPt.x, y1: lastPt.y, x2: p.x, y2: p.y, color: wbColor });
+                    const color = wbIsEraser ? '#120409' : wbColor;
+                    const width = wbIsEraser ? 15 : 3;
+                    db.ref(`wb_strokes/${currentRoom}`).push({ x1: lastPt.x, y1: lastPt.y, x2: p.x, y2: p.y, color, width });
                     lastPt = p;
                 };
                 const endDraw = () => { drawing = false; };
@@ -731,7 +715,7 @@
                 db.ref(`wb_strokes/${currentRoom}`).on('child_added', snap => {
                     const s = snap.val();
                     ctx.beginPath(); ctx.moveTo(s.x1, s.y1); ctx.lineTo(s.x2, s.y2);
-                    ctx.strokeStyle = s.color || '#fbbf24'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.stroke();
+                    ctx.strokeStyle = s.color || '#fbbf24'; ctx.lineWidth = s.width || 3; ctx.lineCap = 'round'; ctx.stroke();
                 });
                 db.ref(`wb_strokes/${currentRoom}`).on('value', snap => {
                     if(!snap.exists()) ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -755,15 +739,7 @@
                         const md = getMyData();
                         statusRef.onDisconnect().set({ state: 'offline', name: md.name, avatar: md.avatar, lastSeen: firebase.database.ServerValue.TIMESTAMP });
                         statusRef.set({ state: 'online', name: md.name, avatar: md.avatar, lastSeen: firebase.database.ServerValue.TIMESTAMP });
-                        db.ref('users_registry/' + user.uid).once('value', regSnap => {
-                            const existing = regSnap.val() || {};
-                            db.ref('users_registry/' + user.uid).update({
-                                name: md.name,
-                                avatar: md.avatar,
-                                badge: "WrtS Kullanıcısı",
-                                joinedAt: existing.joinedAt || Date.now()
-                            });
-                        });
+                        db.ref('users_registry/' + user.uid).update({ name: md.name, avatar: md.avatar, badge: "WrtS Kullanıcısı" });
                     }
                 });
 
@@ -890,7 +866,7 @@
             });
         }
 
-        // KULLANICI PROFİL KARTI & SON GÖRÜLME TARİHİ
+        // KULLANICI PROFİL KARTI
         window.openUserProfileModal = function(targetUid, encName) {
             closeModal('users-modal'); closeModal('menu-drawer-modal');
             if(targetUid === currentUser.uid) { openMyProfile(); return; }
@@ -903,7 +879,6 @@
             db.ref(`users_registry/${targetUid}`).once('value', snap => {
                 const uData = snap.val() || {};
                 if(uData.avatar) upAvatar.src = uData.avatar;
-                document.getElementById('up-joined').textContent = uData.joinedAt ? new Date(uData.joinedAt).toLocaleDateString('tr-TR') : 'Kayıtlı Üye';
             });
 
             const st = activeUsersData[targetUid] || {};
@@ -1028,7 +1003,7 @@
             }
         };
 
-        // MESAJ ELEMENTİ (TIKLAMA & SOLA KAYDIRMA İLE ALINTILAMA + ETİKET VURGUSU)
+        // MESAJ ELEMENTİ (HIZLI EMOJI + DÜZENLEME + ALINTILAMA)
         function createMessageElement(snap, room) {
             const data = snap.val(); const key = snap.key; const isMe = currentUser && data.uid === currentUser.uid;
             const div = document.createElement('div'); div.id = `msg-${key}`; div.className = `flex gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'} items-end transition-transform duration-150`;
@@ -1044,11 +1019,19 @@
             } else {
                 let msgText = data.mesaj || '';
                 msgText = msgText.replace(/(@[^\s]+)/g, '<span class="bg-amber-500/30 text-amber-300 px-1 rounded font-bold">$1</span>');
-                content = `<p class="text-sm break-words">${msgText}</p>`;
+                content = `<p class="text-sm break-words">${msgText} ${data.edited ? '<span class="text-[9px] opacity-60">(düzenlendi)</span>' : ''}</p>`;
             }
 
             const timeStr = new Date(data.zaman || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             const safePreview = (data.mesaj || 'Medya').replace(/'/g, '').replace(/"/g, '');
+
+            // Tepkiler (Reactions) HTML
+            let reactionsHtml = '';
+            if (data.reactions) {
+                const counts = {};
+                Object.values(data.reactions).forEach(emo => counts[emo] = (counts[emo] || 0) + 1);
+                reactionsHtml = `<div class="flex gap-1 mt-1 flex-wrap">${Object.entries(counts).map(([emo, cnt]) => `<span class="bg-black/40 border border-rose-900/40 text-[10px] px-1.5 py-0.5 rounded-full">${emo} ${cnt}</span>`).join('')}</div>`;
+            }
 
             div.innerHTML = `
                 <img onclick="openUserProfileModal('${data.uid}', '${encodeURIComponent(data.isim)}')" src="${data.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-6 h-6 rounded-full object-cover shrink-0 mb-1 cursor-pointer">
@@ -1059,14 +1042,24 @@
                         ${content}
                         <div class="text-[9px] opacity-75 text-right mt-0.5">${timeStr}</div>
                     </div>
-                    <div id="menu-${key}" class="hidden flex gap-2 mt-1 bg-[#1c0910] border border-rose-900/60 px-2 py-1 rounded-xl text-xs z-10">
-                        <button onclick="setReplyTo('${key}', '${data.isim}', '${safePreview}')" class="text-amber-400 font-bold">💬 Alıntıla</button>
-                        ${isMe ? `<button onclick="db.ref('odalar/${room}/${key}').remove()" class="text-red-400 font-bold">🗑️ Sil</button>` : ''}
+                    ${reactionsHtml}
+                    <div id="menu-${key}" class="hidden flex flex-col gap-1.5 mt-1 bg-[#1c0910] border border-rose-900/60 p-2 rounded-xl text-xs z-10 shadow-xl">
+                        <div class="flex gap-2 border-b border-rose-900/40 pb-1.5">
+                            <button onclick="addReaction('${room}', '${key}', '❤️')" class="hover:scale-125 transition">❤️</button>
+                            <button onclick="addReaction('${room}', '${key}', '🔥')" class="hover:scale-125 transition">🔥</button>
+                            <button onclick="addReaction('${room}', '${key}', '😂')" class="hover:scale-125 transition">😂</button>
+                            <button onclick="addReaction('${room}', '${key}', '👍')" class="hover:scale-125 transition">👍</button>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="setReplyTo('${key}', '${data.isim}', '${safePreview}')" class="text-amber-400 font-bold">💬 Alıntıla</button>
+                            ${isMe && data.type === 'text' ? `<button onclick="startEditMessage('${key}', '${safePreview}')" class="text-sky-400 font-bold">✏️ Düzenle</button>` : ''}
+                            ${isMe ? `<button onclick="db.ref('odalar/${room}/${key}').remove()" class="text-red-400 font-bold">🗑️ Sil</button>` : ''}
+                        </div>
                     </div>
                 </div>
             `;
 
-            // SOLA KAYDIRARAK (SWIPE) ALINTILAMA (MOBİL + MOUSE)
+            // SOLA KAYDIRARAK (SWIPE) ALINTILAMA
             let startX = 0, isDragging = false;
             div.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
             div.addEventListener('touchend', e => {
@@ -1079,6 +1072,12 @@
             });
 
             return div;
+        }
+
+        window.addReaction = function(room, key, emoji) {
+            if(!currentUser) return;
+            db.ref(`odalar/${room}/${key}/reactions/${currentUser.uid}`).set(emoji);
+            document.getElementById(`menu-${key}`).classList.add('hidden');
         }
 
         window.scrollToMessage = function(key) {
@@ -1116,15 +1115,31 @@
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
                 if (!isInitialLoad && currentUser && d.uid !== currentUser.uid) playWhatsAppSound('receive');
             });
+            roomRef.on('child_changed', snap => {
+                const oldEl = document.getElementById(`msg-${snap.key}`);
+                if(oldEl) {
+                    const newEl = createMessageElement(snap, room);
+                    oldEl.replaceWith(newEl);
+                }
+            });
             roomRef.on('child_removed', snap => document.getElementById(`msg-${snap.key}`)?.remove());
         }
 
-        // ETİKETLEME (@) SİSTEMİ
+        // YAZIYOR... GÖSTERGESİ
+        let typingTimer = null;
         const msgInput = document.getElementById('msg-input');
-        const mentionDrop = document.getElementById('mention-dropdown');
         msgInput.addEventListener('input', e => {
+            if(!currentUser) return;
+            db.ref(`typing/${currentRoom}/${currentUser.uid}`).set(getMyData().name);
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => {
+                db.ref(`typing/${currentRoom}/${currentUser.uid}`).remove();
+            }, 2000);
+
+            // Etiketleme kontrolü
             const val = e.target.value;
             const atIdx = val.lastIndexOf('@');
+            const mentionDrop = document.getElementById('mention-dropdown');
             if (atIdx !== -1 && (atIdx === 0 || val[atIdx - 1] === ' ')) {
                 const query = val.slice(atIdx + 1).toLowerCase();
                 db.ref('users_registry').once('value', snap => {
@@ -1143,27 +1158,45 @@
             } else { mentionDrop.classList.add('hidden'); }
         });
 
+        db.ref(`typing`).on('value', snap => {
+            const data = snap.val() || {};
+            const roomTyping = data[currentRoom] || {};
+            const others = Object.entries(roomTyping).filter(([uid]) => currentUser && uid !== currentUser.uid).map(([_, name]) => name);
+            const indicator = document.getElementById('typing-indicator');
+            if(others.length > 0) {
+                indicator.textContent = `${others.join(', ')} yazıyor...`;
+            } else {
+                indicator.textContent = '';
+            }
+        });
+
         window.insertMention = function(name) {
             const val = msgInput.value;
             const atIdx = val.lastIndexOf('@');
             msgInput.value = val.slice(0, atIdx) + '@' + name + ' ';
-            mentionDrop.classList.add('hidden');
+            document.getElementById('mention-dropdown').classList.add('hidden');
             msgInput.focus();
         }
 
-        // MESAJ GÖNDERME
+        // MESAJ GÖNDERME VEYA DÜZENLEME
         document.getElementById('msg-form').onsubmit = async e => {
             e.preventDefault();
             const text = msgInput.value.trim(); if (!text) return;
             const muted = (await db.ref(`room_mutes/${currentRoom}/${currentUser.uid}`).once('value')).val();
             if(muted) return alert("Bu odada susturuldun!");
 
+            if(editingMessageKey) {
+                db.ref(`odalar/${currentRoom}/${editingMessageKey}`).update({ mesaj: text, edited: true });
+                cancelReplyOrEdit();
+                msgInput.value = '';
+                return;
+            }
+
             const md = getMyData();
             const msgData = { uid: currentUser.uid, isim: md.name, avatar: md.avatar, mesaj: text, type: 'text', zaman: Date.now() };
-            if (replyingTo) { msgData.replyTo = replyingTo; cancelReply(); }
+            if (replyingTo) { msgData.replyTo = replyingTo; cancelReplyOrEdit(); }
             db.ref('odalar/' + currentRoom).push(msgData);
 
-            // Eğer DM ise karşı tarafa okunmadı bildirimi bırak
             if(currentRoom.startsWith('özel_dm_')) {
                 const parts = currentRoom.replace('özel_dm_', '').split('_');
                 const targetUid = parts.find(id => id !== currentUser.uid);
@@ -1171,18 +1204,33 @@
             }
 
             msgInput.value = '';
-            mentionDrop.classList.add('hidden');
+            document.getElementById('mention-dropdown').classList.add('hidden');
             playWhatsAppSound('send');
         };
 
         window.setReplyTo = (key, name, text) => {
+            editingMessageKey = null;
             replyingTo = { key, name, text };
+            document.getElementById('preview-mode-title').textContent = "Yanıtlanıyor:";
             document.getElementById('reply-preview-text').textContent = `${name}: ${text}`;
             document.getElementById('reply-preview-bar').classList.remove('hidden');
             msgInput.focus();
         };
-        window.cancelReply = () => {
-            replyingTo = null; document.getElementById('reply-preview-bar').classList.add('hidden');
+
+        window.startEditMessage = (key, text) => {
+            replyingTo = null;
+            editingMessageKey = key;
+            msgInput.value = text;
+            document.getElementById('preview-mode-title').textContent = "Düzenleniyor:";
+            document.getElementById('reply-preview-text').textContent = text;
+            document.getElementById('reply-preview-bar').classList.remove('hidden');
+            msgInput.focus();
+        };
+
+        window.cancelReplyOrEdit = () => {
+            replyingTo = null; editingMessageKey = null;
+            document.getElementById('reply-preview-bar').classList.add('hidden');
+            msgInput.value = '';
         };
 
         // KOD & ANKET & FOTOĞRAF & SESLİ NOT
@@ -1260,7 +1308,7 @@
             document.querySelectorAll('#messages > div').forEach(el => el.style.display = el.innerText.toLowerCase().includes(t) ? 'flex' : 'none');
         };
 
-        // SESLİ & GÖRÜNTÜLÜ GÖRÜŞME (WebRTC)
+        // SESLİ & GÖRÜNTÜLÜ GÖRÜŞME
         let localStream, peerConnection;
         window.startWebRTCCall = async (video) => {
             try {
@@ -1307,7 +1355,7 @@
             closeModal('call-modal');
         };
 
-        // OYUN SALONU (XOX + AMİRAL BATTI)
+        // OYUN SALONU
         window.switchGameTab = g => {
             ['xox', 'battleship'].forEach(x => {
                 document.getElementById(`game-panel-${x}`).classList.toggle('hidden', x !== g);
@@ -1336,7 +1384,7 @@
                 db.ref(`games/${currentRoom}/xox`).set(g);
             });
         };
-        window.resetXOXGame = () => db.ref(`games/${currentRoom}/xox`).set({ board: Array(9).fill(''), turn: 'X', winner: '' });
+        window.resetXOXGame = () => db.ref(`games/${currentRoom}/xox`).set({ board: Array(9).fill(''), timer: Date.now() });
 
         function listenBattleship() {
             db.ref(`games/${currentRoom}/bs`).on('value', s => {
