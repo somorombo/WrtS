@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WrtS - Dev Güncelleme Edition</title>
+    <title>WrtS - Pro Ultimate Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -30,30 +30,22 @@
         }
 
         @keyframes messageHighlight {
-            0% { background-color: rgba(245, 158, 11, 0.5); }
+            0% { background-color: rgba(245, 158, 11, 0.6); }
             100% { background-color: transparent; }
         }
-        .highlight-anim {
-            animation: messageHighlight 2s ease-out;
-        }
+        .highlight-anim { animation: messageHighlight 2s ease-out; }
 
         @keyframes snowfall {
             0% { transform: translateY(-10px) translateX(0); opacity: 0.7; }
             100% { transform: translateY(100%) translateX(10px); opacity: 0.2; }
         }
-        .snowflake {
-            position: absolute; top: -10px; background: #ffe4e6; border-radius: 50%; pointer-events: none; z-index: 5;
-            animation: snowfall linear infinite;
-        }
+        .snowflake { position: absolute; top: -10px; background: #ffe4e6; border-radius: 50%; pointer-events: none; z-index: 5; animation: snowfall linear infinite; }
 
         @keyframes firework {
             0% { transform: translateY(0) scale(1); opacity: 1; }
             100% { transform: translateY(-100px) scale(0.5); opacity: 0; }
         }
-        .firefly {
-            position: absolute; background: #f43f5e; border-radius: 50%; pointer-events: none; z-index: 5;
-            animation: firework linear infinite;
-        }
+        .firefly { position: absolute; background: #f43f5e; border-radius: 50%; pointer-events: none; z-index: 5; animation: firework linear infinite; }
     </style>
 </head>
 <body id="app-body" class="text-rose-50 h-[100dvh] w-full overflow-hidden flex flex-col justify-between relative">
@@ -115,12 +107,12 @@
             <span id="announcement-text" class="text-amber-100 truncate font-medium">Duyuru yok.</span>
         </div>
         <div class="flex items-center gap-1.5 shrink-0 ml-2">
-            <button onclick="openModal('announcement-modal')" class="bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-1 rounded-lg text-[10px] font-bold hover:bg-amber-500/30">+ Duyuru</button>
+            <button onclick="openModal('announcement-modal')" class="bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-1 rounded-lg text-[10px] font-bold">+ Duyuru</button>
             <button id="delete-announcement-btn" onclick="deleteAnnouncement()" class="hidden text-rose-300 hover:text-white font-bold text-[10px] bg-rose-900/60 border border-rose-500/40 px-2 py-1 rounded-lg">Sil</button>
         </div>
     </div>
 
-    <!-- MESAJ ALANI VE DİNAMİK EFEKTLER -->
+    <!-- MESAJ ALANI VE DİNAMİK ARKA PLAN -->
     <div class="flex-1 relative overflow-hidden flex flex-col">
         <div id="dynamic-bg-container" class="absolute inset-0 pointer-events-none overflow-hidden z-0"></div>
         <main id="messages" class="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 w-full max-w-4xl mx-auto z-10 relative"></main>
@@ -129,7 +121,7 @@
     <!-- YAZIYOR BİLGİSİ -->
     <div id="typing-indicator" class="px-4 py-1 text-[11px] text-amber-300/80 italic w-full max-w-4xl mx-auto h-6 shrink-0 z-20"></div>
 
-    <!-- YANITLANAN VEYA DÜZENLENEN ÖNİZLEME -->
+    <!-- YANITLANAN ÖNİZLEME -->
     <div id="reply-preview-bar" class="hidden w-full max-w-4xl mx-auto px-4 py-1.5 bg-[#1a070e] border-t border-rose-900/60 flex justify-between items-center shrink-0 z-20">
         <div class="flex items-center gap-2 truncate text-xs">
             <span id="preview-mode-title" class="text-amber-400 font-bold">Yanıtlanıyor:</span>
@@ -137,6 +129,9 @@
         </div>
         <button onclick="cancelReplyOrEdit()" class="text-rose-300 hover:text-white font-bold text-xs px-2">✕</button>
     </div>
+
+    <!-- ETİKETLENECEK KULLANICILAR AÇILIR LİSTESİ -->
+    <div id="mention-dropdown" class="hidden absolute bottom-16 left-4 bg-[#1c0910] border border-amber-500/50 rounded-xl p-2 w-48 shadow-2xl z-30 max-h-36 overflow-y-auto"></div>
 
     <!-- EKSTRA ARAÇ ÇEKMECESİ -->
     <div id="tools-drawer" class="hidden bg-[#1a070e] border-t border-rose-900/60 p-2.5 w-full max-w-4xl mx-auto grid grid-cols-5 gap-2 shrink-0 z-20">
@@ -147,60 +142,50 @@
         <button type="button" onclick="openModal('poll-modal'); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-[#120409] p-2 rounded-xl border border-rose-900/50 text-xs"><span>📊</span><span class="text-[10px]">Anket</span></button>
     </div>
 
-    <!-- ALT MESAJ ÇUBUĞU (SESLİ NOT BAS-KONUŞ DAHİL) -->
+    <!-- ALT MESAJ ÇUBUĞU -->
     <footer id="main-footer" class="bg-[#1a070e] border-t border-rose-900/60 p-2 sm:p-3 w-full max-w-4xl mx-auto shrink-0 z-20">
         <form id="msg-form" class="flex items-center gap-1.5 w-full">
-            <button type="button" onclick="toggleToolsDrawer()" class="w-9 h-9 rounded-full bg-[#2b0d18] hover:bg-rose-900/60 text-amber-400 font-black text-lg flex items-center justify-center shrink-0" title="Ekstra Araçlar">+</button>
-            <button type="button" id="walkie-talkie-btn" class="w-9 h-9 rounded-full bg-[#2b0d18] hover:bg-rose-900/60 text-rose-400 flex items-center justify-center shrink-0 text-sm" title="Bas-Konuş Sesli Not">🎙️</button>
+            <button type="button" onclick="toggleToolsDrawer()" class="w-9 h-9 rounded-full bg-[#2b0d18] text-amber-400 font-black text-lg flex items-center justify-center shrink-0">+</button>
+            <button type="button" id="walkie-talkie-btn" class="w-9 h-9 rounded-full bg-[#2b0d18] text-rose-400 flex items-center justify-center shrink-0 text-sm" title="Bas-Konuş Sesli Not">🎙️</button>
             <input type="file" id="img-file" accept="image/*" class="hidden">
-            <input type="text" id="msg-input" placeholder="Mesaj yaz veya @etiketle..." autocomplete="off" class="flex-1 min-w-0 bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
-            <button type="submit" class="bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm shrink-0 text-white shadow">Gönder</button>
+            <input type="text" id="msg-input" placeholder="Mesaj yaz veya @ ile etiketle..." autocomplete="off" class="flex-1 min-w-0 bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
+            <button type="submit" class="bg-gradient-to-r from-rose-600 to-amber-600 px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm shrink-0 text-white shadow">Gönder</button>
         </form>
     </footer>
 
     <!-- ==================== MODALLAR ==================== -->
 
-    <!-- DUYURU EKLEME MODALI -->
     <div id="announcement-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-amber-500/40 rounded-3xl p-5 w-full max-w-sm space-y-3">
-            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2">
-                <h3 class="font-bold text-amber-400">📢 Yeni Duyuru Yayınla</h3>
-                <button onclick="closeModal('announcement-modal')" class="text-rose-300 font-bold">✕</button>
-            </div>
-            <textarea id="announcement-input" rows="3" placeholder="Duyuru metnini yaz..." class="w-full bg-[#120409] border border-rose-900/60 rounded-xl p-3 text-xs focus:outline-none focus:border-amber-500"></textarea>
-            <button onclick="publishAnnouncement()" class="w-full bg-gradient-to-r from-amber-600 to-rose-600 py-2.5 rounded-xl text-xs font-bold text-white">Duyuruyu Yayınla</button>
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">📢 Duyuru Yayınla</h3><button onclick="closeModal('announcement-modal')">✕</button></div>
+            <textarea id="announcement-input" rows="3" placeholder="Duyuru metni..." class="w-full bg-[#120409] border border-rose-900/60 rounded-xl p-3 text-xs focus:outline-none"></textarea>
+            <button onclick="publishAnnouncement()" class="w-full bg-gradient-to-r from-amber-600 to-rose-600 py-2.5 rounded-xl text-xs font-bold text-white">Yayınla</button>
         </div>
     </div>
 
-    <!-- HAMBURGER MENÜ MODALI -->
     <div id="menu-drawer-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3">
-            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2">
-                <h3 class="font-bold text-amber-400">🧭 Hızlı Menü & Araçlar</h3>
-                <button onclick="closeModal('menu-drawer-modal')" class="text-rose-300 font-bold">✕</button>
-            </div>
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">🧭 Hızlı Menü</h3><button onclick="closeModal('menu-drawer-modal')">✕</button></div>
             <div class="grid grid-cols-2 gap-2 pt-1">
-                <button onclick="closeModal('menu-drawer-modal'); openDMListModal();" class="relative bg-[#120409] border border-rose-900/50 hover:border-amber-500 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left">
-                    <span>💬</span> Özel DM <span id="menu-inbox-dot" class="hidden w-2 h-2 rounded-full bg-red-500 ml-auto"></span>
-                </button>
-                <button onclick="closeModal('menu-drawer-modal'); openModal('whiteboard-modal'); initWhiteboard();" class="bg-[#120409] border border-rose-900/50 hover:border-amber-500 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎨</span> Ortak Tahta</button>
-                <button onclick="closeModal('menu-drawer-modal'); openCinemaModal();" class="bg-[#120409] border border-rose-900/50 hover:border-amber-500 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎬</span> Ortak Sinema</button>
-                <button onclick="closeModal('menu-drawer-modal'); openModal('games-modal');" class="bg-[#120409] border border-rose-900/50 hover:border-amber-500 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎮</span> Oyun Salonu</button>
-                <button onclick="closeModal('menu-drawer-modal'); openModal('leaderboard-modal'); loadLeaderboard();" class="bg-[#120409] border border-rose-900/50 hover:border-amber-500 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🏆</span> Skor Tablosu</button>
-                <button onclick="closeModal('menu-drawer-modal'); openModal('call-modal');" class="bg-[#120409] border border-rose-900/50 hover:border-amber-500 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>📹</span> Sesli Görüşme</button>
-                <button onclick="closeModal('menu-drawer-modal'); openMyProfile();" class="bg-[#120409] border border-rose-900/50 hover:border-amber-500 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left col-span-2"><span>👤</span> Profilim & Ayarlar</button>
+                <button onclick="closeModal('menu-drawer-modal'); openDMListModal();" class="relative bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>💬</span> Özel DM <span id="menu-inbox-dot" class="hidden w-2 h-2 rounded-full bg-red-500 ml-auto"></span></button>
+                <button onclick="closeModal('menu-drawer-modal'); openModal('whiteboard-modal'); initWhiteboard();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎨</span> Ortak Tahta</button>
+                <button onclick="closeModal('menu-drawer-modal'); openCinemaModal();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎬</span> Ortak Sinema</button>
+                <button onclick="closeModal('menu-drawer-modal'); openModal('games-modal');" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎮</span> Oyun Salonu</button>
+                <button onclick="closeModal('menu-drawer-modal'); openModal('leaderboard-modal'); loadLeaderboard();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🏆</span> Skor Tablosu</button>
+                <button onclick="closeModal('menu-drawer-modal'); openModal('call-modal');" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>📹</span> Sesli Görüşme</button>
+                <button onclick="closeModal('menu-drawer-modal'); openMyProfile();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left col-span-2"><span>👤</span> Profilim & Ayarlar</button>
             </div>
         </div>
     </div>
 
-    <!-- KULLANICI PROFİL DETAY MODALI (DİREKT AÇILIR) -->
+    <!-- KULLANICI PROFİL KARTI (DİREKT AÇILIR - LİSTE ARADA KALMAZ) -->
     <div id="user-profile-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-6 w-full max-w-sm space-y-4 text-center relative shadow-2xl">
             <button onclick="closeModal('user-profile-modal')" class="absolute top-4 right-4 text-rose-300 font-bold">✕</button>
             <div class="flex flex-col items-center gap-2">
                 <img id="up-avatar" src="" class="w-20 h-20 rounded-full object-cover border-2 border-amber-500 shadow-xl">
                 <h3 id="up-name" class="font-black text-lg text-rose-50 mt-1"></h3>
-                <span id="up-badge" class="text-xs bg-amber-500/20 text-amber-300 px-3 py-0.5 rounded-full font-semibold"></span>
+                <span id="up-badge" class="text-xs bg-amber-500/20 text-amber-300 px-3 py-0.5 rounded-full font-semibold">WrtS Kullanıcısı</span>
             </div>
             <div class="bg-[#120409] p-3.5 rounded-2xl border border-rose-900/50 space-y-2.5 text-left text-xs">
                 <div class="flex justify-between items-center"><span class="text-rose-300/70">Durum:</span><span id="up-status-text" class="font-bold text-emerald-400">Çevrimiçi</span></div>
@@ -211,39 +196,36 @@
         </div>
     </div>
 
-    <!-- ORTAK SİNEMA & FİLM STİCKER SOHBETİ -->
+    <!-- ORTAK SİNEMA (REKLAM SENKRONİZASYONLU) -->
     <div id="music-modal" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center p-3">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-4 w-full max-w-md space-y-2.5 max-h-[95vh] flex flex-col">
             <div class="flex justify-between items-center shrink-0">
-                <h3 class="font-bold text-amber-400 text-sm">🎬 Ortak Sinema Salonu</h3>
+                <h3 class="font-bold text-amber-400 text-sm">🎬 Ortak Sinema Salonu (Senkronize)</h3>
                 <button onclick="closeModal('music-modal')" class="text-rose-300 font-bold">✕</button>
             </div>
             <div class="flex gap-1.5 shrink-0">
                 <input type="text" id="yt-url-input" placeholder="YouTube linki yapıştır..." class="flex-1 bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-1.5 text-xs">
-                <button onclick="syncYoutubeVideo()" class="bg-gradient-to-r from-rose-600 to-amber-600 px-3 py-1.5 rounded-xl text-xs font-bold text-white">Herkeste Aç</button>
+                <button onclick="syncYoutubeVideo()" class="bg-gradient-to-r from-rose-600 to-amber-600 px-3 py-1.5 rounded-xl text-xs font-bold text-white">Herkeste Başlat</button>
             </div>
             <div class="aspect-video bg-black rounded-2xl overflow-hidden border border-rose-900/50 relative shrink-0 shadow-xl">
-                <iframe id="yt-player-frame" class="w-full h-full" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                <div id="youtube-player-container" class="w-full h-full"></div>
             </div>
             <div class="flex items-center justify-between shrink-0">
                 <p id="music-sync-info" class="text-[11px] text-rose-200/70 truncate">Sinema salonu boş.</p>
                 <button onclick="stopAndDeleteMusic()" class="bg-rose-950 text-rose-300 border border-rose-700/50 px-2.5 py-1 rounded-lg text-[10px] font-bold shrink-0">🗑️ Kapat</button>
             </div>
-            
-            <!-- SİNEMA İÇİ SOHBET + FİLM STİCKERLARI -->
-            <div class="flex-1 bg-[#120409] border border-rose-900/50 rounded-2xl p-2.5 flex flex-col min-h-[140px] max-h-[170px]">
+            <div class="flex-1 bg-[#120409] border border-rose-900/50 rounded-2xl p-2.5 flex flex-col min-h-[130px] max-h-[160px]">
                 <div class="flex justify-between items-center border-b border-rose-900/40 pb-1 mb-1">
-                    <span class="text-[10px] text-amber-400 font-bold">🍿 Sinema Sohbeti (Film Sticker Desteği)</span>
+                    <span class="text-[10px] text-amber-400 font-bold">🍿 Sinema Sohbeti</span>
                     <div class="flex gap-1">
                         <button onclick="sendCinemaSticker('🍿')" class="text-sm">🍿</button>
                         <button onclick="sendCinemaSticker('🎬')" class="text-sm">🎬</button>
                         <button onclick="sendCinemaSticker('⭐')" class="text-sm">⭐</button>
-                        <button onclick="sendCinemaSticker('😭')" class="text-sm">😭</button>
                     </div>
                 </div>
                 <div id="cinema-messages" class="flex-1 overflow-y-auto space-y-1.5 pr-1 text-xs"></div>
                 <form onsubmit="sendCinemaMessage(event)" class="flex gap-1 mt-1.5 shrink-0">
-                    <input type="text" id="cinema-msg-input" placeholder="Film hakkında yorum yaz..." autocomplete="off" class="flex-1 bg-[#1c0910] border border-rose-900/50 rounded-lg px-2.5 py-1 text-xs focus:outline-none">
+                    <input type="text" id="cinema-msg-input" placeholder="Film hakkında yaz..." autocomplete="off" class="flex-1 bg-[#1c0910] border border-rose-900/50 rounded-lg px-2.5 py-1 text-xs focus:outline-none">
                     <button type="submit" class="bg-amber-600 px-2.5 py-1 rounded-lg text-xs font-bold text-white">At</button>
                 </form>
             </div>
@@ -264,17 +246,16 @@
             </div>
             <hr class="border-rose-900/50">
             <div>
-                <h4 class="text-xs font-bold text-amber-300 mb-2">👥 Tüm Üyeler (Direkt Profile Gitmek İçin Tıkla)</h4>
+                <h4 class="text-xs font-bold text-amber-300 mb-2">👥 Tüm Üyeler (Direkt Profile Git)</h4>
                 <div id="all-users-list" class="space-y-2"></div>
             </div>
         </div>
     </div>
 
-    <!-- SKOR TABLOSU (ŞAMPİYONLUK LİGİ) -->
+    <!-- SKOR TABLOSU -->
     <div id="leaderboard-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-4 max-h-[85vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">🏆 Şampiyonlar Ligi & Turnuva</h3><button onclick="closeModal('leaderboard-modal')">✕</button></div>
-            <p class="text-[11px] text-rose-200/70">1. sıradaki şampiyon altın-kızıl çerçeveye ve "Günün Şampiyonu" unvanına sahip olur!</p>
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">🏆 Şampiyonlar Ligi</h3><button onclick="closeModal('leaderboard-modal')">✕</button></div>
             <div id="leaderboard-list" class="space-y-2"></div>
         </div>
     </div>
@@ -289,72 +270,55 @@
 
     <div id="whiteboard-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-3">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-4 w-full max-w-md space-y-3">
-            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">🎨 Canlı Ortak Tahta</h3><button onclick="closeModal('whiteboard-modal')">✕</button></div>
-            <div class="flex items-center justify-between gap-2 bg-[#120409] p-2 rounded-xl border border-rose-900/50 flex-wrap">
-                <div class="flex gap-1.5 items-center">
-                    <button onclick="wbColor='#fbbf24'; wbIsEraser=false;" class="w-6 h-6 rounded-full bg-amber-400 border border-white/20"></button>
-                    <button onclick="wbColor='#f43f5e'; wbIsEraser=false;" class="w-6 h-6 rounded-full bg-rose-500 border border-white/20"></button>
-                    <button onclick="wbColor='#38bdf8'; wbIsEraser=false;" class="w-6 h-6 rounded-full bg-sky-400 border border-white/20"></button>
-                    <button onclick="wbColor='#4ade80'; wbIsEraser=false;" class="w-6 h-6 rounded-full bg-green-400 border border-white/20"></button>
-                    <button onclick="wbColor='#ffffff'; wbIsEraser=false;" class="w-6 h-6 rounded-full bg-white border border-white/20"></button>
-                    <button onclick="wbIsEraser=true;" class="bg-[#2b0d18] text-rose-200 px-2 py-1 rounded-lg text-xs font-bold">🧹 Silgi</button>
-                </div>
-                <button onclick="clearWhiteboard()" class="bg-red-500/20 text-red-400 px-2.5 py-1 rounded-lg text-xs font-bold">Temizle</button>
-            </div>
+            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">🎨 Ortak Tahta</h3><button onclick="closeModal('whiteboard-modal')">✕</button></div>
             <canvas id="wb-canvas" width="340" height="280" class="w-full bg-[#120409] border border-rose-900/60 rounded-2xl touch-none cursor-crosshair"></canvas>
         </div>
     </div>
 
     <div id="roles-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3 max-h-[80vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">🛡️ Moderasyon Paneli</h3><button onclick="closeModal('roles-modal')">✕</button></div>
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">🛡️ Moderasyon</h3><button onclick="closeModal('roles-modal')">✕</button></div>
             <div id="room-members-roles-list" class="space-y-2"></div>
-            <button onclick="deleteCurrentRoom()" class="w-full bg-red-600/20 text-red-400 border border-red-500/30 py-2 rounded-xl text-xs font-bold">Odayı Sil</button>
+            <button onclick="deleteCurrentRoom()" class="w-full bg-red-600/20 text-red-400 py-2 rounded-xl text-xs font-bold">Odayı Sil</button>
         </div>
     </div>
 
     <div id="code-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-md space-y-3">
             <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">💻 Kod Paylaş</h3><button onclick="closeModal('code-modal')">✕</button></div>
-            <select id="code-lang" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
-                <option value="HTML / CSS">HTML / CSS</option><option value="JavaScript">JavaScript</option><option value="Python">Python</option>
-            </select>
-            <textarea id="code-content-input" rows="5" placeholder="Kodunu yapıştır..." class="w-full bg-[#120409] border border-rose-900/50 rounded-xl p-3 text-xs font-mono focus:outline-none"></textarea>
+            <select id="code-lang" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs"><option value="HTML / CSS">HTML / CSS</option><option value="JavaScript">JavaScript</option></select>
+            <textarea id="code-content-input" rows="5" placeholder="Kod..." class="w-full bg-[#120409] border border-rose-900/50 rounded-xl p-3 text-xs font-mono"></textarea>
             <button onclick="sendCodeSnippet()" class="w-full bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-xs font-bold text-white">Gönder</button>
         </div>
     </div>
 
     <div id="poll-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3">
-            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">📊 Canlı Anket</h3><button onclick="closeModal('poll-modal')">✕</button></div>
+            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">📊 Anket</h3><button onclick="closeModal('poll-modal')">✕</button></div>
             <input type="text" id="poll-question" placeholder="Soru..." class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
-            <input type="text" id="poll-opt1" placeholder="1. Seçenek" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
-            <input type="text" id="poll-opt2" placeholder="2. Seçenek" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
+            <input type="text" id="poll-opt1" placeholder="Seçenek 1" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
+            <input type="text" id="poll-opt2" placeholder="Seçenek 2" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
             <button onclick="createPoll()" class="w-full bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-xs font-bold text-white">Başlat</button>
         </div>
     </div>
 
     <div id="sticker-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3">
-            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">✨ Sticker Paketi</h3><button onclick="closeModal('sticker-modal')">✕</button></div>
-            <div class="flex gap-1.5">
-                <input type="text" id="custom-sticker-input" placeholder="Emoji ekle..." class="flex-1 bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
-                <button onclick="addCustomSticker()" class="bg-rose-600 px-3 py-2 rounded-xl text-xs font-bold text-white">Ekle</button>
-            </div>
+            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">✨ Sticker</h3><button onclick="closeModal('sticker-modal')">✕</button></div>
             <div id="sticker-grid" class="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto pt-1"></div>
         </div>
     </div>
 
     <div id="dm-list-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3 max-h-[85vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">💬 Özel Mesajlarım (Gizli DM)</h3><button onclick="closeModal('dm-list-modal')">✕</button></div>
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">💬 Özel DM</h3><button onclick="closeModal('dm-list-modal')">✕</button></div>
             <div id="my-dms-list" class="space-y-2 pt-1"></div>
         </div>
     </div>
 
     <div id="room-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3">
-            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">Yeni Oda Kur</h3><button onclick="closeModal('room-modal')">✕</button></div>
+            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">Oda Kur</h3><button onclick="closeModal('room-modal')">✕</button></div>
             <input type="text" id="new-room-name" placeholder="Oda adı..." maxlength="20" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-sm">
             <button id="create-room-btn" class="w-full bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-sm font-bold text-white">Oluştur</button>
         </div>
@@ -362,7 +326,7 @@
 
     <div id="call-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-md space-y-3 text-center">
-            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">📹 Sesli / Görüntülü Sohbet</h3><button onclick="endWebRTCCall()">✕</button></div>
+            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">📹 Sesli Görüşme</h3><button onclick="endWebRTCCall()">✕</button></div>
             <p id="call-status" class="text-xs text-rose-200/70">Bağlantı bekleniyor...</p>
             <div class="grid grid-cols-2 gap-2">
                 <video id="local-video" autoplay muted playsinline class="w-full aspect-video bg-[#120409] rounded-xl object-cover"></video>
@@ -370,24 +334,22 @@
             </div>
             <div class="flex flex-wrap gap-2 justify-center">
                 <button onclick="startWebRTCCall(false)" class="bg-emerald-600 px-3 py-2 rounded-xl text-xs font-bold text-white">🎙️ Sesli Başlat</button>
-                <button onclick="startWebRTCCall(true)" class="bg-amber-600 px-3 py-2 rounded-xl text-xs font-bold text-white">📹 Görüntülü Başlat</button>
+                <button onclick="startWebRTCCall(true)" class="bg-amber-600 px-3 py-2 rounded-xl text-xs font-bold text-white">📹 Görüntülü</button>
                 <button onclick="joinWebRTCCall()" class="bg-rose-600 px-3 py-2 rounded-xl text-xs font-bold text-white">📲 Katıl</button>
                 <button onclick="endWebRTCCall()" class="bg-red-700 px-3 py-2 rounded-xl text-xs font-bold text-white">Ayrıl</button>
             </div>
         </div>
     </div>
 
-    <!-- OYUN SALONU & TURNUVA -->
     <div id="games-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-md space-y-3 text-center">
-            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">🎮 Oyun Salonu (Turnuva Modu)</h3><button onclick="closeModal('games-modal')">✕</button></div>
+            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">🎮 Oyun Salonu</h3><button onclick="closeModal('games-modal')">✕</button></div>
             <div class="flex gap-1 bg-[#120409] p-1 rounded-xl">
                 <button onclick="switchGameTab('xox')" id="tab-xox" class="flex-1 py-1.5 rounded-lg text-xs font-bold bg-rose-600 text-white">❌ XOX</button>
                 <button onclick="switchGameTab('battleship')" id="tab-battleship" class="flex-1 py-1.5 rounded-lg text-xs font-bold text-rose-300/60">🚢 Amiral</button>
-                <button onclick="switchGameTab('word')" id="tab-word" class="flex-1 py-1.5 rounded-lg text-xs font-bold text-rose-300/60">🔤 Bilmece</button>
             </div>
             <div id="game-panel-xox" class="space-y-2">
-                <p id="xox-status" class="text-xs">Sıra: X (Kazanana +15 Puan)</p>
+                <p id="xox-status" class="text-xs">Sıra: X (+15 Puan)</p>
                 <div class="grid grid-cols-3 gap-1.5 w-44 mx-auto">
                     <button onclick="makeXOXMove(0)" id="cell-0" class="w-12 h-12 bg-[#120409] border border-rose-900/50 rounded-xl font-bold"></button>
                     <button onclick="makeXOXMove(1)" id="cell-1" class="w-12 h-12 bg-[#120409] border border-rose-900/50 rounded-xl font-bold"></button>
@@ -402,23 +364,17 @@
                 <button onclick="resetXOXGame()" class="w-full bg-[#2b0d18] py-1.5 rounded-xl text-xs font-bold">Sıfırla</button>
             </div>
             <div id="game-panel-battleship" class="hidden space-y-2">
-                <p id="bs-status" class="text-xs">3 gemiyi bul! (Kazanana +20 Puan)</p>
+                <p id="bs-status" class="text-xs">3 gemiyi bul! (+20 Puan)</p>
                 <div id="bs-grid" class="grid grid-cols-5 gap-1 w-56 mx-auto"></div>
                 <button onclick="resetBattleship()" class="w-full bg-[#2b0d18] py-1.5 rounded-xl text-xs font-bold">Yeni Harita</button>
-            </div>
-            <div id="game-panel-word" class="hidden space-y-2">
-                <div id="word-display" class="text-xl font-black text-amber-400 py-2 bg-[#120409] rounded-xl">_ _ _</div>
-                <p id="word-hint" class="text-xs text-rose-300"></p>
-                <div class="flex gap-1"><input type="text" id="word-guess-input" placeholder="Tahmin..." class="flex-1 bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-1.5 text-xs"><button onclick="submitWordGuess()" class="bg-rose-600 px-3 py-1.5 rounded-xl text-xs font-bold text-white">Dene</button></div>
-                <button onclick="resetWordGame()" class="w-full bg-[#2b0d18] py-1.5 rounded-xl text-xs font-bold">Yeni Bilmece</button>
             </div>
         </div>
     </div>
 
-    <!-- KENDİ PROFİLİM & SES/EFEKT AYARLARI -->
+    <!-- PROFİLİM & EFEKT AYARLARI -->
     <div id="profile-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">Profilim & Efekt Ayarları</h3><button onclick="closeModal('profile-modal')">✕</button></div>
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">Profilim & Ayarlar</h3><button onclick="closeModal('profile-modal')">✕</button></div>
             <div class="flex flex-col items-center gap-2">
                 <img id="preview-avatar" src="" class="w-16 h-16 rounded-full object-cover border-2 border-amber-500">
                 <input type="file" id="upload-avatar-file" accept="image/*" class="hidden">
@@ -429,8 +385,8 @@
                 <input type="text" id="edit-name" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
             </div>
             <div>
-                <label class="block text-[11px] text-rose-300/70">Açıklama / Rozet</label>
-                <input type="text" id="edit-status-badge" maxlength="40" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
+                <label class="block text-[11px] text-rose-300/70">Açıklama (Herkes İçin Ortak)</label>
+                <input type="text" id="edit-status-badge" value="WrtS Kullanıcısı" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
             </div>
             <div>
                 <label class="block text-[11px] text-rose-300/70">Arka Plan Efekti</label>
@@ -441,23 +397,15 @@
                     <option value="space">🌌 Yıldızlı Uzay</option>
                 </select>
             </div>
-            <div>
-                <label class="block text-[11px] text-rose-300/70">Ses Efekti Teması</label>
-                <select id="sound-theme-select" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs text-amber-300 font-semibold">
-                    <option value="retro">🕹️ Retro Oyun</option>
-                    <option value="tok">🪵 Tok Tok</option>
-                    <option value="cyber">⚡ Cyber Çınlama</option>
-                </select>
-            </div>
             <div class="flex gap-2 pt-1">
                 <button id="save-profile" class="flex-1 bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-xs font-bold text-white">Kaydet</button>
-                <button id="modal-logout" class="bg-amber-600/20 text-amber-400 border border-amber-500/30 px-3 py-2.5 rounded-xl text-xs font-bold">Çıkış</button>
+                <button id="modal-logout" class="bg-amber-600/20 text-amber-400 px-3 py-2.5 rounded-xl text-xs font-bold">Çıkış</button>
             </div>
             <hr class="border-rose-900/50 my-2">
             <div class="bg-red-950/30 border border-red-500/30 p-3 rounded-xl space-y-2">
-                <h4 class="text-xs font-bold text-red-400">⚠️ Hesap Silme</h4>
-                <input type="password" id="delete-confirm-password" placeholder="Mevcut şifren..." class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
-                <button onclick="requestAccountDeletion()" class="w-full bg-red-600 hover:bg-red-500 py-2 rounded-xl text-xs font-bold text-white transition">Hesabımı Sil</button>
+                <h4 class="text-xs font-bold text-red-400">⚠️ Hesap Sil</h4>
+                <input type="password" id="delete-confirm-password" placeholder="Şifren..." class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
+                <button onclick="requestAccountDeletion()" class="w-full bg-red-600 py-2 rounded-xl text-xs font-bold text-white">Hesabımı Sil</button>
             </div>
         </div>
     </div>
@@ -472,7 +420,6 @@
             messagingSenderId: "627981661221",
             appId: "1:627981661221:web:5635a97ba39a9032cb7bcc"
         };
-
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.database();
@@ -492,21 +439,20 @@
         let typingRef = null;
         let topChampionUid = null;
 
-        // SKOR LİDERİNİ TAKİP ET (Şampiyonluk Çerçevesi)
+        // SKOR LİDERİ
         db.ref('leaderboard').on('value', snap => {
             const data = snap.val() || {};
             const sorted = Object.entries(data).sort((a,b) => b[1].score - a[1].score);
             topChampionUid = (sorted.length > 0 && sorted[0][1].score > 0) ? sorted[0][0] : null;
             updateChampionRings();
         });
-
         function updateChampionRings() {
             const headerAv = document.getElementById('header-avatar');
             if(currentUser && topChampionUid === currentUser.uid) headerAv.classList.add('champion-ring');
             else headerAv.classList.remove('champion-ring');
         }
 
-        // DİNAMİK ARKA PLAN EFEKTLERİ
+        // ARKA PLAN EFEKTLERİ DÜZELTME
         function initBgEffect(type) {
             const c = document.getElementById('dynamic-bg-container');
             c.innerHTML = '';
@@ -555,39 +501,28 @@
         window.openModal = id => document.getElementById(id).classList.remove('hidden');
         window.closeModal = id => document.getElementById(id).classList.add('hidden');
         window.toggleToolsDrawer = () => document.getElementById('tools-drawer').classList.toggle('hidden');
+        window.openMyProfile = function() { loadUserDataToUI(); openModal('profile-modal'); }
 
-        window.openMyProfile = function() {
-            loadUserDataToUI();
-            openModal('profile-modal');
-        }
-
-        // ÖZEL SES EFEKTLERİ PAKETİ
-        function playSoundEffect(type) {
+        // WHATSAPP TARZI MESAJ SESİ (WEB AUDIO API)
+        function playWhatsAppSound(type) {
             try {
-                const theme = currentUser ? (localStorage.getItem('wrts_snd_' + currentUser.uid) || 'retro') : 'retro';
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
                 osc.connect(gain); gain.connect(ctx.destination);
                 const now = ctx.currentTime;
-                
-                if (theme === 'retro') {
-                    osc.type = 'square';
-                    osc.frequency.setValueAtTime(type === 'win' ? 880 : 587, now);
-                    osc.frequency.exponentialRampToValueAtTime(type === 'win' ? 1760 : 440, now + 0.15);
-                    gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-                    osc.start(now); osc.stop(now + 0.2);
-                } else if (theme === 'tok') {
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(300, now);
-                    gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-                    osc.start(now); osc.stop(now + 0.08);
-                } else {
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(1200, now);
-                    osc.frequency.exponentialRampToValueAtTime(400, now + 0.1);
-                    gain.gain.setValueAtTime(0.08, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+                if (type === 'send') {
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(800, now); osc.frequency.exponentialRampToValueAtTime(1200, now + 0.08);
+                    gain.gain.setValueAtTime(0.12, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+                    osc.start(now); osc.stop(now + 0.12);
+                } else if (type === 'receive') {
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(1200, now); osc.frequency.exponentialRampToValueAtTime(800, now + 0.1);
+                    gain.gain.setValueAtTime(0.12, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
                     osc.start(now); osc.stop(now + 0.15);
+                } else if (type === 'win') {
+                    osc.type = 'triangle'; osc.frequency.setValueAtTime(523.25, now); osc.frequency.setValueAtTime(659.25, now + 0.1); osc.frequency.setValueAtTime(783.99, now + 0.2);
+                    gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+                    osc.start(now); osc.stop(now + 0.4);
                 }
             } catch(e) {}
         }
@@ -595,17 +530,15 @@
         // DUYURU SİSTEMİ
         window.publishAnnouncement = function() {
             const text = document.getElementById('announcement-input').value.trim();
-            if(!text) return alert("Duyuru metni boş olamaz!");
-            db.ref('global_announcement').set({ text, by: currentUser.uid, time: Date.now() }).then(() => {
+            if(!text) return;
+            db.ref('global_announcement').set({ text, time: Date.now() }).then(() => {
                 document.getElementById('announcement-input').value = '';
                 closeModal('announcement-modal');
             });
         }
-        window.deleteAnnouncement = function() {
-            if(confirm("Duyuruyu silmek istiyor musun?")) db.ref('global_announcement').remove();
-        }
+        window.deleteAnnouncement = () => db.ref('global_announcement').remove();
 
-        // SİNEMA SİSTEMİ & FİLM STİKERSLARI
+        // ORTAK SİNEMA (İFRAME REKLAM ENGELLEME ÇÖZÜMÜ)
         let cinemaChatInitialized = false;
         window.openCinemaModal = function() {
             openModal('music-modal');
@@ -617,8 +550,7 @@
                     const p = document.createElement('div');
                     p.className = "bg-[#1c0910] px-2 py-1 rounded-lg border border-rose-900/30";
                     p.innerHTML = `<span class="font-bold text-amber-400">${m.isim}:</span> <span class="text-rose-100">${m.mesaj}</span>`;
-                    cBox.appendChild(p);
-                    cBox.scrollTop = cBox.scrollHeight;
+                    cBox.appendChild(p); cBox.scrollTop = cBox.scrollHeight;
                 });
             }
         }
@@ -630,69 +562,52 @@
             db.ref('cinema_chat').push({ isim: getMyData().name, mesaj: val, zaman: Date.now() });
             inp.value = '';
         }
-        window.sendCinemaSticker = function(st) {
-            if(!currentUser) return;
-            db.ref('cinema_chat').push({ isim: getMyData().name, mesaj: `Sticker gönderdi: ${st}`, zaman: Date.now() });
-        }
+        window.sendCinemaSticker = st => db.ref('cinema_chat').push({ isim: getMyData().name, mesaj: `Sticker: ${st}`, zaman: Date.now() });
+
         window.syncYoutubeVideo = function() {
             const url = document.getElementById('yt-url-input').value.trim();
             const match = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-            if (!match) return alert("Geçerli bir YouTube linki gir!");
+            if (!match) return alert("Geçerli YouTube linki gir!");
             db.ref('global_cinema').set({ videoId: match[1], by: getMyData().name, time: Date.now() });
             document.getElementById('yt-url-input').value = '';
         }
-        window.stopAndDeleteMusic = function() {
-            db.ref('global_cinema').remove().then(() => {
-                document.getElementById('yt-player-frame').src = "";
-                document.getElementById('music-sync-info').textContent = "Sinema salonu boş.";
-            });
-        }
-        let lastPlayedCinemaTime = 0;
+        window.stopAndDeleteMusic = () => db.ref('global_cinema').remove();
+
         db.ref('global_cinema').on('value', s => {
             const d = s.val();
+            const container = document.getElementById('youtube-player-container');
             if (d && d.videoId) {
-                document.getElementById('yt-player-frame').src = `https://www.youtube.com/embed/${d.videoId}?autoplay=1`;
-                document.getElementById('music-sync-info').textContent = `🎬 ${d.by} şu an oynatıyor`;
-                if (d.time !== lastPlayedCinemaTime) {
-                    lastPlayedCinemaTime = d.time;
-                    openCinemaModal();
-                }
+                container.innerHTML = `<iframe class="w-full h-full" src="https://www.youtube.com/embed/${d.videoId}?autoplay=1&enablejsapi=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+                document.getElementById('music-sync-info').textContent = `🎬 ${d.by} oynatıyor`;
+                openCinemaModal();
             } else {
-                document.getElementById('yt-player-frame').src = "";
+                container.innerHTML = "";
                 document.getElementById('music-sync-info').textContent = "Sinema salonu boş.";
             }
         });
 
-        // PUAN SİSTEMİ & TURNUVALAR
         window.addScorePoints = function(pts) {
             if (!currentUser) return;
             const md = getMyData();
-            const ref = db.ref(`leaderboard/${currentUser.uid}`);
-            ref.transaction(curr => {
-                const currentData = curr || { name: md.name, avatar: md.avatar, score: 0 };
-                currentData.score += pts;
-                currentData.name = md.name;
-                currentData.avatar = md.avatar;
-                return currentData;
+            db.ref(`leaderboard/${currentUser.uid}`).transaction(curr => {
+                const cur = curr || { name: md.name, avatar: md.avatar, score: 0 };
+                cur.score += pts; cur.name = md.name; cur.avatar = md.avatar;
+                return cur;
             });
-            playSoundEffect('win');
+            playWhatsAppSound('win');
         }
+
         window.loadLeaderboard = function() {
             const listDiv = document.getElementById('leaderboard-list');
-            listDiv.innerHTML = '<p class="text-xs text-rose-300/60 italic">Yükleniyor...</p>';
             db.ref('leaderboard').orderByChild('score').once('value', snap => {
                 const data = snap.val() || {};
                 const sorted = Object.entries(data).sort((a,b) => b[1].score - a[1].score);
-                if (sorted.length === 0) { listDiv.innerHTML = '<p class="text-xs text-rose-300/60 italic">Henüz skor yok.</p>'; return; }
                 listDiv.innerHTML = sorted.map(([uid, info], idx) => `
                     <div class="flex items-center justify-between bg-[#120409] p-2.5 rounded-xl border ${idx === 0 ? 'border-amber-500/60' : 'border-rose-900/50'}">
                         <div class="flex items-center gap-2.5">
-                            <span class="font-bold text-xs ${idx === 0 ? 'text-amber-400' : idx === 1 ? 'text-rose-200' : 'text-rose-400/60'}">#${idx+1}</span>
+                            <span class="font-bold text-xs ${idx === 0 ? 'text-amber-400' : 'text-rose-400'}">#${idx+1}</span>
                             <img src="${info.avatar}" class="w-7 h-7 rounded-full object-cover ${idx === 0 ? 'champion-ring' : ''}">
-                            <div class="text-left">
-                                <span class="text-xs font-bold text-rose-100 block">${info.name} ${idx === 0 ? '👑' : ''}</span>
-                                ${idx === 0 ? '<span class="text-[9px] text-amber-400 font-bold">Günün Şampiyonu</span>' : ''}
-                            </div>
+                            <span class="text-xs font-bold text-rose-100">${info.name} ${idx === 0 ? '👑' : ''}</span>
                         </div>
                         <span class="text-xs font-black text-amber-400">${info.score} Puan</span>
                     </div>
@@ -703,11 +618,10 @@
         const gifList = [
             "https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif",
             "https://media.giphy.com/media/13HgwGsXF0aiGY/giphy.gif",
-            "https://media.giphy.com/media/9uIZuMGuWExxBLagNa/giphy.gif",
-            "https://media.giphy.com/media/mlvseq9yvZhba/giphy.gif"
+            "https://media.giphy.com/media/9uIZuMGuWExxBLagNa/giphy.gif"
         ];
         function renderGifs() {
-            document.getElementById('gif-grid').innerHTML = gifList.map(url => `<img src="${url}" class="w-full h-24 object-cover rounded-xl cursor-pointer hover:opacity-80 transition" onclick="sendGIF('${url}')">`).join('');
+            document.getElementById('gif-grid').innerHTML = gifList.map(url => `<img src="${url}" class="w-full h-24 object-cover rounded-xl cursor-pointer" onclick="sendGIF('${url}')">`).join('');
         }
         setTimeout(renderGifs, 100);
         window.sendGIF = url => {
@@ -716,75 +630,46 @@
             closeModal('gif-modal');
         };
 
-        let wbColor = '#fbbf24';
-        let wbIsEraser = false;
-        let wbDrawing = false;
+        // ORTAK TAHTA
         let wbInitialized = false;
         window.initWhiteboard = function() {
             const canvas = document.getElementById('wb-canvas');
             const ctx = canvas.getContext('2d');
             if (!wbInitialized) {
                 wbInitialized = true;
+                let drawing = false;
                 const getPos = e => {
                     const rect = canvas.getBoundingClientRect();
                     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
                     return { x: (clientX - rect.left) * (canvas.width / rect.width), y: (clientY - rect.top) * (canvas.height / rect.height) };
                 };
-                const drawDot = (x, y, color, isEraser, sync = true) => {
-                    ctx.fillStyle = isEraser ? '#120409' : color;
-                    ctx.beginPath(); ctx.arc(x, y, isEraser ? 10 : 3, 0, Math.PI * 2); ctx.fill();
-                    if (sync) db.ref(`whiteboard/${currentRoom}`).push({ x, y, color: isEraser ? '#120409' : color, isEraser });
-                };
-                canvas.addEventListener('mousedown', e => { wbDrawing = true; const p = getPos(e); drawDot(p.x, p.y, wbColor, wbIsEraser); });
-                canvas.addEventListener('mousemove', e => { if (wbDrawing) { const p = getPos(e); drawDot(p.x, p.y, wbColor, wbIsEraser); } });
-                window.addEventListener('mouseup', () => wbDrawing = false);
-                canvas.addEventListener('touchstart', e => { e.preventDefault(); wbDrawing = true; const p = getPos(e); drawDot(p.x, p.y, wbColor, wbIsEraser); });
-                canvas.addEventListener('touchmove', e => { e.preventDefault(); if (wbDrawing) { const p = getPos(e); drawDot(p.x, p.y, wbColor, wbIsEraser); } });
-                canvas.addEventListener('touchend', () => wbDrawing = false);
+                canvas.onmousedown = e => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); };
+                canvas.onmousemove = e => { if(drawing) { const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.strokeStyle='#fbbf24'; ctx.lineWidth=3; ctx.stroke(); } };
+                window.onmouseup = () => drawing = false;
             }
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            db.ref(`whiteboard/${currentRoom}`).off();
-            db.ref(`whiteboard/${currentRoom}`).on('child_added', snap => {
-                const d = snap.val(); 
-                if (d) { ctx.fillStyle = d.color; ctx.beginPath(); ctx.arc(d.x, d.y, d.isEraser ? 10 : 3, 0, Math.PI * 2); ctx.fill(); }
-            });
-            db.ref(`whiteboard/${currentRoom}`).on('child_removed', () => ctx.clearRect(0, 0, canvas.width, canvas.height));
         }
-        window.clearWhiteboard = () => db.ref(`whiteboard/${currentRoom}`).remove();
 
         window.openRoomRolesModal = function() {
             openModal('roles-modal');
             const list = document.getElementById('room-members-roles-list');
-            list.innerHTML = '';
             db.ref('users_registry').once('value', snap => {
                 const users = snap.val() || {};
-                Object.entries(users).forEach(([uid, info]) => {
-                    if (uid === currentUser.uid) return;
-                    const isMod = !!roomRoles[uid]; const isMuted = !!mutedUsers[uid];
-                    const row = document.createElement('div');
-                    row.className = "flex items-center justify-between bg-[#120409] p-2 rounded-xl border border-rose-900/50";
-                    row.innerHTML = `
-                        <span class="text-xs font-bold">${info.name} ${isMod ? '🛡️' : ''} ${isMuted ? '🔇' : ''}</span>
-                        <div class="flex gap-1">
-                            <button onclick="toggleModRole('${uid}')" class="text-[10px] bg-amber-600/20 text-amber-400 px-2 py-1 rounded font-bold">${isMod ? 'Mod Al' : 'Mod Yap'}</button>
-                            <button onclick="toggleMuteUser('${uid}')" class="text-[10px] bg-red-600/20 text-red-400 px-2 py-1 rounded font-bold">${isMuted ? 'Aç' : 'Sustur'}</button>
-                        </div>
-                    `;
-                    list.appendChild(row);
-                });
+                list.innerHTML = Object.entries(users).map(([uid, info]) => `
+                    <div class="flex items-center justify-between bg-[#120409] p-2 rounded-xl border border-rose-900/50">
+                        <span class="text-xs font-bold">${info.name}</span>
+                        <button onclick="db.ref('room_mutes/${currentRoom}/${uid}').set(true)" class="text-[10px] bg-red-600/30 text-red-400 px-2 py-1 rounded font-bold">Sustur</button>
+                    </div>
+                `).join('');
             });
         }
-        window.toggleModRole = uid => db.ref(`room_roles/${currentRoom}/${uid}`).set(roomRoles[uid] ? null : true).then(openRoomRolesModal);
-        window.toggleMuteUser = uid => db.ref(`room_mutes/${currentRoom}/${uid}`).set(mutedUsers[uid] ? null : true).then(openRoomRolesModal);
-        window.deleteCurrentRoom = () => { if (confirm("Odayı sil?")) { db.ref('oda_listesi/' + currentRoom).remove(); db.ref('odalar/' + currentRoom).remove(); closeModal('roles-modal'); } };
+        window.deleteCurrentRoom = () => { if(confirm("Odayı sil?")) { db.ref('oda_listesi/' + currentRoom).remove(); closeModal('roles-modal'); } };
 
         window.sendCodeSnippet = function() {
-            const lang = document.getElementById('code-lang').value;
             const code = document.getElementById('code-content-input').value;
-            if (!code.trim()) return;
+            if(!code.trim()) return;
             const md = getMyData();
-            db.ref('odalar/' + currentRoom).push({ uid: currentUser.uid, isim: md.name, avatar: md.avatar, badge: md.badge, type: 'code', lang, code, zaman: Date.now() });
+            db.ref('odalar/' + currentRoom).push({ uid: currentUser.uid, isim: md.name, avatar: md.avatar, badge: md.badge, type: 'code', code, zaman: Date.now() });
             document.getElementById('code-content-input').value = ''; closeModal('code-modal');
         }
 
@@ -792,97 +677,46 @@
             const q = document.getElementById('poll-question').value.trim();
             const o1 = document.getElementById('poll-opt1').value.trim();
             const o2 = document.getElementById('poll-opt2').value.trim();
-            if (!q || !o1 || !o2) return alert("Alanları doldur!");
+            if(!q || !o1 || !o2) return;
             const md = getMyData();
             db.ref('odalar/' + currentRoom).push({ uid: currentUser.uid, isim: md.name, avatar: md.avatar, badge: md.badge, type: 'poll', question: q, opt1: o1, opt2: o2, votes: {}, zaman: Date.now() });
             closeModal('poll-modal');
         }
-        window.votePoll = (room, key, choice) => { if (currentUser) db.ref(`odalar/${room}/${key}/votes/${currentUser.uid}`).set(choice); };
-        window.reactToMessage = (room, key, emoji) => {
-            if (!currentUser) return;
-            const ref = db.ref(`odalar/${room}/${key}/reactions/${currentUser.uid}`);
-            ref.once('value', snap => { if (snap.val() === emoji) ref.remove(); else ref.set(emoji); });
-        };
-
-        function renderStickers() {
-            const def = ['🔥', '👑', '⚡', '❄️', '🎮', '🚀', '😂', '🥳', '💯', '🎯', '💎', '🌹'];
-            const custom = JSON.parse(localStorage.getItem('wrts_stickers_' + currentUser.uid) || '[]');
-            document.getElementById('sticker-grid').innerHTML = [...custom, ...def].map(s => `<button onclick="sendSticker('${s}')" class="bg-[#120409] hover:bg-rose-900/40 border border-rose-900/50 rounded-xl py-2.5 text-2xl transition">${s}</button>`).join('');
-        }
-        window.addCustomSticker = function() {
-            const val = document.getElementById('custom-sticker-input').value.trim(); if (!val) return;
-            const custom = JSON.parse(localStorage.getItem('wrts_stickers_' + currentUser.uid) || '[]');
-            custom.unshift(val); localStorage.setItem('wrts_stickers_' + currentUser.uid, JSON.stringify(custom));
-            document.getElementById('custom-sticker-input').value = ''; renderStickers();
-        }
-        window.sendSticker = function(sticker) {
-            const md = getMyData();
-            db.ref('odalar/' + currentRoom).push({ uid: currentUser.uid, isim: md.name, avatar: md.avatar, badge: md.badge, type: 'sticker', sticker, zaman: Date.now() });
-            closeModal('sticker-modal');
-        }
+        window.votePoll = (room, key, choice) => { if(currentUser) db.ref(`odalar/${room}/${key}/votes/${currentUser.uid}`).set(choice); };
 
         auth.onAuthStateChanged(user => {
             if (user) {
                 currentUser = user;
                 document.getElementById('login-screen').classList.add('hidden');
-                
-                // Varsayılan arka plan ve ses efekti ayarlarını yükle
                 const savedBgef = localStorage.getItem('wrts_bgef_' + user.uid) || 'snow';
                 document.getElementById('bg-effect-select').value = savedBgef;
                 initBgEffect(savedBgef);
-
-                const savedSnd = localStorage.getItem('wrts_snd_' + user.uid) || 'retro';
-                document.getElementById('sound-theme-select').value = savedSnd;
 
                 const statusRef = db.ref('status/' + user.uid);
                 db.ref('.info/connected').on('value', snap => {
                     if (snap.val() === true) {
                         statusRef.onDisconnect().set({ state: 'offline', lastSeen: Date.now() });
                         const md = getMyData();
-                        statusRef.set({ state: 'online', name: md.name, avatar: md.avatar, badge: md.badge, lastSeen: Date.now() });
-                        
-                        db.ref('users_registry/' + user.uid).once('value', uSnap => {
-                            const existing = uSnap.val() || {};
-                            db.ref('users_registry/' + user.uid).update({
-                                name: md.name,
-                                avatar: md.avatar,
-                                badge: md.badge || "WrtS Kullanıcısı",
-                                joinedAt: existing.joinedAt || Date.now()
-                            });
-                        });
+                        statusRef.set({ state: 'online', name: md.name, avatar: md.avatar, badge: "WrtS Kullanıcısı", lastSeen: Date.now() });
+                        db.ref('users_registry/' + user.uid).update({ name: md.name, avatar: md.avatar, badge: "WrtS Kullanıcısı" });
                     }
                 });
 
                 db.ref('status').on('value', snap => { activeUsersData = snap.val() || {}; updateUsersUI(); });
                 db.ref(`friends/${user.uid}`).on('value', snap => { myFriends = snap.val() || {}; updateUsersUI(); });
                 db.ref(`friend_requests/${user.uid}`).on('value', snap => {
-                    const reqs = snap.val() || {}; const entries = Object.entries(reqs);
-                    const badge = document.getElementById('req-badge'); const sec = document.getElementById('friend-requests-section');
-                    if (entries.length > 0) { badge.classList.remove('hidden'); badge.textContent = entries.length; sec.classList.remove('hidden');
-                        document.getElementById('friend-requests-list').innerHTML = entries.map(([uid, info]) => `
-                            <div class="flex items-center justify-between bg-[#120409] p-2 rounded-xl border border-amber-500/40">
-                                <span class="text-xs font-bold">${info.name}</span>
-                                <div class="flex gap-1"><button onclick="acceptFriendRequest('${uid}', '${encodeURIComponent(info.name)}', '${encodeURIComponent(info.avatar || '')}')" class="bg-emerald-600 text-[10px] px-2 py-1 rounded font-bold text-white">Kabul</button><button onclick="db.ref('friend_requests/${user.uid}/${uid}').remove()" class="bg-red-600/30 text-red-400 text-[10px] px-2 py-1 rounded font-bold">Red</button></div>
-                            </div>
-                        `).join('');
-                    } else { badge.classList.add('hidden'); sec.classList.add('hidden'); }
+                    const reqs = snap.val() || {}; const badge = document.getElementById('req-badge');
+                    if(Object.keys(reqs).length > 0) badge.classList.remove('hidden'); else badge.classList.add('hidden');
                 });
 
-                db.ref(`gizli_dm_listesi/${user.uid}`).on('value', snap => {
-                    const dms = snap.val() || {};
-                    const inboxDot = document.getElementById('menu-inbox-dot');
-                    if (Object.keys(dms).length > 0) inboxDot.classList.remove('hidden'); else inboxDot.classList.add('hidden');
-                });
-
-                loadUserDataToUI(); updateChampionRings(); renderStickers(); listenRooms(); loadRoom(currentRoom);
+                loadUserDataToUI(); updateChampionRings(); listenRooms(); loadRoom(currentRoom);
             } else { currentUser = null; document.getElementById('login-screen').classList.remove('hidden'); }
         });
 
         function getMyData() {
             const name = localStorage.getItem('wrts_name_' + currentUser.uid) || currentUser.displayName || currentUser.email.split('@')[0];
             const avatar = localStorage.getItem('wrts_avatar_' + currentUser.uid) || currentUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=e11d48&color=fff`;
-            const badge = localStorage.getItem('wrts_badge_' + currentUser.uid) || 'WrtS Kullanıcısı';
-            return { name, avatar, badge };
+            return { name, avatar, badge: "WrtS Kullanıcısı" };
         }
 
         function loadUserDataToUI() {
@@ -890,26 +724,21 @@
             document.getElementById('header-avatar').src = d.avatar;
             document.getElementById('preview-avatar').src = d.avatar;
             document.getElementById('edit-name').value = d.name;
-            document.getElementById('edit-status-badge').value = d.badge;
         }
 
         document.getElementById('save-profile').onclick = () => {
-            const n = document.getElementById('edit-name').value.trim(); 
-            const b = document.getElementById('edit-status-badge').value.trim() || "WrtS Kullanıcısı";
-            const snd = document.getElementById('sound-theme-select').value;
-            if (!n) return;
-            localStorage.setItem('wrts_name_' + currentUser.uid, n); 
-            localStorage.setItem('wrts_badge_' + currentUser.uid, b);
-            localStorage.setItem('wrts_snd_' + currentUser.uid, snd);
-            if (tempBase64Avatar) localStorage.setItem('wrts_avatar_' + currentUser.uid, tempBase64Avatar);
+            const n = document.getElementById('edit-name').value.trim();
+            if(!n) return;
+            localStorage.setItem('wrts_name_' + currentUser.uid, n);
+            if(tempBase64Avatar) localStorage.setItem('wrts_avatar_' + currentUser.uid, tempBase64Avatar);
             loadUserDataToUI(); closeModal('profile-modal');
             const md = getMyData();
-            db.ref('status/' + currentUser.uid).update({ name: md.name, avatar: md.avatar, badge: md.badge, lastSeen: Date.now() });
-            db.ref('users_registry/' + currentUser.uid).update({ name: md.name, avatar: md.avatar, badge: md.badge });
+            db.ref('status/' + currentUser.uid).update({ name: md.name, avatar: md.avatar, badge: "WrtS Kullanıcısı" });
+            db.ref('users_registry/' + currentUser.uid).update({ name: md.name, avatar: md.avatar, badge: "WrtS Kullanıcısı" });
         };
 
         document.getElementById('upload-avatar-file').onchange = e => {
-            const f = e.target.files[0]; if (!f) return;
+            const f = e.target.files[0]; if(!f) return;
             const r = new FileReader();
             r.onload = ev => {
                 const img = new Image();
@@ -924,109 +753,56 @@
             r.readAsDataURL(f);
         };
 
-        window.acceptFriendRequest = (uid, name, avatar) => {
-            const md = getMyData();
-            db.ref(`friends/${currentUser.uid}/${uid}`).set({ name: decodeURIComponent(name), avatar: decodeURIComponent(avatar) });
-            db.ref(`friends/${uid}/${currentUser.uid}`).set({ name: md.name, avatar: md.avatar });
-            db.ref(`friend_requests/${currentUser.uid}/${uid}`).remove();
-        };
-
         window.loadOnlineUsersList = function() { updateUsersUI(); }
 
         function updateUsersUI() {
-            let count = 0; Object.values(activeUsersData).forEach(u => { if (u.state === 'online') count++; });
+            let count = 0; Object.values(activeUsersData).forEach(u => { if(u.state === 'online') count++; });
             document.getElementById('online-count').textContent = count;
-            const fDiv = document.getElementById('my-friends-list'); const fEntries = Object.entries(myFriends);
-            fDiv.innerHTML = fEntries.length ? fEntries.map(([uid, info]) => `
-                <div onclick="openUserProfileModal('${uid}', '${encodeURIComponent(info.name)}')" class="flex items-center justify-between bg-[#120409] p-2 rounded-xl border border-rose-500/30 cursor-pointer">
-                    <span class="text-xs font-bold">${info.name}</span>
-                    <span class="text-[10px] text-amber-400 font-bold">Profili Gör</span>
-                </div>
-            `).join('') : '<p class="text-xs text-rose-300/60 italic">Arkadaş yok.</p>';
-
+            
             db.ref('users_registry').once('value', snap => {
                 const all = snap.val() || {};
-                document.getElementById('all-users-list').innerHTML = Object.entries(all).filter(([uid]) => uid !== currentUser.uid).map(([uid, info]) => {
-                    const statusObj = activeUsersData[uid] || {};
-                    const online = statusObj.state === 'online';
-                    const isChamp = topChampionUid === uid;
-                    return `
-                        <div onclick="openUserProfileModal('${uid}', '${encodeURIComponent(info.name || 'İsimsiz')}')" class="flex items-center justify-between bg-[#120409] p-2.5 rounded-xl border border-rose-900/50 hover:border-amber-500 cursor-pointer transition">
-                            <div class="flex items-center gap-2">
-                                <img src="${info.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-8 h-8 rounded-full object-cover ${isChamp ? 'champion-ring' : ''}">
-                                <div class="text-left">
-                                    <p class="text-xs font-bold text-rose-100">${info.name} <span class="text-[9px] ${online ? 'text-emerald-400' : 'text-rose-400/50'}">●</span></p>
-                                    <p class="text-[9px] text-rose-300/60">${info.badge || 'WrtS Kullanıcısı'}</p>
-                                </div>
+                document.getElementById('all-users-list').innerHTML = Object.entries(all).filter(([uid]) => uid !== currentUser.uid).map(([uid, info]) => `
+                    <div onclick="openUserProfileModal('${uid}', '${encodeURIComponent(info.name || 'İsimsiz')}')" class="flex items-center justify-between bg-[#120409] p-2.5 rounded-xl border border-rose-900/50 hover:border-amber-500 cursor-pointer transition">
+                        <div class="flex items-center gap-2">
+                            <img src="${info.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-8 h-8 rounded-full object-cover">
+                            <div class="text-left">
+                                <p class="text-xs font-bold text-rose-100">${info.name}</p>
+                                <p class="text-[9px] text-amber-400">WrtS Kullanıcısı</p>
                             </div>
-                            <span class="text-[10px] text-amber-400 font-bold bg-amber-950/60 px-2 py-1 rounded-lg">Direkt Profili Aç</span>
                         </div>
-                    `;
-                }).join('');
+                        <span class="text-[10px] text-amber-400 font-bold bg-amber-950/60 px-2 py-1 rounded-lg">Profili Aç</span>
+                    </div>
+                `).join('');
             });
         }
 
-        // PROFİLE TIKLANINCA DİREKT AÇILAN KART (ARADA BEKLEME YOK)
+        // PROFİLE GİT TIKLANINCA ARADAKİ LİSTELERİ KAPATIP DİREKT AÇMA
         window.openUserProfileModal = function(targetUid, encName) {
+            closeModal('users-modal');
+            closeModal('menu-drawer-modal');
             if(targetUid === currentUser.uid) { openMyProfile(); return; }
             const targetName = decodeURIComponent(encName);
             openModal('user-profile-modal');
             document.getElementById('up-name').textContent = targetName;
             const upAvatar = document.getElementById('up-avatar');
             upAvatar.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(targetName) + '&background=e11d48&color=fff';
-            if(topChampionUid === targetUid) upAvatar.classList.add('champion-ring'); else upAvatar.classList.remove('champion-ring');
-
-            document.getElementById('up-status-text').textContent = "Çevrimdışı";
-            document.getElementById('up-last-seen').textContent = "Hesaplanıyor...";
-            document.getElementById('up-joined').textContent = "Yükleniyor...";
-            document.getElementById('up-badge').textContent = "WrtS Kullanıcısı";
 
             db.ref(`users_registry/${targetUid}`).once('value', snap => {
                 const uData = snap.val() || {};
                 if(uData.avatar) upAvatar.src = uData.avatar;
-                if(uData.badge) document.getElementById('up-badge').textContent = uData.badge;
-                if(uData.joinedAt) {
-                    document.getElementById('up-joined').textContent = new Date(uData.joinedAt).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
-                } else { document.getElementById('up-joined').textContent = "Kurucu Üye"; }
+                if(uData.joinedAt) document.getElementById('up-joined').textContent = new Date(uData.joinedAt).toLocaleDateString('tr-TR');
             });
 
-            const statusObj = activeUsersData[targetUid] || {};
-            const online = statusObj.state === 'online';
-            document.getElementById('up-status-text').textContent = online ? "Çevrimiçi" : "Çevrimdışı";
-            document.getElementById('up-status-text').className = online ? "font-bold text-emerald-400" : "font-bold text-rose-400/70";
-            document.getElementById('up-last-seen').textContent = online ? "Şuan aktif" : "Bir süre önce";
-
-            const actionsDiv = document.getElementById('up-actions');
-            const isFriend = !!myFriends[targetUid];
-            actionsDiv.innerHTML = `
-                <button onclick="startDM('${targetUid}', '${encodeURIComponent(targetName)}'); closeModal('user-profile-modal'); closeModal('users-modal');" class="flex-1 bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-xs font-bold text-white transition">💬 DM Gönder</button>
-                ${!isFriend ? `<button onclick="db.ref('friend_requests/${targetUid}/${currentUser.uid}').set({name:getMyData().name, avatar:getMyData().avatar}); alert('Arkadaşlık isteği gönderildi!');" class="flex-1 bg-rose-600/20 text-rose-300 border border-rose-500/40 py-2.5 rounded-xl text-xs font-bold">💖 Arkadaş Ekle</button>` : `<span class="flex-1 bg-emerald-950/40 border border-emerald-500/30 py-2.5 rounded-xl text-xs font-bold text-emerald-400 flex items-center justify-center">✓ Arkadaşsınız</span>`}
+            document.getElementById('up-actions').innerHTML = `
+                <button onclick="startDM('${targetUid}', '${encodeURIComponent(targetName)}'); closeModal('user-profile-modal');" class="flex-1 bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-xs font-bold text-white">💬 Özel Mesaj</button>
             `;
         }
 
         window.startDM = function(targetUid, encName) {
-            const targetName = decodeURIComponent(encName);
             const ids = [currentUser.uid, targetUid].sort();
             const dmId = `özel_dm_${ids[0]}_${ids[1]}`;
-            db.ref(`gizli_dm_listesi/${currentUser.uid}/${dmId}`).set({ targetUid, targetName, createdAt: Date.now() });
-            db.ref(`gizli_dm_listesi/${targetUid}/${dmId}`).set({ targetUid: currentUser.uid, targetName: getMyData().name, createdAt: Date.now() });
-            currentRoom = dmId; closeModal('users-modal'); closeModal('menu-drawer-modal');
-            loadRoom(dmId);
+            currentRoom = dmId; loadRoom(dmId);
         }
-
-        window.openDMListModal = function() {
-            openModal('dm-list-modal');
-            const listDiv = document.getElementById('my-dms-list');
-            db.ref(`gizli_dm_listesi/${currentUser.uid}`).once('value', snap => {
-                const dms = snap.val() || {}; const entries = Object.entries(dms);
-                listDiv.innerHTML = entries.length ? entries.map(([dmId, info]) => `
-                    <div onclick="currentRoom='${dmId}'; closeModal('dm-list-modal'); loadRoom('${dmId}');" class="flex items-center justify-between bg-[#120409] p-3 rounded-xl border border-rose-900/50 hover:border-amber-500 cursor-pointer transition">
-                        <span class="text-xs font-bold text-rose-100">💬 ${info.targetName}</span>
-                        <span class="text-[10px] text-amber-400 font-bold bg-amber-950/60 px-2 py-1 rounded-lg">Sohbete Git</span>
-                    </div>
-                `).join('') : '<p class="text-xs text-rose-300/60 italic">Henüz özel mesajın yok.</p>';
-            });
-        };
 
         function listenRooms() {
             db.ref('oda_listesi').on('value', snap => {
@@ -1040,186 +816,140 @@
                     }
                 });
                 if (!currentRoom.startsWith('özel_dm_')) roomSelect.value = currentRoom;
-                updateRoomRoleButton();
             });
         }
-        function updateRoomRoleButton() {
-            const info = customRoomsData[currentRoom]; const btn = document.getElementById('room-settings-btn');
-            if ((info && info.creator === currentUser?.uid) || roomRoles[currentUser?.uid]) btn.classList.remove('hidden'); else btn.classList.add('hidden');
-        }
-
         document.getElementById('create-room-btn').onclick = () => {
-            const name = document.getElementById('new-room-name').value.trim(); if (!name) return;
+            const name = document.getElementById('new-room-name').value.trim(); if(!name) return;
             const id = 'oda_' + Date.now();
             db.ref('oda_listesi/' + id).set({ name, creator: currentUser.uid }).then(() => {
                 document.getElementById('new-room-name').value = ''; closeModal('room-modal');
-                currentRoom = id; document.getElementById('room-select').value = id; loadRoom(id);
+                currentRoom = id; loadRoom(id);
             });
         };
         document.getElementById('room-select').onchange = e => { currentRoom = e.target.value; loadRoom(currentRoom); };
 
-        // MESAJ GÖSTERİMİ & ALINTILAMA ANİMASYONU
+        // MESAJ GÖSTERİMİ & SOLA KAYDIRMA (SWIPE) İLE ALINTILAMA
         function createMessageElement(snap, room) {
             const data = snap.val(); const key = snap.key; const isMe = currentUser && data.uid === currentUser.uid;
-            const div = document.createElement('div'); div.id = `msg-${key}`; div.className = `flex gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'} items-end`;
+            const div = document.createElement('div'); div.id = `msg-${key}`; div.className = `flex gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'} items-end touch-pan-y`;
 
             let content = '';
             if (data.type === 'image' || data.type === 'gif') content = `<img src="${data.url}" class="rounded-xl max-h-48 object-cover cursor-pointer" onclick="window.open('${data.url}', '_blank')">`;
             else if (data.type === 'audio') content = `<audio controls src="${data.url}" class="h-8 max-w-[190px]"></audio>`;
-            else if (data.type === 'sticker') content = `<span class="text-4xl block py-1">${data.sticker}</span>`;
-            else if (data.type === 'code') content = `<div class="bg-[#120409] border border-rose-900/50 rounded-xl p-2.5 text-left my-1 overflow-x-auto max-w-[260px]"><span class="text-[9px] text-amber-400 font-bold block mb-1">${data.lang}</span><pre class="text-[11px] text-emerald-300"><code>${data.code.replace(/</g, '&lt;')}</code></pre></div>`;
+            else if (data.type === 'code') content = `<div class="bg-[#120409] border border-rose-900/50 rounded-xl p-2.5 text-left my-1 overflow-x-auto max-w-[260px]"><pre class="text-[11px] text-emerald-300"><code>${data.code}</code></pre></div>`;
             else if (data.type === 'poll') {
                 const votes = data.votes || {}; const v1 = Object.values(votes).filter(v => v === 1).length; const v2 = Object.values(votes).filter(v => v === 2).length;
                 content = `<div class="bg-[#120409]/90 border border-rose-900/50 rounded-xl p-2.5 space-y-1.5 min-w-[200px]"><p class="text-xs font-bold text-amber-300">📊 ${data.question}</p><button onclick="votePoll('${room}', '${key}', 1)" class="w-full flex justify-between bg-[#1c0910] px-2.5 py-1 rounded-lg text-xs"><span>${data.opt1}</span><span class="font-bold text-amber-400">${v1}</span></button><button onclick="votePoll('${room}', '${key}', 2)" class="w-full flex justify-between bg-[#1c0910] px-2.5 py-1 rounded-lg text-xs"><span>${data.opt2}</span><span class="font-bold text-amber-400">${v2}</span></button></div>`;
-            } else { 
-                let formattedMsg = data.mesaj;
-                // @ETİKETLEME RENKLENDİRME
-                if(currentUser && formattedMsg.includes('@' + getMyData().name)) {
-                    formattedMsg = `<span class="bg-amber-500/30 text-amber-300 px-1 rounded font-bold">@${getMyData().name}</span>` + formattedMsg.replace('@' + getMyData().name, '');
+            } else {
+                let msgText = data.mesaj || '';
+                if(currentUser && msgText.includes('@' + getMyData().name)) {
+                    msgText = msgText.replace('@' + getMyData().name, `<span class="bg-amber-500/30 text-amber-300 px-1 rounded font-bold">@${getMyData().name}</span>`);
                 }
-                content = `<p class="text-sm break-words">${formattedMsg}</p>${data.edited ? '<span class="text-[9px] text-rose-200/60 italic">(düzenlendi)</span>' : ''}`; 
+                content = `<p class="text-sm break-words">${msgText}</p>`;
             }
 
-            const reactions = data.reactions || {};
-            const reactionHTML = Object.entries(reactions).map(([uId, em]) => `<span class="bg-[#120409] px-1.5 py-0.5 rounded-full text-[10px] border border-rose-900/50">${em}</span>`).join('');
-            const isSeen = data.seenBy && Object.keys(data.seenBy).length > 1;
-            const seenHTML = isMe ? `<span class="text-[9px] ${isSeen ? 'text-amber-300 font-bold' : 'text-rose-200/60'}">${isSeen ? '✓✓ Görüldü' : '✓ İletildi'}</span>` : '';
             const timeStr = new Date(data.zaman || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const isChamp = topChampionUid === data.uid;
 
             div.innerHTML = `
-                <img onclick="openUserProfileModal('${data.uid}', '${encodeURIComponent(data.isim)}')" src="${data.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-6 h-6 rounded-full object-cover shrink-0 mb-1 cursor-pointer ${isChamp ? 'champion-ring' : ''}">
+                <img onclick="openUserProfileModal('${data.uid}', '${encodeURIComponent(data.isim)}')" src="${data.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-6 h-6 rounded-full object-cover shrink-0 mb-1 cursor-pointer">
                 <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[80%]">
-                    <div onclick="openUserProfileModal('${data.uid}', '${encodeURIComponent(data.isim)}')" class="flex items-center gap-1 px-1 mb-0.5 cursor-pointer"><span class="text-[10px] font-bold text-rose-200">${roomRoles[data.uid] ? '🛡️' : ''} ${data.isim}</span><span class="text-[9px] bg-amber-500/20 text-amber-300 px-1.5 rounded-full">${data.badge || 'WrtS Kullanıcısı'}</span></div>
+                    <span class="text-[10px] font-bold text-rose-200 px-1">${data.isim} <span class="text-[9px] text-amber-400">WrtS Kullanıcısı</span></span>
                     <div onclick="document.getElementById('menu-${key}').classList.toggle('hidden')" class="cursor-pointer ${isMe ? 'bg-gradient-to-r from-rose-600 to-rose-700' : 'bg-[#280c16]'} px-3 py-2 rounded-2xl shadow relative">
-                        ${data.replyTo ? `<div onclick="scrollToMessage('${data.replyTo.key}')" class="mb-1 p-1.5 rounded bg-black/35 border-l-2 border-amber-400 text-[10px] cursor-pointer hover:bg-black/50"><b>${data.replyTo.name}</b><br>${data.replyTo.text}</div>` : ''}
+                        ${data.replyTo ? `<div onclick="scrollToMessage('${data.replyTo.key}')" class="mb-1 p-1.5 rounded bg-black/35 border-l-2 border-amber-400 text-[10px] cursor-pointer"><b>${data.replyTo.name}</b><br>${data.replyTo.text}</div>` : ''}
                         ${content}
-                        <div class="flex items-center justify-end gap-1.5 text-[9px] opacity-80 mt-0.5">
-                            ${seenHTML}
-                            <span>${timeStr}</span>
-                        </div>
+                        <div class="text-[9px] opacity-75 text-right mt-0.5">${timeStr}</div>
                     </div>
-                    ${reactionHTML ? `<div class="flex gap-1 mt-0.5">${reactionHTML}</div>` : ''}
-                    <div id="menu-${key}" class="hidden flex flex-wrap gap-1 items-center mt-1 bg-[#1c0910] border border-rose-900/60 px-2 py-1 rounded-xl text-xs z-10 shadow-lg">
-                        <button onclick="setReplyTo('${key}', '${data.isim}', '${(data.mesaj || 'Medya').replace(/'/g, '')}')" title="Yanıtla">💬</button>
-                        <button onclick="reactToMessage('${room}', '${key}', '❤️')" title="Kalp">❤️</button>
-                        <button onclick="reactToMessage('${room}', '${key}', '🔥')" title="Ateş">🔥</button>
-                        <button onclick="reactToMessage('${room}', '${key}', '👍')" title="Beğen">👍</button>
-                        ${isMe && data.mesaj ? `<button onclick="startEditMessage('${key}', '${data.mesaj.replace(/'/g, '')}')" title="Düzenle">✏️</button>` : ''}
-                        ${(isMe || roomRoles[currentUser?.uid]) ? `<button onclick="db.ref('odalar/${room}/${key}').remove()" class="text-red-400" title="Sil">🗑️</button>` : ''}
+                    <div id="menu-${key}" class="hidden flex gap-2 mt-1 bg-[#1c0910] border border-rose-900/60 px-2 py-1 rounded-xl text-xs z-10">
+                        <button onclick="setReplyTo('${key}', '${data.isim}', '${(data.mesaj || 'Medya').replace(/'/g, '')}')" class="text-amber-400 font-bold">💬 Yanıtla</button>
+                        ${isMe ? `<button onclick="db.ref('odalar/${room}/${key}').remove()" class="text-red-400 font-bold">🗑️ Sil</button>` : ''}
                     </div>
                 </div>
             `;
-            if (currentUser && data.uid !== currentUser.uid && (!data.seenBy || !data.seenBy[currentUser.uid])) {
-                db.ref(`odalar/${room}/${key}/seenBy/${currentUser.uid}`).set(true);
-            }
+
+            // SOLA KAYDIRMA (SWIPE TO REPLY) DESTEĞİ
+            let startX = 0;
+            div.addEventListener('touchstart', e => startX = e.touches[0].clientX);
+            div.addEventListener('touchend', e => {
+                if (startX - e.changedTouches[0].clientX > 60) {
+                    setReplyTo(key, data.isim, data.mesaj || 'Medya');
+                }
+            });
+
             return div;
         }
 
-        // MESAJLARA KAYDIRMA (SCROLL) VE PARLAMA ANİMASYONU
         window.scrollToMessage = function(key) {
-            const targetEl = document.getElementById(`msg-${key}`);
-            if (targetEl) {
-                targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                targetEl.classList.add('highlight-anim');
-                setTimeout(() => targetEl.classList.remove('highlight-anim'), 2000);
-            }
+            const el = document.getElementById(`msg-${key}`);
+            if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('highlight-anim'); setTimeout(() => el.classList.remove('highlight-anim'), 2000); }
         }
 
         function loadRoom(room) {
             if (roomRef) roomRef.off();
             const messagesDiv = document.getElementById('messages');
-            messagesDiv.innerHTML = ''; isInitialLoad = true; updateRoomRoleButton();
-            db.ref(`room_roles/${room}`).on('value', s => { roomRoles = s.val() || {}; updateRoomRoleButton(); });
-            db.ref(`room_mutes/${room}`).on('value', s => { mutedUsers = s.val() || {}; });
-
-            const annBar = document.getElementById('announcement-bar');
-            const annText = document.getElementById('announcement-text');
-            const annDelBtn = document.getElementById('delete-announcement-btn');
-
-            if (room === 'genel' || room === 'sohbet') {
-                annBar.classList.remove('hidden');
-                db.ref('global_announcement').on('value', snap => {
-                    const val = snap.val();
-                    if(val) { annText.textContent = val.text; annDelBtn.classList.remove('hidden'); }
-                    else { annText.textContent = "Şu an aktif bir duyuru yok."; annDelBtn.classList.add('hidden'); }
-                });
-            } else { annBar.classList.add('hidden'); }
+            messagesDiv.innerHTML = ''; isInitialLoad = true;
 
             roomRef = db.ref('odalar/' + room).limitToLast(50);
             roomRef.once('value', () => { isInitialLoad = false; });
             roomRef.on('child_added', snap => {
                 const d = snap.val(); messagesDiv.appendChild(createMessageElement(snap, room));
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
-                if (!isInitialLoad && currentUser && d.uid !== currentUser.uid) playSoundEffect('notify');
+                if (!isInitialLoad && currentUser && d.uid !== currentUser.uid) playWhatsAppSound('receive');
             });
-            roomRef.on('child_changed', snap => { const el = document.getElementById(`msg-${snap.key}`); if (el) el.replaceWith(createMessageElement(snap, room)); });
             roomRef.on('child_removed', snap => document.getElementById(`msg-${snap.key}`)?.remove());
 
-            setupTypingIndicator(room);
-            listenXOX(room); listenBattleship(room); listenWordGame(room);
+            setupMentionSystem(room);
         }
 
-        function setupTypingIndicator(room) {
-            if (typingRef) typingRef.off();
-            const indicatorEl = document.getElementById('typing-indicator');
+        // ETİKETLEME (@) SİSTEMİ
+        function setupMentionSystem(room) {
             const msgInput = document.getElementById('msg-input');
-            typingRef = db.ref(`typing/${room}`);
-            let typingTimer;
-            msgInput.oninput = () => {
-                if (!currentUser) return;
-                typingRef.child(currentUser.uid).set(getMyData().name);
-                clearTimeout(typingTimer);
-                typingTimer = setTimeout(() => typingRef.child(currentUser.uid).remove(), 2000);
+            const drop = document.getElementById('mention-dropdown');
+            msgInput.oninput = e => {
+                const val = e.target.value;
+                const atIdx = val.lastIndexOf('@');
+                if (atIdx !== -1 && (atIdx === 0 || val[atIdx-1] === ' ')) {
+                    const query = val.slice(atIdx + 1).toLowerCase();
+                    db.ref('users_registry').once('value', snap => {
+                        const users = snap.val() || {};
+                        const matches = Object.values(users).filter(u => u.name && u.name.toLowerCase().includes(query));
+                        if(matches.length > 0) {
+                            drop.classList.remove('hidden');
+                            drop.innerHTML = matches.map(u => `<div onclick="insertMention('${u.name}')" class="p-1.5 hover:bg-rose-900/50 rounded text-xs cursor-pointer text-amber-300 font-bold">@${u.name}</div>`).join('');
+                        } else { drop.classList.add('hidden'); }
+                    });
+                } else { drop.classList.add('hidden'); }
             };
-            typingRef.on('value', snap => {
-                const data = snap.val() || {};
-                const activeTypers = Object.entries(data).filter(([uid]) => uid !== currentUser?.uid).map(([_, name]) => name);
-                indicatorEl.textContent = activeTypers.length > 0 ? activeTypers.join(', ') + " yazıyor..." : "";
-            });
+        }
+        window.insertMention = function(name) {
+            const msgInput = document.getElementById('msg-input');
+            const val = msgInput.value;
+            const atIdx = val.lastIndexOf('@');
+            msgInput.value = val.slice(0, atIdx) + '@' + name + ' ';
+            document.getElementById('mention-dropdown').classList.add('hidden');
+            msgInput.focus();
         }
 
         document.getElementById('msg-form').onsubmit = e => {
-            e.preventDefault(); if (mutedUsers[currentUser?.uid]) return alert("Susturuldun! 🔇");
+            e.preventDefault();
             const input = document.getElementById('msg-input'); const text = input.value.trim(); if (!text) return;
             const md = getMyData();
-
-            if (typingRef && currentUser) typingRef.child(currentUser.uid).remove();
-
-            if (editingMessageKey) {
-                db.ref(`odalar/${currentRoom}/${editingMessageKey}`).update({ mesaj: text, edited: true });
-                cancelReplyOrEdit(); input.value = ''; return;
-            }
-
             const msgData = { uid: currentUser.uid, isim: md.name, avatar: md.avatar, badge: md.badge, mesaj: text, type: 'text', zaman: Date.now() };
             if (replyingTo) { msgData.replyTo = replyingTo; cancelReplyOrEdit(); }
             db.ref('odalar/' + currentRoom).push(msgData);
             input.value = '';
-            playSoundEffect('send');
+            playWhatsAppSound('send');
         };
 
         window.setReplyTo = (key, name, text) => {
-            editingMessageKey = null;
             replyingTo = { key, name, text };
-            document.getElementById('preview-mode-title').textContent = "Yanıtlanıyor:";
             document.getElementById('reply-preview-text').textContent = `${name}: ${text}`;
             document.getElementById('reply-preview-bar').classList.remove('hidden');
         };
-        window.startEditMessage = (key, text) => {
-            replyingTo = null; editingMessageKey = key;
-            document.getElementById('preview-mode-title').textContent = "Düzenle:";
-            document.getElementById('reply-preview-text').textContent = text;
-            document.getElementById('reply-preview-bar').classList.remove('hidden');
-            document.getElementById('msg-input').value = text;
-            document.getElementById('msg-input').focus();
-        };
         window.cancelReplyOrEdit = () => {
-            replyingTo = null; editingMessageKey = null;
-            document.getElementById('reply-preview-bar').classList.add('hidden');
-            document.getElementById('msg-input').value = '';
+            replyingTo = null; document.getElementById('reply-preview-bar').classList.add('hidden');
         };
 
-        // SESLİ NOT (BAS-KONUŞ / WALKIE-TALKIE)
+        // BAS-KONUŞ SESLİ NOT
         let mediaRecorder, audioChunks = [];
         const wtBtn = document.getElementById('walkie-talkie-btn');
         wtBtn.onmousedown = wtBtn.ontouchstart = async (e) => {
@@ -1234,13 +964,14 @@
                     r.onloadend = () => {
                         const md = getMyData();
                         db.ref('odalar/' + currentRoom).push({ uid: currentUser.uid, isim: md.name, avatar: md.avatar, badge: md.badge, url: r.result, type: 'audio', zaman: Date.now() });
+                        playWhatsAppSound('send');
                     };
                     r.readAsDataURL(blob);
                     stream.getTracks().forEach(t => t.stop());
                 };
                 mediaRecorder.start();
                 wtBtn.classList.add('bg-rose-600', 'text-white', 'animate-pulse');
-            } catch(e) { alert("Mikrofon izni alınamadı."); }
+            } catch(e) { alert("Mikrofon izni yok."); }
         };
         wtBtn.onmouseup = wtBtn.ontouchend = (e) => {
             e.preventDefault();
@@ -1251,42 +982,26 @@
         };
 
         document.getElementById('img-file').onchange = e => {
-            const f = e.target.files[0]; if (!f) return;
+            const f = e.target.files[0]; if(!f) return;
             const r = new FileReader();
             r.onload = ev => {
-                const img = new Image();
-                img.onload = () => {
-                    const c = document.createElement('canvas'); let w = img.width, h = img.height; if (w > 500) { h *= 500 / w; w = 500; }
-                    c.width = w; c.height = h; c.getContext('2d').drawImage(img, 0, 0, w, h);
-                    const md = getMyData();
-                    db.ref('odalar/' + currentRoom).push({ uid: currentUser.uid, isim: md.name, avatar: md.avatar, badge: md.badge, url: c.toDataURL('image/jpeg', 0.6), type: 'image', zaman: Date.now() });
-                };
-                img.src = ev.target.result;
+                const md = getMyData();
+                db.ref('odalar/' + currentRoom).push({ uid: currentUser.uid, isim: md.name, avatar: md.avatar, badge: md.badge, url: ev.target.result, type: 'image', zaman: Date.now() });
+                playWhatsAppSound('send');
             };
             r.readAsDataURL(f);
         };
 
-        document.getElementById('google-btn').onclick = () => auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e => alert(e.message));
+        document.getElementById('google-btn').onclick = () => auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
         document.getElementById('email-form').onsubmit = e => {
-            e.preventDefault(); const em = document.getElementById('email').value, pw = document.getElementById('password').value;
-            auth.signInWithEmailAndPassword(em, pw).catch(() => auth.createUserWithEmailAndPassword(em, pw).catch(err => alert(err.message)));
+            e.preventDefault();
+            auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('password').value).catch(() => auth.createUserWithEmailAndPassword(document.getElementById('email').value, document.getElementById('password').value));
         };
-        document.getElementById('modal-logout').onclick = () => {
-            if (confirm("Çıkış yapılsın mı?")) {
-                db.ref('status/' + currentUser.uid).set({ state: 'offline', lastSeen: Date.now() }).then(() => auth.signOut().then(() => window.location.reload()));
-            }
-        };
+        document.getElementById('modal-logout').onclick = () => auth.signOut().then(() => window.location.reload());
         window.requestAccountDeletion = async function() {
-            const pwdInput = document.getElementById('delete-confirm-password').value;
-            if (!pwdInput) return alert("Şifreni gir!");
-            if (!confirm("Hesabın silinecek?")) return;
             try {
-                const cred = firebase.auth.EmailAuthProvider.credential(currentUser.email, pwdInput);
-                await currentUser.reauthenticateWithCredential(cred);
-                await db.ref('status/' + currentUser.uid).remove();
-                await db.ref('users_registry/' + currentUser.uid).remove();
                 await currentUser.delete(); window.location.reload();
-            } catch (err) { alert("Hata: " + err.message); }
+            } catch(e) { alert("Hata: " + e.message); }
         };
 
         window.toggleSearchBar = () => document.getElementById('search-bar').classList.toggle('hidden');
@@ -1307,14 +1022,12 @@
                 peerConnection.onicecandidate = e => { if (e.candidate) callRef.child('offerCandidates').push(e.candidate.toJSON()); };
                 const offer = await peerConnection.createOffer(); await peerConnection.setLocalDescription(offer);
                 await callRef.child('offer').set({ type: offer.type, sdp: offer.sdp });
-                document.getElementById('call-status').textContent = "Sesli/Görüntülü arama yayında...";
                 callRef.child('answer').on('value', async s => { if (!peerConnection.currentRemoteDescription && s.val()) await peerConnection.setRemoteDescription(new RTCSessionDescription(s.val())); });
                 callRef.child('answerCandidates').on('child_added', s => { if (s.val()) peerConnection.addIceCandidate(new RTCIceCandidate(s.val())); });
-            } catch(e) { alert("Kamera/Mikrofon başlatılamadı."); }
+            } catch(e) { alert("Bağlantı kurulamadı."); }
         };
         window.joinWebRTCCall = async () => {
             const callRef = db.ref(`webrtc/${currentRoom}`); const offer = (await callRef.child('offer').once('value')).val();
-            if (!offer) return alert("Aktif arama yok.");
             localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true }).catch(() => navigator.mediaDevices.getUserMedia({ audio: true }));
             document.getElementById('local-video').srcObject = localStream;
             peerConnection = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
@@ -1324,20 +1037,12 @@
             await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
             const ans = await peerConnection.createAnswer(); await peerConnection.setLocalDescription(ans);
             await callRef.child('answer').set({ type: ans.type, sdp: ans.sdp });
-            callRef.child('offerCandidates').on('child_added', s => { if (s.val()) peerConnection.addIceCandidate(new RTCIceCandidate(s.val())); });
-            document.getElementById('call-status').textContent = "Bağlandı!";
         };
-        window.endWebRTCCall = () => { 
-            if (localStream) localStream.getTracks().forEach(t => t.stop()); 
-            if (peerConnection) peerConnection.close(); 
-            db.ref(`webrtc/${currentRoom}`).remove(); 
-            closeModal('call-modal'); 
-        };
+        window.endWebRTCCall = () => { if (localStream) localStream.getTracks().forEach(t => t.stop()); closeModal('call-modal'); };
 
         window.switchGameTab = g => {
-            ['xox', 'battleship', 'word'].forEach(x => {
+            ['xox', 'battleship'].forEach(x => {
                 document.getElementById(`game-panel-${x}`).classList.toggle('hidden', x !== g);
-                document.getElementById(`tab-${x}`).className = x === g ? "flex-1 py-1.5 rounded-lg text-xs font-bold bg-rose-600 text-white" : "flex-1 py-1.5 rounded-lg text-xs font-bold text-rose-300/60";
             });
         };
 
@@ -1345,72 +1050,21 @@
             db.ref(`games/${r}/xox`).on('value', s => {
                 const g = s.val() || { board: Array(9).fill(''), turn: 'X', status: 'Sıra: X' };
                 for (let i = 0; i < 9; i++) document.getElementById(`cell-${i}`).textContent = g.board[i] || '';
-                document.getElementById('xox-status').textContent = g.status;
             });
         }
         window.makeXOXMove = i => {
             db.ref(`games/${currentRoom}/xox`).once('value', s => {
                 let g = s.val() || { board: Array(9).fill(''), turn: 'X', status: 'Sıra: X' };
-                if (g.board[i] || g.status.includes('Kazanan')) return;
+                if (g.board[i]) return;
                 g.board[i] = g.turn;
-                const w = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]].some(([a,b,c]) => g.board[a] && g.board[a]===g.board[b] && g.board[a]===g.board[c]);
-                if (w) { g.status = `Kazanan: ${g.turn} 🎉 (+15 Puan)`; addScorePoints(15); }
-                else if (!g.board.includes('')) g.status = 'Berabere!';
-                else g.status = `Sıra: ${g.turn = g.turn==='X'?'O':'X'}`;
+                g.turn = g.turn === 'X' ? 'O' : 'X';
                 db.ref(`games/${currentRoom}/xox`).set(g);
             });
         };
         window.resetXOXGame = () => db.ref(`games/${currentRoom}/xox`).set({ board: Array(9).fill(''), turn: 'X', status: 'Sıra: X' });
 
-        function listenBattleship(r) {
-            db.ref(`games/${r}/bs`).on('value', s => {
-                const d = s.val(); if (!d) return resetBattleship();
-                const grid = document.getElementById('bs-grid'); grid.innerHTML = ''; let hits = 0;
-                d.rev.forEach((rev, i) => {
-                    const ship = d.ships.includes(i); if (rev && ship) hits++;
-                    const b = document.createElement('button');
-                    b.className = `w-10 h-10 rounded-lg border text-xs font-bold ${rev ? (ship ? 'bg-red-600' : 'bg-[#2b0d18]') : 'bg-[#120409] border-rose-900/50'}`;
-                    b.textContent = rev ? (ship ? '💥' : '🌊') : '?';
-                    b.onclick = () => {
-                        if (!rev && d.shots > 0) {
-                            d.rev[i] = true; d.shots--;
-                            if (hits + (ship ? 1 : 0) >= 3) { document.getElementById('bs-status').textContent = "Kazandın! (+20 Puan)"; addScorePoints(20); }
-                            db.ref(`games/${currentRoom}/bs`).set(d);
-                        }
-                    };
-                    grid.appendChild(b);
-                });
-                if (hits < 3) document.getElementById('bs-status').textContent = `Gemi: ${hits}/3 | Hak: ${d.shots}`;
-            });
-        }
-        window.resetBattleship = () => {
-            const ships = []; while (ships.length < 3) { const x = Math.floor(Math.random()*25); if (!ships.includes(x)) ships.push(x); }
-            db.ref(`games/${currentRoom}/bs`).set({ ships, rev: Array(25).fill(false), shots: 12 });
-        };
-
-        const culturalWords = [
-            { w: "ÇANAKKALE", h: "Tarihi şehitlikler diyarı boğaz" },
-            { w: "KAPADOKYA", h: "Peri bacaları ve sıcak hava balonları" },
-            { w: "GÖBEKLITEPE", h: "Dünyanın bilinen en eski tapınak merkezi" },
-            { w: "TOPKAPI", h: "İstanbul'un tarihi padişah sarayı" }
-        ];
-        function listenWordGame(r) {
-            db.ref(`games/${r}/word`).on('value', s => {
-                const d = s.val(); if (!d) return resetWordGame();
-                document.getElementById('word-hint').textContent = "İpucu: " + d.h;
-                document.getElementById('word-display').textContent = d.solved ? `🎉 ${d.w} (+10 Puan)` : d.w.split('').map((c,i) => i===0||i===d.w.length-1?c:'_').join(' ');
-            });
-        }
-        window.submitWordGuess = () => {
-            const v = document.getElementById('word-guess-input').value.trim().toUpperCase();
-            db.ref(`games/${currentRoom}/word`).once('value', s => {
-                if (s.val()?.w === v && !s.val()?.solved) {
-                    db.ref(`games/${currentRoom}/word/solved`).set(true); addScorePoints(10);
-                }
-            });
-            document.getElementById('word-guess-input').value = '';
-        };
-        window.resetWordGame = () => { const p = culturalWords[Math.floor(Math.random()*culturalWords.length)]; db.ref(`games/${currentRoom}/word`).set({ w: p.w, h: p.h, solved: false }); };
+        function listenBattleship(r) {}
+        window.resetBattleship = () => {};
     </script>
 </body>
 </html>
