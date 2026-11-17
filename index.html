@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WrtS - Fixed & Clean</title>
+    <title>WrtS - Fixed & Final</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -343,7 +343,6 @@
                 <button onclick="resetXOXGame()" class="w-full bg-[#2b0d18] hover:bg-rose-900/50 py-2 rounded-xl text-xs font-bold text-rose-200 transition">Oyunu Sıfırla</button>
             </div>
 
-            <!-- AMİRAL BATTI DÜZELTİLDİ -->
             <div id="game-panel-battleship" class="hidden space-y-3 py-2">
                 <p id="bs-status" class="text-xs text-amber-300 font-bold">3 gizli gemiyi bul! Kalan Hak: <span id="bs-shots">10</span></p>
                 <div id="bs-grid" class="grid grid-cols-5 gap-1.5 w-60 mx-auto"></div>
@@ -1032,6 +1031,7 @@
             }
         };
 
+        // MESAJ ELEMENTİ (Emoji bırakma ve geri çekme tamir edildi)
         function createMessageElement(snap, room) {
             const data = snap.val(); const key = snap.key; const isMe = currentUser && data.uid === currentUser.uid;
             
@@ -1064,6 +1064,20 @@
                 seenHtml = `<span class="text-[10px] ${isSeen ? 'text-sky-400 font-bold' : 'text-rose-200/60'} ml-1" title="${isSeen ? 'Görüldü' : 'İletildi'}">${isSeen ? '✓✓' : '✓'}</span>`;
             }
 
+            // Emojiler HTML oluşturma
+            const reactions = data.reactions || {};
+            let reactionsHtml = '';
+            const reactionCounts = {};
+            Object.entries(reactions).forEach(([uId, emo]) => {
+                reactionCounts[emo] = (reactionCounts[emo] || 0) + 1;
+            });
+            if(Object.keys(reactionCounts).length > 0) {
+                reactionsHtml = `<div class="flex flex-wrap gap-1 mt-1">` + Object.entries(reactionCounts).map(([emo, count]) => {
+                    const reactedByMe = reactions[currentUser?.uid] === emo;
+                    return `<span onclick="toggleReaction('${room}', '${key}', '${emo}')" class="text-[11px] bg-[#120409]/80 border ${reactedByMe ? 'border-amber-400 text-amber-300' : 'border-rose-900/40 text-rose-200'} px-1.5 py-0.5 rounded-full cursor-pointer">${emo} ${count}</span>`;
+                }).join('') + `</div>`;
+            }
+
             div.innerHTML = `
                 <img onclick="openUserProfileModal('${data.uid}', '${encodeURIComponent(data.isim)}')" src="${data.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-6 h-6 rounded-full object-cover shrink-0 mb-1 cursor-pointer">
                 <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[80%]">
@@ -1073,10 +1087,20 @@
                         ${content}
                         <div class="text-[9px] opacity-75 text-right mt-0.5 flex items-center justify-end gap-1"><span>${timeStr}</span>${seenHtml}</div>
                     </div>
-                    <div id="menu-${key}" class="hidden flex gap-2 mt-1 bg-[#1c0910] border border-rose-900/60 p-2 rounded-xl text-xs z-10 shadow-xl">
-                        <button onclick="setReplyTo('${key}', '${data.isim}', '${safePreview}')" class="text-amber-400 font-bold">Yanıtla</button>
-                        ${isMe && data.type === 'text' ? `<button onclick="startEditMessage('${key}', '${safePreview}')" class="text-sky-400 font-bold">Düzenle</button>` : ''}
-                        ${isMe ? `<button onclick="db.ref('odalar/${room}/${key}').remove()" class="text-red-400 font-bold">Sil</button>` : ''}
+                    ${reactionsHtml}
+                    <div id="menu-${key}" class="hidden flex flex-col gap-1.5 mt-1 bg-[#1c0910] border border-rose-900/60 p-2.5 rounded-xl text-xs z-10 shadow-xl">
+                        <div class="flex gap-2 border-b border-rose-900/40 pb-1.5">
+                            <button onclick="toggleReaction('${room}', '${key}', '❤️')" class="hover:scale-125 transition">❤️</button>
+                            <button onclick="toggleReaction('${room}', '${key}', '🔥')" class="hover:scale-125 transition">🔥</button>
+                            <button onclick="toggleReaction('${room}', '${key}', '😂')" class="hover:scale-125 transition">😂</button>
+                            <button onclick="toggleReaction('${room}', '${key}', '👍')" class="hover:scale-125 transition">👍</button>
+                            <button onclick="toggleReaction('${room}', '${key}', '🎉')" class="hover:scale-125 transition">🎉</button>
+                        </div>
+                        <div class="flex gap-2 pt-0.5">
+                            <button onclick="setReplyTo('${key}', '${data.isim}', '${safePreview}')" class="text-amber-400 font-bold">Yanıtla</button>
+                            ${isMe && data.type === 'text' ? `<button onclick="startEditMessage('${key}', '${safePreview}')" class="text-sky-400 font-bold">Düzenle</button>` : ''}
+                            ${isMe ? `<button onclick="db.ref('odalar/${room}/${key}').remove()" class="text-red-400 font-bold">Sil</button>` : ''}
+                        </div>
                     </div>
                 </div>
             `;
@@ -1095,6 +1119,20 @@
             };
 
             return div;
+        }
+
+        // EMOJI EKLEME VE GERİ ÇEKME FONKSİYONU
+        window.toggleReaction = function(room, key, emo) {
+            if(!currentUser) return;
+            const ref = db.ref(`odalar/${room}/${key}/reactions/${currentUser.uid}`);
+            ref.once('value', snap => {
+                if(snap.val() === emo) {
+                    ref.remove(); // Aynı emojiyse geri çek/kaldır
+                } else {
+                    ref.set(emo); // Yeni emoji ekle veya değiştir
+                }
+            });
+            document.getElementById(`menu-${key}`)?.classList.add('hidden');
         }
 
         window.scrollToMessage = function(key) {
@@ -1258,13 +1296,14 @@
             r.readAsDataURL(f);
         };
 
+        // SESLİ MESAJ (WALKIE-TALKIE) SORUNSUZ FORMAT VE KAYIT MANTIĞI
         let mediaRecorder, audioChunks = [];
         const wtBtn = document.getElementById('walkie-talkie-btn');
         wtBtn.onmousedown = wtBtn.ontouchstart = async (e) => {
             e.preventDefault();
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' }); 
+                mediaRecorder = new MediaRecorder(stream); 
                 audioChunks = [];
                 mediaRecorder.ondataavailable = ev => { if(ev.data.size > 0) audioChunks.push(ev.data); };
                 mediaRecorder.onstop = () => {
@@ -1400,7 +1439,6 @@
         };
         window.resetXOXGame = () => db.ref(`games/${currentRoom}/xox`).set({ board: Array(9).fill(''), turn: 'X', winner: '' });
 
-        // AMİRAL BATTI MANTIĞI DÜZELTİLDİ (10 hak sınırı ve skor/istatistik ayrımı)
         function listenBattleship() {
             db.ref(`games/${currentRoom}/bs`).on('value', s => {
                 let g = s.val();
