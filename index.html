@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WrtS - Clean & Fixed</title>
+    <title>WrtS - Ultimate Clean</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -317,7 +317,7 @@
         </div>
     </div>
 
-    <!-- OYUN SALONU (Hile korumalı, optimize edilmiş XOX ve Amiral Battı) -->
+    <!-- OYUN SALONU (Hile korumalı ve optimize edilmiş) -->
     <div id="games-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-md space-y-3 text-center">
             <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">🎮 Oyun Salonu</h3><button onclick="closeModal('games-modal')">✕</button></div>
@@ -478,7 +478,7 @@
             return res;
         }
 
-        // Skorları ve İstatistikleri Sıfırla (0 olarak zorla)
+        // Skor ve İstatistikler Kesin Sıfırlama
         window.loadStats = function() {
             if(!currentUser) return;
             db.ref(`stats/${currentUser.uid}`).once('value', s => {
@@ -489,7 +489,6 @@
         }
         function incrementUserStat(field, amount = 1) {
             if(!currentUser) return;
-            // Sınırsız puan kasılmasını engellemek için sadece mesaj sayısını normal artırıyoruz, skor hile korumalı
             db.ref(`stats/${currentUser.uid}/${field}`).transaction(cur => (cur || 0) + amount);
         }
 
@@ -1025,7 +1024,7 @@
             }
         };
 
-        // MESAJ ELEMENTİ
+        // MESAJ ELEMENTİ (Sola kaydırarak yanıtlama / Swipe to reply dahil)
         function createMessageElement(snap, room) {
             const data = snap.val(); const key = snap.key; const isMe = currentUser && data.uid === currentUser.uid;
             const div = document.createElement('div'); div.id = `msg-${key}`; div.className = `flex gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'} items-end transition-transform duration-150 select-none`;
@@ -1047,13 +1046,6 @@
             const timeStr = new Date(data.zaman || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             const safePreview = (data.mesaj || 'Medya').replace(/'/g, '').replace(/"/g, '');
 
-            let reactionsHtml = '';
-            if (data.reactions) {
-                const counts = {};
-                Object.values(data.reactions).forEach(emo => counts[emo] = (counts[emo] || 0) + 1);
-                reactionsHtml = `<div class="flex gap-1 mt-1 flex-wrap">${Object.entries(counts).map(([emo, cnt]) => `<span onclick="toggleReaction('${room}', '${key}', '${emo}')" class="bg-black/50 border border-rose-900/40 text-[10px] px-2 py-0.5 rounded-full cursor-pointer hover:border-red-500 transition">${emo} ${cnt}</span>`).join('')}</div>`;
-            }
-
             div.innerHTML = `
                 <img onclick="openUserProfileModal('${data.uid}', '${encodeURIComponent(data.isim)}')" src="${data.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-6 h-6 rounded-full object-cover shrink-0 mb-1 cursor-pointer">
                 <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[80%]">
@@ -1063,19 +1055,10 @@
                         ${content}
                         <div class="text-[9px] opacity-75 text-right mt-0.5">${timeStr}</div>
                     </div>
-                    ${reactionsHtml}
-                    <div id="menu-${key}" class="hidden flex flex-col gap-1.5 mt-1 bg-[#1c0910] border border-rose-900/60 p-2 rounded-xl text-xs z-10 shadow-xl">
-                        <div class="flex gap-2 border-b border-rose-900/40 pb-1.5">
-                            <button onclick="toggleReaction('${room}', '${key}', '❤️')" class="hover:scale-125 transition">❤️</button>
-                            <button onclick="toggleReaction('${room}', '${key}', '🔥')" class="hover:scale-125 transition">🔥</button>
-                            <button onclick="toggleReaction('${room}', '${key}', '😂')" class="hover:scale-125 transition">😂</button>
-                            <button onclick="toggleReaction('${room}', '${key}', '👍')" class="hover:scale-125 transition">👍</button>
-                        </div>
-                        <div class="flex gap-2">
-                            <button onclick="setReplyTo('${key}', '${data.isim}', '${safePreview}')" class="text-amber-400 font-bold">Alıntıla</button>
-                            ${isMe && data.type === 'text' ? `<button onclick="startEditMessage('${key}', '${safePreview}')" class="text-sky-400 font-bold">Düzenle</button>` : ''}
-                            ${isMe ? `<button onclick="db.ref('odalar/${room}/${key}').remove()" class="text-red-400 font-bold">Sil</button>` : ''}
-                        </div>
+                    <div id="menu-${key}" class="hidden flex gap-2 mt-1 bg-[#1c0910] border border-rose-900/60 p-2 rounded-xl text-xs z-10 shadow-xl">
+                        <button onclick="setReplyTo('${key}', '${data.isim}', '${safePreview}')" class="text-amber-400 font-bold">Yanıtlama</button>
+                        ${isMe && data.type === 'text' ? `<button onclick="startEditMessage('${key}', '${safePreview}')" class="text-sky-400 font-bold">Düzenle</button>` : ''}
+                        ${isMe ? `<button onclick="db.ref('odalar/${room}/${key}').remove()" class="text-red-400 font-bold">Sil</button>` : ''}
                     </div>
                 </div>
             `;
@@ -1084,6 +1067,7 @@
                 document.getElementById(`menu-${key}`).classList.toggle('hidden');
             };
 
+            // Sola kaydırarak yanıtlama (Swipe to reply)
             let startX = 0;
             div.ontouchstart = e => startX = e.touches[0].clientX;
             div.ontouchend = e => {
@@ -1094,20 +1078,6 @@
             };
 
             return div;
-        }
-
-        window.toggleReaction = function(room, key, emoji) {
-            if(!currentUser) return;
-            const ref = db.ref(`odalar/${room}/${key}/reactions/${currentUser.uid}`);
-            ref.once('value', snap => {
-                if (snap.val() === emoji) {
-                    ref.remove();
-                } else {
-                    ref.set(emoji);
-                }
-            });
-            const menuEl = document.getElementById(`menu-${key}`);
-            if(menuEl) menuEl.classList.add('hidden');
         }
 
         window.scrollToMessage = function(key) {
@@ -1168,7 +1138,6 @@
             indicator.textContent = others.length > 0 ? `${others.join(', ')} yazıyor...` : '';
         });
 
-        // @ai Etiketlendiğinde Bilgilendirici ve Hazır Olmadığını Belirten Açıklama
         function getAISystemNotice() {
             return "🤖 **WrtS AI Bilgilendirme:** Yapay zeka asistanı modülü şu an geliştirilme aşamasındadır ve tam olarak aktif değildir. Yakında güncellenmiş özellikleriyle sizlerle olacak!";
         }
@@ -1191,7 +1160,6 @@
             db.ref('odalar/' + currentRoom).push(msgData);
             incrementUserStat('msgs', 1);
 
-            // @ai Etiketlendiğinde Bilgilendirici Açıklama Gönderimi
             if(cleanText.includes('@ai')) {
                 setTimeout(() => {
                     db.ref('odalar/' + currentRoom).push({
@@ -1312,7 +1280,6 @@
             document.querySelectorAll('#messages > div').forEach(el => el.style.display = el.innerText.toLowerCase().includes(t) ? 'flex' : 'none');
         };
 
-        // GÖRÜNTÜLÜ / SESLİ & EKRAN PAYLAŞIMI (WebRTC)
         let localStream, peerConnection;
         window.startWebRTCCall = async (video) => {
             try {
@@ -1380,7 +1347,7 @@
             closeModal('call-modal');
         };
 
-        // OYUN SALONU (Hile korumalı, optimize edilmiş XOX ve Amiral Battı mantığı)
+        // OYUN SALONU (XOX ve Amiral Battı Hatasız Mantık)
         window.switchGameTab = g => {
             ['xox', 'battleship'].forEach(x => {
                 document.getElementById(`game-panel-${x}`).classList.toggle('hidden', x !== g);
