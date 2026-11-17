@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WrtS - Ultra Clean & Fixed</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <style>
+        body { 
+            overscroll-behavior-y: none; 
+            background: radial-gradient(circle at top right, #2e0916, #14050a 45%, #090306 100%);
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-thumb { background: #e11d48; border-radius: 4px; }
+        pre code { font-family: 'Courier New', Courier, monospace; }
+        
+        @keyframes championGlow {
+            0% { border-color: #f59e0b; box-shadow: 0 0 8px rgba(245,158,11,0.6); }
+            50% { border-color: #fb7185; box-shadow: 0 0 18px rgba(251,113,133,0.9); }
+            100% { border-color: #f59e0b; box-shadow: 0 0 8px rgba(245,158,11,0.6); }
+        }
+        .champion-ring { border: 2.5px solid #f59e0b !important; animation: championGlow 2s infinite; }
+
+        @keyframes messageHighlight {
+            0% { background-color: rgba(245, 158, 11, 0.6); }
+            100% { background-color: transparent; }
+        }
+        .highlight-anim { animation: messageHighlight 2s ease-out; }
+
+        @keyframes snowfall {
+            0% { transform: translateY(-10px) translateX(0); opacity: 0.8; }
+            100% { transform: translateY(100vh) translateX(15px); opacity: 0.2; }
+        }
+        .snowflake { position: absolute; top: -10px; background: #ffe4e6; border-radius: 50%; pointer-events: none; z-index: 5; animation: snowfall linear infinite; }
+
+        @keyframes riseUp {
+            0% { transform: translateY(0) scale(1); opacity: 0.9; }
+            100% { transform: translateY(-100vh) scale(0.3); opacity: 0; }
+        }
+        .particle-up { position: absolute; bottom: -10px; border-radius: 50%; pointer-events: none; z-index: 5; animation: riseUp linear infinite; }
+    </style>
+</head>
+<body id="app-body" class="text-rose-50 h-[100dvh] w-full overflow-hidden flex flex-col justify-between relative">
+
+    <!-- GİRİŞ EKRANI (Sadeleştirildi) -->
+    <div id="login-screen" class="fixed inset-0 bg-[#0d0407]/95 z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-[#1c0910] border border-rose-900/60 p-6 rounded-3xl w-full max-w-sm space-y-4 shadow-2xl backdrop-blur-md">
+            <h1 class="text-2xl font-black text-center text-rose-100 tracking-wider">WrtS Giriş</h1>
+            <form id="email-form" class="space-y-3">
+                <input type="email" id="email" placeholder="E-posta adresi" required class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500">
+                <input type="password" id="password" placeholder="Şifre" required class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500">
+                <button type="submit" class="w-full bg-rose-700 hover:bg-rose-600 py-3 rounded-xl font-bold text-sm transition shadow-lg text-white">Giriş Yap / Kayıt Ol</button>
+            </form>
+            <div class="text-center text-xs text-rose-300/50">veya</div>
+            <button id="google-btn" type="button" class="w-full bg-white text-slate-900 hover:bg-rose-50 py-3 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2">
+                <span>Google ile Giriş Yap</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ÜST BAR -->
+    <header id="main-header" class="bg-[#1a070e]/95 backdrop-blur border-b border-rose-900/60 px-3 py-2.5 flex items-center justify-between gap-2 shrink-0 z-20 shadow-lg">
+        <div class="flex items-center gap-2 shrink-0">
+            <button onclick="openModal('menu-drawer-modal')" class="relative bg-[#2b0d18] hover:bg-rose-900/50 text-amber-400 p-2 rounded-xl text-base font-bold flex items-center justify-center transition" title="Menü">
+                ☰
+                <span id="header-menu-dot" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full animate-ping"></span>
+            </button>
+            <span class="font-black text-base text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-rose-400 tracking-wider">WrtS</span>
+            <select id="room-select" class="bg-[#120409] border border-rose-900/60 text-xs rounded-xl px-2.5 py-1.5 text-amber-300 font-semibold focus:outline-none max-w-[115px] truncate">
+                <option value="genel"># Genel</option>
+                <option value="sohbet"># Muhabbet</option>
+                <option value="oyun"># Oyun</option>
+            </select>
+            <button onclick="openModal('room-modal')" class="bg-amber-500/20 text-amber-400 border border-amber-500/30 w-7 h-7 rounded-xl flex items-center justify-center font-bold text-sm shrink-0">+</button>
+            <button id="room-settings-btn" onclick="openRoomRolesModal()" class="hidden bg-rose-600/20 text-rose-400 border border-rose-500/30 w-7 h-7 rounded-xl flex items-center justify-center text-xs shrink-0" title="Moderatör">🛡️</button>
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+            <button onclick="toggleSearchBar()" class="bg-[#2b0d18] text-rose-200 p-2 rounded-xl text-xs font-bold">🔍</button>
+            <button onclick="openModal('users-modal'); loadOnlineUsersList();" class="relative bg-[#2b0d18] px-2.5 py-1.5 rounded-xl border border-rose-800/60 text-xs text-emerald-400 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span id="online-count">1</span>
+                <span id="req-badge" class="hidden absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">!</span>
+            </button>
+            <button onclick="openMyProfile()" class="flex items-center gap-1 bg-[#2b0d18] p-1 rounded-full border border-rose-800/60">
+                <img id="header-avatar" src="" class="w-6 h-6 rounded-full object-cover">
+            </button>
+        </div>
+    </header>
+
+    <!-- MESAJ ARAMA ÇUBUĞU -->
+    <div id="search-bar" class="hidden bg-[#1a070e] border-b border-rose-900/60 px-4 py-2 flex items-center gap-2 w-full mx-auto shrink-0 z-20">
+        <input type="text" id="msg-search-input" placeholder="Sohbette ara..." class="flex-1 bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-1.5 text-xs focus:outline-none">
+        <button onclick="toggleSearchBar()" class="text-xs text-rose-300 px-2">Kapat</button>
+    </div>
+
+    <!-- DUYURU BANNER ALANI -->
+    <div id="announcement-bar" class="hidden bg-gradient-to-r from-amber-950 via-[#2b0d18] to-amber-950 border-b border-amber-500/40 px-3 py-2 flex items-center justify-between text-xs shrink-0 z-15 shadow-md">
+        <div class="flex items-center gap-2 overflow-hidden flex-1">
+            <span class="text-amber-400 font-bold shrink-0">📢 Duyuru:</span>
+            <span id="announcement-text" class="text-amber-100 truncate font-medium">Duyuru yok.</span>
+        </div>
+        <div class="flex items-center gap-1.5 shrink-0 ml-2">
+            <button onclick="openModal('announcement-modal')" class="bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-1 rounded-lg text-[10px] font-bold">+ Duyuru</button>
+            <button id="delete-announcement-btn" onclick="deleteAnnouncement()" class="hidden text-rose-300 font-bold text-[10px] bg-rose-900/60 px-2 py-1 rounded-lg">Sil</button>
+        </div>
+    </div>
+
+    <!-- DM BİLGİ ÇUBUĞU -->
+    <div id="dm-banner" class="hidden bg-rose-950/90 border-b border-rose-500/40 px-3 py-1.5 flex items-center justify-between text-xs shrink-0 z-15">
+        <span id="dm-banner-text" class="text-rose-200 font-bold">💬 Özel Sohbet</span>
+        <button onclick="exitDM()" class="bg-rose-600/30 text-rose-200 px-2.5 py-0.5 rounded-lg text-[10px] font-bold">Genel Odalara Dön</button>
+    </div>
+
+    <!-- MESAJ ALANI & DİNAMİK ARKA PLAN -->
+    <div class="flex-1 relative overflow-hidden flex flex-col">
+        <div id="dynamic-bg-container" class="absolute inset-0 pointer-events-none overflow-hidden z-0"></div>
+        <main id="messages" class="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 w-full max-w-4xl mx-auto z-10 relative"></main>
+    </div>
+
+    <!-- YAZIYOR BİLGİSİ -->
+    <div id="typing-indicator" class="px-4 py-1 text-[11px] text-amber-300/80 italic w-full max-w-4xl mx-auto h-6 shrink-0 z-20"></div>
+
+    <!-- YANITLANAN VEYA DÜZENLENEN ÖNİZLEME -->
+    <div id="reply-preview-bar" class="hidden w-full max-w-4xl mx-auto px-4 py-1.5 bg-[#1a070e] border-t border-rose-900/60 flex justify-between items-center shrink-0 z-20">
+        <div class="flex items-center gap-2 truncate text-xs">
+            <span id="preview-mode-title" class="text-amber-400 font-bold">Yanıtlanıyor:</span>
+            <span id="reply-preview-text" class="text-rose-200 truncate"></span>
+        </div>
+        <button onclick="cancelReplyOrEdit()" class="text-rose-300 font-bold text-xs px-2">✕</button>
+    </div>
+
+    <!-- ETİKETLENECEK KULLANICILAR -->
+    <div id="mention-dropdown" class="hidden absolute bottom-16 left-4 bg-[#1c0910] border border-amber-500/50 rounded-xl p-2 w-52 shadow-2xl z-30 max-h-40 overflow-y-auto"></div>
+
+    <!-- EKSTRA ARAÇLAR -->
+    <div id="tools-drawer" class="hidden bg-[#1a070e] border-t border-rose-900/60 p-2.5 w-full max-w-4xl mx-auto grid grid-cols-5 gap-2 shrink-0 z-20">
+        <button type="button" onclick="document.getElementById('img-file').click(); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-[#120409] p-2 rounded-xl border border-rose-900/50 text-xs"><span>🖼️</span><span class="text-[10px]">Fotoğraf</span></button>
+        <button type="button" onclick="openModal('gif-modal'); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-[#120409] p-2 rounded-xl border border-rose-900/50 text-xs"><span>🎞️</span><span class="text-[10px]">GIF</span></button>
+        <button type="button" onclick="openModal('sticker-modal'); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-[#120409] p-2 rounded-xl border border-rose-900/50 text-xs"><span>✨</span><span class="text-[10px]">Sticker</span></button>
+        <button type="button" onclick="openModal('code-modal'); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-[#120409] p-2 rounded-xl border border-rose-900/50 text-xs"><span>💻</span><span class="text-[10px]">Kod</span></button>
+        <button type="button" onclick="openModal('poll-modal'); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-[#120409] p-2 rounded-xl border border-rose-900/50 text-xs"><span>📊</span><span class="text-[10px]">Anket</span></button>
+    </div>
+
+    <!-- ALT ÇUBUK -->
+    <footer id="main-footer" class="bg-[#1a070e] border-t border-rose-900/60 p-2 sm:p-3 w-full max-w-4xl mx-auto shrink-0 z-20">
+        <form id="msg-form" class="flex items-center gap-1.5 w-full">
+            <button type="button" onclick="toggleToolsDrawer()" class="w-9 h-9 rounded-full bg-[#2b0d18] text-amber-400 font-black text-lg flex items-center justify-center shrink-0">+</button>
+            <button type="button" id="walkie-talkie-btn" class="w-9 h-9 rounded-full bg-[#2b0d18] text-rose-400 flex items-center justify-center shrink-0 text-sm" title="Bas-Konuş Sesli Not">🎙️</button>
+            <input type="file" id="img-file" accept="image/*" class="hidden">
+            <input type="text" id="msg-input" placeholder="Mesaj yaz, @ai yaz veya etiketle..." autocomplete="off" class="flex-1 min-w-0 bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
+            <button type="submit" class="bg-gradient-to-r from-rose-600 to-amber-600 px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm text-white shadow">Gönder</button>
+        </form>
+    </footer>
+
+    <!-- ==================== MODALLAR ==================== -->
+
+    <!-- HIZLI MENÜ -->
+    <div id="menu-drawer-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3 max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">🧭 WrtS Menü</h3><button onclick="closeModal('menu-drawer-modal')">✕</button></div>
+            <div class="grid grid-cols-2 gap-2 pt-1">
+                <button onclick="closeModal('menu-drawer-modal'); openDMListModal();" class="relative bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left">
+                    <span>💬</span> Özel DM 
+                    <span id="menu-inbox-dot" class="hidden w-2.5 h-2.5 rounded-full bg-red-500 ml-auto"></span>
+                </button>
+                <button onclick="closeModal('menu-drawer-modal'); openModal('voice-channel-modal');" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎙️</span> Sesli Kanal</button>
+                <button onclick="closeModal('menu-drawer-modal'); openModal('whiteboard-modal'); initWhiteboard();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎨</span> Ortak Tahta</button>
+                <button onclick="closeModal('menu-drawer-modal'); openCinemaModal();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎬</span> Ortak Sinema</button>
+                <button onclick="closeModal('menu-drawer-modal'); openModal('games-modal'); initGames();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎮</span> Oyun Salonu</button>
+                <button onclick="closeModal('menu-drawer-modal'); openModal('leaderboard-modal'); loadLeaderboard();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🏆</span> Skor Tablosu</button>
+                <button onclick="closeModal('menu-drawer-modal'); openModal('stats-modal'); loadStats();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>📊</span> İstatistikler</button>
+                <button onclick="closeModal('menu-drawer-modal'); openMyProfile();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left col-span-2"><span>👤</span> Profilim & Rozetler</button>
+                <!-- Kurucuya özel rozet yönetim paneli -->
+                <button id="admin-badge-btn" onclick="closeModal('menu-drawer-modal'); openModal('badge-admin-modal'); loadBadgeAdminList();" class="hidden bg-amber-500/20 border border-amber-500/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-amber-300 text-left col-span-2"><span>👑</span> Rozet Yönetim Paneli (Kurucu)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DUYURU MODALI -->
+    <div id="announcement-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#1c0910] border border-amber-500/40 rounded-3xl p-5 w-full max-w-sm space-y-3">
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">📢 Duyuru Yayınla</h3><button onclick="closeModal('announcement-modal')">✕</button></div>
+            <textarea id="announcement-input" rows="3" placeholder="Duyuru metni yazın..." class="w-full bg-[#120409] border border-rose-900/60 rounded-xl p-3 text-xs focus:outline-none"></textarea>
+            <button onclick="publishAnnouncement()" class="w-full bg-gradient-to-r from-amber-600 to-rose-600 py-2.5 rounded-xl text-xs font-bold text-white">Yayınla</button>
+        </div>
+    </div>
+
+    <!-- DİSCORD TARZI SESLİ KANAL MODALI (Düzeltildi) -->
+    <div id="voice-channel-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-4 text-center">
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">🎙️ Sesli Kanal</h3><button onclick="closeModal('voice-channel-modal')">✕</button></div>
+            <p id="vc-status" class="text-xs text-rose-200">Kanala bağlı kimse yok.</p>
+            <div id="vc-members-list" class="space-y-2 bg-[#120409] p-3 rounded-2xl min-h-[80px]"></div>
+            <div class="flex gap-2">
+                <button onclick="joinVoiceChannel()" class="flex-1 bg-emerald-600 py-2.5 rounded-xl text-xs font-bold text-white">Kanala Katıl</button>
+                <button onclick="leaveVoiceChannel()" class="flex-1 bg-red-600/30 text-red-400 py-2.5 rounded-xl text-xs font-bold">Ayrıl</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- KURUCU ÖZEL ROZET YÖNETİMİ -->
+    <div id="badge-admin-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#1c0910] border border-amber-500/50 rounded-3xl p-5 w-full max-w-sm space-y-4 max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">👑 Rozet Ver / Kaldır</h3><button onclick="closeModal('badge-admin-modal')">✕</button></div>
+            <div id="badge-admin-users-list" class="space-y-2"></div>
+        </div>
+    </div>
+
+    <!-- 2 ADIMLI HESAP SİLME MODALI -->
+    <div id="delete-account-modal" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#1c0910] border border-red-600/60 rounded-3xl p-5 w-full max-w-sm space-y-4 text-center">
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-red-500">⚠️ Hesap Silme (2 Adımlı)</h3><button onclick="closeModal('delete-account-modal')">✕</button></div>
+            <div id="del-step-1" class="space-y-3">
+                <p class="text-xs text-rose-200">Hesabınızı kalıcı olarak silmek istiyor musunuz? Bu işlem geri alınamaz.</p>
+                <button onclick="proceedToDeleteStep2()" class="w-full bg-red-600 hover:bg-red-700 py-2.5 rounded-xl text-xs font-bold text-white">Evet, Devam Et</button>
+            </div>
+            <div id="del-step-2" class="hidden space-y-3">
+                <p class="text-xs text-amber-400 font-bold">Son Adım: Lütfen şifrenizi girerek onaylayın.</p>
+                <input type="password" id="del-confirm-pass" placeholder="Şifreniz" class="w-full bg-[#120409] border border-red-900 rounded-xl px-3 py-2 text-xs focus:outline-none">
+                <button onclick="executeAccountDeletion()" class="w-full bg-red-700 py-2.5 rounded-xl text-xs font-bold text-white shadow-lg">Hesabımı Kalıcı Olarak Sil</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- İSTATİSTİK PANELI -->
+    <div id="stats-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3">
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">📊 Kullanıcı İstatistikleri</h3><button onclick="closeModal('stats-modal')">✕</button></div>
+            <div class="bg-[#120409] p-4 rounded-2xl space-y-2.5 text-xs">
+                <div class="flex justify-between"><span class="text-rose-300">Toplam Mesaj:</span><span id="stat-msgs" class="font-bold text-amber-400">0</span></div>
+                <div class="flex justify-between"><span class="text-rose-300">Kazanılan Skor:</span><span id="stat-score" class="font-bold text-amber-400">0</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KULLANICI PROFİL KARTI -->
+    <div id="user-profile-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-6 w-full max-w-sm space-y-4 text-center relative shadow-2xl">
+            <button onclick="closeModal('user-profile-modal')" class="absolute top-4 right-4 text-rose-300 font-bold">✕</button>
+            <div class="flex flex-col items-center gap-2">
+                <img id="up-avatar" src="" class="w-20 h-20 rounded-full object-cover border-2 border-amber-500 shadow-xl">
+                <h3 id="up-name" class="font-black text-lg text-rose-50 mt-1"></h3>
+                <span id="up-bio" class="text-xs text-rose-300 italic">WrtS Kullanıcısı</span>
+                <div id="up-badges-container" class="flex flex-wrap gap-1 pt-1 justify-center"></div>
+            </div>
+            <div class="bg-[#120409] p-3.5 rounded-2xl border border-rose-900/50 space-y-2.5 text-left text-xs">
+                <div class="flex justify-between items-center"><span class="text-rose-300/70">Durum:</span><span id="up-status-text" class="font-bold text-emerald-400">Çevrimiçi</span></div>
+                <div class="flex justify-between items-center"><span class="text-rose-300/70">Son Görülme:</span><span id="up-last-seen" class="text-rose-100">Az önce</span></div>
+            </div>
+            <div id="up-actions" class="flex gap-2 pt-1"></div>
+        </div>
+    </div>
+
+    <!-- ORTAK SİNEMA -->
+    <div id="music-modal" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center p-3">
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-4 w-full max-w-md space-y-2.5 max-h-[95vh] flex flex-col">
+            <div class="flex justify-between items-center shrink-0">
+                <div class="flex items-center gap-2">
+                    <h3 class="font-bold text-amber-400 text-sm">🎬 Ortak Sinema & Playlist</h3>
+                    <button id="cinema-mute-btn" onclick="toggleCinemaMute()" class="bg-rose-950 text-rose-300 border border-rose-700/50 px-2 py-0.5 rounded-lg text-[10px] font-bold">🔕 Sessiz</button>
+                </div>
+                <button onclick="closeModal('music-modal')" class="text-rose-300 font-bold">✕</button>
+            </div>
+            <div class="flex gap-1.5 shrink-0">
+                <input type="text" id="yt-url-input" placeholder="YouTube linki yapıştır..." class="flex-1 bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-1.5 text-xs">
+                <button onclick="syncYoutubeVideo()" class="bg-gradient-to-r from-rose-600 to-amber-600 px-3 py-1.5 rounded-xl text-xs font-bold text-white">Ekle</button>
+            </div>
+            <div class="aspect-video bg-black rounded-2xl overflow-hidden border border-rose-900/50 relative shrink-0 shadow-xl">
+                <div id="yt-player-frame" class="w-full h-full"></div>
+            </div>
+            <div class="flex items-center justify-between gap-1 shrink-0">
+                <p id="music-sync-info" class="text-[11px] text-rose-200/70 truncate flex-1">Sinema salonu boş.</p>
+                <button onclick="forceSyncAllToMyTime()" class="bg-amber-600/30 text-amber-300 border border-amber-500/40 px-2 py-1 rounded-lg text-[10px] font-bold shrink-0">🔄 Senkron</button>
+                <button onclick="stopAndDeleteMusic()" class="bg-rose-950 text-rose-300 border border-rose-700/50 px-2 py-1 rounded-lg text-[10px] font-bold shrink-0">Kapat</button>
+            </div>
+            <div class="flex-1 bg-[#120409] border border-rose-900/50 rounded-2xl p-2.5 flex flex-col min-h-[100px] max-h-[130px]">
+                <div id="cinema-messages" class="flex-1 overflow-y-auto space-y-1.5 pr-1 text-xs"></div>
+                <form onsubmit="sendCinemaMessage(event)" class="flex gap-1 mt-1.5 shrink-0">
+                    <input type="text" id="cinema-msg-input" placeholder="Film hakkında yaz..." autocomplete="off" class="flex-1 bg-[#1c0910] border border-rose-900/50 rounded-lg px-2.5 py-1 text-xs focus:outline-none">
+                    <button type="submit" class="bg-amber-600 px-2.5 py-1 rounded-lg text-xs font-bold text-white">At</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- KULLANICILAR & ARKADAŞLAR -->
+    <div id="users-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-4 max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">Kullanıcılar & Arkadaşlar</h3><button onclick="closeModal('users-modal')">✕</button></div>
+            <div id="friend-requests-section" class="hidden">
+                <h4 class="text-xs font-bold text-amber-400 mb-2">📩 İstekler</h4>
+                <div id="friend-requests-list" class="space-y-2 mb-2"></div>
+            </div>
+            <div>
+                <h4 class="text-xs font-bold text-rose-400 mb-2">💖 Arkadaşlarım</h4>
+                <div id="my-friends-list" class="space-y-2"></div>
+            </div>
+            <hr class="border-rose-900/50">
+            <div>
+                <h4 class="text-xs font-bold text-amber-300 mb-2">👥 Tüm Üyeler</h4>
+                <div id="all-users-list" class="space-y-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SKOR TABLOSU (Sıfırlandı) -->
+    <div id="leaderboard-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-4 max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">🏆 Skor Tablosu</h3><button onclick="closeModal('leaderboard-modal')">✕</button></div>
+            <div id="leaderboard-list" class="space-y-2"></div>
+        </div>
+    </div>
+
+    <!-- ÖZEL DM LİSTESİ -->
+    <div id="dm-list-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3 max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">💬 Özel Mesajlarım (DM)</h3><button onclick="closeModal('dm-list-modal')">✕</button></div>
+            <div id="my-dms-list" class="space-y-2 pt-1"></div>
+        </div>
+    </div>
+
+    <!-- ORTAK TAHTA -->
+    <div id="whiteboard-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-3">
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-4 w-full max-w-md space-y-3">
+            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">🎨 Ortak Tahta</h3><button onclick="closeModal('whiteboard-modal')">✕</button></div>
+            <div class="flex justify-between items-center">
+                <div class="flex gap-1.5 items-center">
+                    <button onclick="wbColor='#fbbf24'; wbIsEraser=false;" class="w-6 h-6 rounded-full bg-amber-400 border border-white"></button>
+                    <button onclick="wbColor='#f43f5e'; wbIsEraser=false;" class="w-6 h-6 rounded-full bg-rose-500 border border-white"></button>
+                    <button onclick="wbColor='#34d399'; wbIsEraser=false;" class="w-6 h-6 rounded-full bg-emerald-400 border border-white"></button>
+                    <button onclick="wbIsEraser=true;" class="bg-rose-900/60 border border-rose-500 px-2 py-0.5 rounded text-[10px] font-bold text-rose-200">Silgi</button>
+                </div>
+                <button onclick="clearWhiteboard()" class="bg-red-500/20 text-red-400 px-2.5 py-1 rounded-lg text-xs font-bold">Temizle</button>
+            </div>
+            <canvas id="wb-canvas" width="340" height="280" class="w-full bg-[#120409] border border-rose-900/60 rounded-2xl touch-none cursor-crosshair"></canvas>
+        </div>
+    </div>
+
+    <!-- OYUN SALONU (Sıfırdan Yenilendi ve Hatalar Giderildi) -->
+    <div id="games-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-md space-y-3 text-center">
+            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">🎮 Oyun Salonu</h3><button onclick="closeModal('games-modal')">✕</button></div>
+            <div class="flex gap-1 bg-[#120409] p-1 rounded-xl">
+                <button onclick="switchGameTab('xox')" id="tab-xox" class="flex-1 py-1.5 rounded-lg text-xs font-bold bg-rose-600 text-white">XOX</button>
+                <button onclick="switchGameTab('battleship')" id="tab-battleship" class="flex-1 py-1.5 rounded-lg text-xs font-bold text-rose-300/60">Amiral Battı</button>
+            </div>
+            
+            <!-- XOX Oyunu -->
+            <div id="game-panel-xox" class="space-y-2">
+                <p id="xox-status" class="text-xs text-amber-300 font-bold">Sıra: X</p>
+                <div class="grid grid-cols-3 gap-1.5 w-48 mx-auto">
+                    <button onclick="makeXOXMove(0)" id="cell-0" class="w-14 h-14 bg-[#120409] border border-rose-900/50 rounded-xl font-black text-xl text-amber-400"></button>
+                    <button onclick="makeXOXMove(1)" id="cell-1" class="w-14 h-14 bg-[#120409] border border-rose-900/50 rounded-xl font-black text-xl text-amber-400"></button>
+                    <button onclick="makeXOXMove(2)" id="cell-2" class="w-14 h-14 bg-[#120409] border border-rose-900/50 rounded-xl font-black text-xl text-amber-400"></button>
+                    <button onclick="makeXOXMove(3)" id="cell-3" class="w-14 h-14 bg-[#120409] border border-rose-900/50 rounded-xl font-black text-xl text-amber-400"></button>
+                    <button onclick="makeXOXMove(4)" id="cell-4" class="w-14 h-14 bg-[#120409] border border-rose-900/50 rounded-xl font-black text-xl text-amber-400"></button>
+                    <button onclick="makeXOXMove(5)" id="cell-5" class="w-14 h-14 bg-[#120409] border border-rose-900/50 rounded-xl font-black text-xl text-amber-400"></button>
+                    <button onclick="makeXOXMove(6)" id="cell-6" class="w-14 h-14 bg-[#120409] border border-rose-900/50 rounded-xl font-black text-xl text-amber-400"></button>
+                    <button onclick="makeXOXMove(7)" id="cell-7" class="w-14 h-14 bg-[#120409] border border-rose-900/50 rounded-xl font-black text-xl text-amber-400"></button>
+                    <button onclick="makeXOXMove(8)" id="cell-8" class="w-14 h-14 bg-[#120409] border border-rose-900/50 rounded-xl font-black text-xl text-amber-400"></button>
+                </div>
+                <button onclick="resetXOXGame()" class="w-full bg-[#2b0d18] py-2 rounded-xl text-xs font-bold text-rose-200">XOX Sıfırla</button>
+            </div>
+
+            <!-- Amiral Battı Oyunu -->
+            <div id="game-panel-battleship" class="hidden space-y-2">
+                <p id="bs-status" class="text-xs text-amber-300 font-bold">3 gizli gemiyi bul!</p>
+                <div id="bs-grid" class="grid grid-cols-5 gap-1.5 w-60 mx-auto"></div>
+                <button onclick="resetBattleship()" class="w-full bg-[#2b0d18] py-2 rounded-xl text-xs font-bold text-rose-200">Yeni Harita</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- YARDIMCI MODALLAR -->
+    <div id="gif-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-md space-y-3 max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">🎞️ GIF Seç</h3><button onclick="closeModal('gif-modal')">✕</button></div>
+            <div id="gif-grid" class="grid grid-cols-2 gap-2"></div>
+        </div>
+    </div>
+
+    <div id="sticker-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3">
+            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">✨ Sticker</h3><button onclick="closeModal('sticker-modal')">✕</button></div>
+            <div id="sticker-grid" class="grid grid-cols-4 gap-2 pt-1 text-2xl text-center"></div>
+        </div>
+    </div>
+
+    <div id="code-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-md space-y-3">
+            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">💻 Kod Paylaş</h3><button onclick="closeModal('code-modal')">✕</button></div>
+            <textarea id="code-content-input" rows="5" placeholder="Kodunu buraya yapıştır..." class="w-full bg-[#120409] border border-rose-900/50 rounded-xl p-3 text-xs font-mono"></textarea>
+            <button onclick="sendCodeSnippet()" class="w-full bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-xs font-bold text-white">Gönder</button>
+        </div>
+    </div>
+
+    <div id="poll-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3">
+            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">📊 Anket Oluştur</h3><button onclick="closeModal('poll-modal')">✕</button></div>
+            <input type="text" id="poll-question" placeholder="Soru..." class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
+            <input type="text" id="poll-opt1" placeholder="Seçenek 1" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
+            <input type="text" id="poll-opt2" placeholder="Seçenek 2" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
+            <button onclick="createPoll()" class="w-full bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-xs font-bold text-white">Başlat</button>
+        </div>
+    </div>
+
+    <div id="room-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3">
+            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">Yeni Oda Kur</h3><button onclick="closeModal('room-modal')">✕</button></div>
+            <input type="text" id="new-room-name" placeholder="Oda adı..." maxlength="20" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-sm">
+            <button id="create-room-btn" class="w-full bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-sm font-bold text-white">Oluştur</button>
+        </div>
+    </div>
+
+    <div id="roles-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3 max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">🛡️ Oda Moderasyonu</h3><button onclick="closeModal('roles-modal')">✕</button></div>
+            <div id="room-members-roles-list" class="space-y-2"></div>
+            <button onclick="deleteCurrentRoom()" class="w-full bg-red-600/20 text-red-400 py-2 rounded-xl text-xs font-bold">Bu Odayı Sil</button>
+        </div>
+    </div>
+
+    <!-- PROFİLİM & AYARLAR (Hesap Silme Eklendi) -->
+    <div id="profile-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">Profilim & Ayarlar</h3><button onclick="closeModal('profile-modal')">✕</button></div>
+            <div class="flex flex-col items-center gap-2">
+                <img id="preview-avatar" src="" class="w-16 h-16 rounded-full object-cover border-2 border-amber-500">
+                <input type="file" id="upload-avatar-file" accept="image/*" class="hidden">
+                <button type="button" onclick="document.getElementById('upload-avatar-file').click()" class="bg-[#2b0d18] text-xs px-3 py-1 rounded-lg">Fotoğraf Değiştir</button>
+            </div>
+            <div>
+                <label class="block text-[11px] text-rose-300/70">Görünen Ad</label>
+                <input type="text" id="edit-name" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
+            </div>
+            <div>
+                <label class="block text-[11px] text-rose-300/70">Kişisel Biyografi</label>
+                <input type="text" id="edit-bio" placeholder="Kendinden bahset..." class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
+            </div>
+            <div>
+                <label class="block text-[11px] text-rose-300/70">Arka Plan Efekti</label>
+                <select id="bg-effect-select" onchange="changeBgEffect(this.value)" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs text-amber-300 font-semibold">
+                    <option value="snow">❄️ Kar Yağışı</option>
+                    <option value="cyber">🌆 Cyber Gece Şehri</option>
+                    <option value="fire">🔥 Kızıl Ateş Parçacıkları</option>
+                    <option value="space">🌌 Yıldızlı Uzay</option>
+                </select>
+            </div>
+            <div class="flex gap-2 pt-1">
+                <button id="save-profile" class="flex-1 bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-xs font-bold text-white">Kaydet</button>
+                <button id="modal-logout" class="bg-amber-600/20 text-amber-400 px-3 py-2.5 rounded-xl text-xs font-bold">Çıkış</button>
+            </div>
+            <hr class="border-rose-900/50 my-2">
+            <button onclick="openDeleteAccountModal()" class="w-full bg-red-600/20 hover:bg-red-600/40 text-red-400 py-2.5 rounded-xl text-xs font-bold transition">⚠️ 2 Adımlı Hesap Silme</button>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCz5KvCtJFPgmk-7bLWY-aIoGz1MXMGrWg",
+            authDomain: "wrts-46aaf.firebaseapp.com",
+            databaseURL: "https://wrts-46aaf-default-rtdb.firebaseio.com",
+            projectId: "wrts-46aaf",
+            storageBucket: "wrts-46aaf.firebasestorage.app",
+            messagingSenderId: "627981661221",
+            appId: "1:627981661221:web:5635a97ba39a9032cb7bcc"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        let currentUser = null;
+        let currentRoom = 'genel';
+        let roomRef = null;
+        let customRoomsData = {};
+        let activeUsersData = {};
+        let myFriends = {};
+        let tempBase64Avatar = null;
+        let replyingTo = null;
+        let editingMessageKey = null;
+        let isInitialLoad = true;
+        let topChampionUid = null;
+        let ytPlayer = null;
+        let ytApiReady = false;
+        let wbColor = '#fbbf24';
+        let wbIsEraser = false;
+        let cinemaMuted = false;
+
+        const ADMIN_EMAIL = "efeurasefecan42@gmail.com"; // Senin mail adresin kurucu yetkisi için
+
+        function onYouTubeIframeAPIReady() { ytApiReady = true; }
+
+        const badWords = ["küfür1", "küfür2", "amk", "aq", "orospu", "piç"];
+        function filterBadWords(txt) {
+            let res = txt;
+            badWords.forEach(w => {
+                const reg = new RegExp(w, 'gi');
+                res = res.replace(reg, '***');
+            });
+            return res;
+        }
+
+        db.ref('leaderboard').on('value', snap => {
+            const data = snap.val() || {};
+            const sorted = Object.entries(data).sort((a,b) => b[1].score - a[1].score);
+            topChampionUid = (sorted.length > 0 && sorted[0][1].score > 0) ? sorted[0][0] : null;
+            updateChampionRings();
+        });
+        function updateChampionRings() {
+            const headerAv = document.getElementById('header-avatar');
+            if(currentUser && topChampionUid === currentUser.uid) headerAv.classList.add('champion-ring');
+            else headerAv.classList.remove('champion-ring');
+        }
+
+        window.loadStats = function() {
+            if(!currentUser) return;
+            db.ref(`stats/${currentUser.uid}`).once('value', s => {
+                const st = s.val() || { msgs: 0, score: 0 };
+                document.getElementById('stat-msgs').textContent = st.msgs || 0;
+                document.getElementById('stat-score').textContent = st.score || 0;
+            });
+        }
+        function incrementUserStat(field, amount = 1) {
+            if(!currentUser) return;
+            db.ref(`stats/${currentUser.uid}/${field}`).transaction(cur => (cur || 0) + amount);
+        }
+
+        // SESLİ KANAL DÜZELTME & İYİLEŞTİRME
+        window.joinVoiceChannel = function() {
+            if(!currentUser) return;
+            const md = getMyData();
+            db.ref(`voice_channel/${currentUser.uid}`).set({ name: md.name, avatar: md.avatar, time: Date.now() });
+            document.getElementById('vc-status').textContent = "Sesli kanaldasın!";
+        }
+        window.leaveVoiceChannel = function() {
+            if(!currentUser) return;
+            db.ref(`voice_channel/${currentUser.uid}`).remove();
+            document.getElementById('vc-status').textContent = "Kanaldan ayrıldın.";
+        }
+        db.ref('voice_channel').on('value', snap => {
+            const members = snap.val() || {};
+            const list = document.getElementById('vc-members-list');
+            const entries = Object.entries(members);
+            if(entries.length > 0) {
+                list.innerHTML = entries.map(([_, u]) => `<div class="flex items-center gap-2 text-xs font-bold text-emerald-400"><img src="${u.avatar}" class="w-5 h-5 rounded-full object-cover"> <span>${u.name} (Aktif Ses)</span></div>`).join('');
+            } else {
+                list.innerHTML = '<span class="text-xs text-rose-300/60 italic">Kanalda kimse yok.</span>';
+            }
+        });
+
+        // 2 ADIMLI HESAP SİLME
+        window.openDeleteAccountModal = function() {
+            closeModal('profile-modal');
+            openModal('delete-account-modal');
+            document.getElementById('del-step-1').classList.remove('hidden');
+            document.getElementById('del-step-2').classList.add('hidden');
+            document.getElementById('del-confirm-pass').value = '';
+        }
+        window.proceedToDeleteStep2 = function() {
+            document.getElementById('del-step-1').classList.add('hidden');
+            document.getElementById('del-step-2').classList.remove('hidden');
+        }
+        window.executeAccountDeletion = function() {
+            const pass = document.getElementById('del-confirm-pass').value;
+            if(!pass) return alert("Lütfen şifrenizi girin.");
+            const user = auth.currentUser;
+            const cred = firebase.auth.EmailAuthProvider.credential(user.email, pass);
+            user.reauthenticateWithCredential(cred).then(() => {
+                const uid = user.uid;
+                db.ref(`users_registry/${uid}`).remove();
+                db.ref(`status/${uid}`).remove();
+                db.ref(`stats/${uid}`).remove();
+                db.ref(`leaderboard/${uid}`).remove();
+                user.delete().then(() => {
+                    alert("Hesabınız kalıcı olarak silindi.");
+                    window.location.reload();
+                }).catch(err => alert("Silme hatası: " + err.message));
+            }).catch(() => alert("Şifre hatalı! Hesap silinemedi."));
+        }
+
+        // SADECE SENİN (KURUCU) ROZET VERME / ALMA YETKİN
+        window.loadBadgeAdminList = function() {
+            const listDiv = document.getElementById('badge-admin-users-list');
+            db.ref('users_registry').once('value', snap => {
+                const users = snap.val() || {};
+                listDiv.innerHTML = Object.entries(users).map(([uid, info]) => `
+                    <div class="flex items-center justify-between bg-[#120409] p-2.5 rounded-xl border border-rose-900/50">
+                        <div class="flex items-center gap-2">
+                            <img src="${info.avatar}" class="w-7 h-7 rounded-full object-cover">
+                            <span class="text-xs font-bold text-rose-100">${info.name}</span>
+                        </div>
+                        <div class="flex gap-1">
+                            <button onclick="grantBadge('${uid}', '👑 Kurucu')" class="bg-amber-600 text-white text-[10px] px-2 py-1 rounded font-bold">Kurucu</button>
+                            <button onclick="grantBadge('${uid}', '⭐ VIP')" class="bg-rose-600 text-white text-[10px] px-2 py-1 rounded font-bold">VIP</button>
+                            <button onclick="removeBadge('${uid}')" class="bg-red-600/30 text-red-400 text-[10px] px-2 py-1 rounded font-bold">Kaldır</button>
+                        </div>
+                    </div>
+                `).join('');
+            });
+        }
+        window.grantBadge = function(uid, badgeName) {
+            db.ref(`users_registry/${uid}/badge`).set(badgeName).then(() => alert("Rozet güncellendi!"));
+        }
+        window.removeBadge = function(uid) {
+            db.ref(`users_registry/${uid}/badge`).remove().then(() => alert("Rozet kaldırıldı!"));
+        }
+
+        function initBgEffect(type) {
+            const c = document.getElementById('dynamic-bg-container');
+            c.innerHTML = '';
+            if (type === 'snow') {
+                for (let i = 0; i < 24; i++) {
+                    const flake = document.createElement('div');
+                    flake.className = 'snowflake';
+                    flake.style.left = Math.random() * 100 + '%';
+                    flake.style.width = (Math.random() * 4 + 2) + 'px';
+                    flake.style.height = flake.style.width;
+                    flake.style.animationDuration = (Math.random() * 5 + 3) + 's';
+                    flake.style.animationDelay = (Math.random() * 5) + 's';
+                    c.appendChild(flake);
+                }
+            } else if (type === 'fire' || type === 'cyber') {
+                for (let i = 0; i < 20; i++) {
+                    const p = document.createElement('div');
+                    p.className = 'particle-up';
+                    p.style.left = Math.random() * 100 + '%';
+                    p.style.width = (Math.random() * 4 + 2) + 'px';
+                    p.style.height = p.style.width;
+                    p.style.background = type === 'cyber' ? '#38bdf8' : '#f43f5e';
+                    p.style.boxShadow = type === 'cyber' ? '0 0 8px #38bdf8' : '0 0 8px #f43f5e';
+                    p.style.animationDuration = (Math.random() * 4 + 2) + 's';
+                    p.style.animationDelay = (Math.random() * 4) + 's';
+                    c.appendChild(p);
+                }
+            } else if (type === 'space') {
+                for (let i = 0; i < 35; i++) {
+                    const s = document.createElement('div');
+                    s.className = 'absolute bg-white rounded-full animate-pulse';
+                    s.style.left = Math.random() * 100 + '%';
+                    s.style.top = Math.random() * 100 + '%';
+                    s.style.width = (Math.random() * 2.5 + 1) + 'px';
+                    s.style.height = s.style.width;
+                    s.style.animationDuration = (Math.random() * 3 + 1) + 's';
+                    c.appendChild(s);
+                }
+            }
+        }
+        window.changeBgEffect = function(val) {
+            if(currentUser) localStorage.setItem('wrts_bgef_' + currentUser.uid, val);
+            initBgEffect(val);
+        }
+
+        window.openModal = id => document.getElementById(id).classList.remove('hidden');
+        window.closeModal = id => document.getElementById(id).classList.add('hidden');
+        window.toggleToolsDrawer = () => document.getElementById('tools-drawer').classList.toggle('hidden');
+        window.openMyProfile = function() { loadUserDataToUI(); openModal('profile-modal'); }
+
+        function playWhatsAppSound(type) {
+            if(cinemaMuted && type === 'receive') return;
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                const now = ctx.currentTime;
+                if (type === 'send') {
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(750, now); osc.frequency.exponentialRampToValueAtTime(1150, now + 0.08);
+                    gain.gain.setValueAtTime(0.12, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
+                    osc.start(now); osc.stop(now + 0.11);
+                } else if (type === 'receive') {
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(1150, now); osc.frequency.exponentialRampToValueAtTime(850, now + 0.09);
+                    gain.gain.setValueAtTime(0.12, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+                    osc.start(now); osc.stop(now + 0.14);
+                }
+            } catch(e) {}
+        }
+
+        window.publishAnnouncement = function() {
+            const text = document.getElementById('announcement-input').value.trim();
+            if(!text) return;
+            db.ref(`announcements/${currentRoom}`).set({ text: filterBadWords(text), by: getMyData().name, time: Date.now() }).then(() => {
+                document.getElementById('announcement-input').value = '';
+                closeModal('announcement-modal');
+            });
+        }
+        window.deleteAnnouncement = () => db.ref(`announcements/${currentRoom}`).remove();
+
+        window.openCinemaModal = () => openModal('music-modal');
+        window.toggleCinemaMute = function() {
+            cinemaMuted = !cinemaMuted;
+            const btn = document.getElementById('cinema-mute-btn');
+            btn.textContent = cinemaMuted ? "🔔 Ses Aç" : "🔕 Sessiz";
+        }
+        window.sendCinemaMessage = function(e) {
+            e.preventDefault();
+            const inp = document.getElementById('cinema-msg-input');
+            const val = inp.value.trim();
+            if(!val || !currentUser) return;
+            db.ref('cinema_chat').push({ isim: getMyData().name, mesaj: filterBadWords(val), zaman: Date.now() });
+            inp.value = '';
+        }
+        window.syncYoutubeVideo = function() {
+            const url = document.getElementById('yt-url-input').value.trim();
+            const match = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+            if (!match) return alert("Geçerli YouTube linki gir!");
+            db.ref('global_cinema').set({ videoId: match[1], by: getMyData().name, startTime: Date.now(), seekSec: 0 });
+            document.getElementById('yt-url-input').value = '';
+        }
+        window.forceSyncAllToMyTime = function() {
+            if(ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
+                const sec = Math.floor(ytPlayer.getCurrentTime());
+                db.ref('global_cinema').update({ seekSec: sec, startTime: Date.now() });
+            }
+        }
+        window.stopAndDeleteMusic = () => db.ref('global_cinema').remove();
+
+        db.ref('global_cinema').on('value', s => {
+            const d = s.val();
+            const container = document.getElementById('yt-player-frame');
+            if (d && d.videoId) {
+                document.getElementById('music-sync-info').textContent = `🎬 ${d.by} oynatıyor`;
+                openCinemaModal();
+                const elapsed = Math.floor((Date.now() - (d.startTime || Date.now())) / 1000) + (d.seekSec || 0);
+                if (ytApiReady && YT && YT.Player) {
+                    if (!ytPlayer || !ytPlayer.loadVideoById) {
+                        container.innerHTML = '<div id="yt-api-target"></div>';
+                        ytPlayer = new YT.Player('yt-api-target', {
+                            height: '100%', width: '100%', videoId: d.videoId,
+                            playerVars: { autoplay: 1, start: elapsed, playsinline: 1 }
+                        });
+                    } else {
+                        ytPlayer.loadVideoById({ videoId: d.videoId, startSeconds: elapsed });
+                    }
+                } else {
+                    container.innerHTML = `<iframe class="w-full h-full" src="https://www.youtube.com/embed/${d.videoId}?autoplay=1&start=${elapsed}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+                }
+            } else {
+                if(ytPlayer && ytPlayer.destroy) { ytPlayer.destroy(); ytPlayer = null; }
+                container.innerHTML = "";
+                document.getElementById('music-sync-info').textContent = "Sinema salonu boş.";
+            }
+        });
+
+        db.ref('cinema_chat').limitToLast(25).on('child_added', snap => {
+            const m = snap.val();
+            const cBox = document.getElementById('cinema-messages');
+            if(cBox) {
+                const p = document.createElement('div');
+                p.className = "bg-[#1c0910] px-2 py-1 rounded-lg border border-rose-900/30";
+                p.innerHTML = `<span class="font-bold text-amber-400">${m.isim}:</span> <span class="text-rose-100">${m.mesaj}</span>`;
+                cBox.appendChild(p); cBox.scrollTop = cBox.scrollHeight;
+            }
+        });
+
+        window.addScorePoints = function(pts) {
+            if (!currentUser) return;
+            const md = getMyData();
+            db.ref(`leaderboard/${currentUser.uid}`).transaction(curr => {
+                const cur = curr || { name: md.name, avatar: md.avatar, score: 0 };
+                cur.score += pts; cur.name = md.name; cur.avatar = md.avatar;
+                return cur;
+            });
+            incrementUserStat('score', pts);
+        }
+        window.loadLeaderboard = function() {
+            const listDiv = document.getElementById('leaderboard-list');
+            db.ref('leaderboard').orderByChild('score').once('value', snap => {
+                const data = snap.val() || {};
+                const sorted = Object.entries(data).sort((a,b) => b[1].score - a[1].score);
+                listDiv.innerHTML = sorted.length ? sorted.map(([uid, info], idx) => `
+                    <div class="flex items-center justify-between bg-[#120409] p-2.5 rounded-xl border ${idx === 0 ? 'border-amber-500/60' : 'border-rose-900/50'}">
+                        <div class="flex items-center gap-2.5">
+                            <span class="font-bold text-xs ${idx === 0 ? 'text-amber-400' : 'text-rose-400'}">#${idx+1}</span>
+                            <img src="${info.avatar}" class="w-7 h-7 rounded-full object-cover ${idx === 0 ? 'champion-ring' : ''}">
+                            <span class="text-xs font-bold text-rose-100">${info.name} ${idx === 0 ? '👑' : ''}</span>
+                        </div>
+                        <span class="text-xs font-black text-amber-400">${info.score} Puan</span>
+                    </div>
+                `).join('') : '<p class="text-xs text-rose-300/60 italic">Skor tablosu boş.</p>';
+            });
+        }
+
+        const gifList = [
+            "https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif",
+            "https://media.giphy.com/media/13HgwGsXF0aiGY/giphy.gif",
+            "https://media.giphy.com/media/9uIZuMGuWExxBLagNa/giphy.gif",
+            "https://media.giphy.com/media/l0HlBO7eyXzSZkJri/giphy.gif"
+        ];
+        const stickerList = ["🔥","😂","❤️","👑","😎","🥳","🤝","💀","🚀","⚽","🎮","🍿"];
+        setTimeout(() => {
+            document.getElementById('gif-grid').innerHTML = gifList.map(url => `<img src="${url}" class="w-full h-24 object-cover rounded-xl cursor-pointer" onclick="sendGIF('${url}')">`).join('');
+            document.getElementById('sticker-grid').innerHTML = stickerList.map(st => `<button onclick="sendSticker('${st}')" class="bg-[#120409] p-2 rounded-xl hover:bg-rose-900/40">${st}</button>`).join('');
+        }, 100);
+
+        window.sendGIF = url => {
+            const md = getMyData();
+            db.ref('odalar/' + currentRoom).push({ uid: currentUser.uid, isim: md.name, avatar: md.avatar, url, type: 'gif', zaman: Date.now() });
+            closeModal('gif-modal'); playWhatsAppSound('send');
+        };
+        window.sendSticker = st => {
+            const md = getMyData();
+            db.ref('odalar/' + currentRoom).push({ uid: currentUser.uid, isim: md.name, avatar: md.avatar, mesaj: st, type: 'sticker', zaman: Date.now() });
+            closeModal('sticker-modal'); playWhatsAppSound('send');
+        };
+
+        let wbInitialized = false;
+        window.initWhiteboard = function() {
+            const canvas = document.getElementById('wb-canvas');
+            const ctx = canvas.getContext('2d');
+            if (!wbInitialized) {
+                wbInitialized = true;
+                let drawing = false, lastPt = null;
+                const getPos = e => {
+                    const rect = canvas.getBoundingClientRect();
+                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                    return { x: (clientX - rect.left) * (canvas.width / rect.width), y: (clientY - rect.top) * (canvas.height / rect.height) };
+                };
+                const startDraw = e => { drawing = true; lastPt = getPos(e); };
+                const moveDraw = e => {
+                    if(!drawing) return;
+                    e.preventDefault();
+                    const p = getPos(e);
+                    const color = wbIsEraser ? '#120409' : wbColor;
+                    const width = wbIsEraser ? 15 : 3;
+                    db.ref(`wb_strokes/${currentRoom}`).push({ x1: lastPt.x, y1: lastPt.y, x2: p.x, y2: p.y, color, width });
+                    lastPt = p;
+                };
+                const endDraw = () => { drawing = false; };
+                canvas.onmousedown = startDraw; canvas.onmousemove = moveDraw; window.onmouseup = endDraw;
+                canvas.ontouchstart = startDraw; canvas.ontouchmove = moveDraw; canvas.ontouchend = endDraw;
+
+                db.ref(`wb_strokes/${currentRoom}`).on('child_added', snap => {
+                    const s = snap.val();
+                    ctx.beginPath(); ctx.moveTo(s.x1, s.y1); ctx.lineTo(s.x2, s.y2);
+                    ctx.strokeStyle = s.color || '#fbbf24'; ctx.lineWidth = s.width || 3; ctx.lineCap = 'round'; ctx.stroke();
+                });
+                db.ref(`wb_strokes/${currentRoom}`).on('value', snap => {
+                    if(!snap.exists()) ctx.clearRect(0, 0, canvas.width, canvas.height);
+                });
+            }
+        }
+        window.clearWhiteboard = () => db.ref(`wb_strokes/${currentRoom}`).remove();
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('login-screen').classList.add('hidden');
+                
+                // Kurucu kontrolü (senin mail adresi ise menüde rozet paneli açılır)
+                if(user.email === ADMIN_EMAIL) {
+                    document.getElementById('admin-badge-btn').classList.remove('hidden');
+                } else {
+                    document.getElementById('admin-badge-btn').classList.add('hidden');
+                }
+
+                const savedBgef = localStorage.getItem('wrts_bgef_' + user.uid) || 'snow';
+                document.getElementById('bg-effect-select').value = savedBgef;
+                initBgEffect(savedBgef);
+
+                const statusRef = db.ref('status/' + user.uid);
+                db.ref('.info/connected').on('value', snap => {
+                    if (snap.val() === true) {
+                        const md = getMyData();
+                        statusRef.onDisconnect().set({ state: 'offline', name: md.name, avatar: md.avatar, lastSeen: firebase.database.ServerValue.TIMESTAMP });
+                        statusRef.set({ state: 'online', name: md.name, avatar: md.avatar, lastSeen: firebase.database.ServerValue.TIMESTAMP });
+                        db.ref('users_registry/' + user.uid).update({ name: md.name, avatar: md.avatar, bio: md.bio });
+                    }
+                });
+
+                db.ref('status').on('value', snap => { activeUsersData = snap.val() || {}; updateUsersUI(); });
+                db.ref(`friends/${user.uid}`).on('value', snap => { myFriends = snap.val() || {}; updateUsersUI(); });
+                db.ref(`friend_requests/${user.uid}`).on('value', snap => {
+                    const reqs = snap.val() || {}; const badge = document.getElementById('req-badge');
+                    if(Object.keys(reqs).length > 0) badge.classList.remove('hidden'); else badge.classList.add('hidden');
+                });
+                db.ref(`gizli_dm_listesi/${user.uid}`).on('value', snap => {
+                    const hasUnread = Object.values(snap.val() || {}).some(d => d.unread);
+                    document.getElementById('menu-inbox-dot').classList.toggle('hidden', !hasUnread);
+                    document.getElementById('header-menu-dot').classList.toggle('hidden', !hasUnread);
+                });
+
+                loadUserDataToUI(); updateChampionRings(); listenRooms(); loadRoom(currentRoom);
+            } else { currentUser = null; document.getElementById('login-screen').classList.remove('hidden'); }
+        });
+
+        function getMyData() {
+            const name = localStorage.getItem('wrts_name_' + currentUser.uid) || currentUser.displayName || currentUser.email.split('@')[0];
+            const bio = localStorage.getItem('wrts_bio_' + currentUser.uid) || "WrtS Kullanıcısı";
+            const avatar = localStorage.getItem('wrts_avatar_' + currentUser.uid) || currentUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=e11d48&color=fff`;
+            return { name, avatar, bio };
+        }
+
+        function loadUserDataToUI() {
+            const d = getMyData();
+            document.getElementById('header-avatar').src = d.avatar;
+            document.getElementById('preview-avatar').src = d.avatar;
+            document.getElementById('edit-name').value = d.name;
+            document.getElementById('edit-bio').value = d.bio;
+        }
+
+        document.getElementById('save-profile').onclick = () => {
+            const n = document.getElementById('edit-name').value.trim();
+            const b = document.getElementById('edit-bio').value.trim();
+            if(!n) return;
+            localStorage.setItem('wrts_name_' + currentUser.uid, n);
+            localStorage.setItem('wrts_bio_' + currentUser.uid, b);
+            if(tempBase64Avatar) localStorage.setItem('wrts_avatar_' + currentUser.uid, tempBase64Avatar);
+            loadUserDataToUI(); closeModal('profile-modal');
+            const md = getMyData();
+            db.ref('status/' + currentUser.uid).update({ name: md.name, avatar: md.avatar });
+            db.ref('users_registry/' + currentUser.uid).update({ name: md.name, avatar: md.avatar, bio: md.bio });
+        };
+
+        document.getElementById('upload-avatar-file').onchange = e => {
+            const f = e.target.files[0]; if(!f) return;
+            const r = new FileReader();
+            r.onload = ev => {
+                const img = new Image();
+                img.onload = () => {
+                    const c = document.createElement('canvas'); c.width = 120; c.height = 120;
+                    c.getContext('2d').drawImage(img, 0, 0, 120, 120);
+                    tempBase64Avatar = c.toDataURL('image/jpeg', 0.7);
+                    document.getElementById('preview-avatar').src = tempBase64Avatar;
+                };
+                img.src = ev.target.result;
+            };
+            r.readAsDataURL(f);
+        };
+
+        window.loadOnlineUsersList = function() {
+            updateUsersUI();
+            db.ref(`friend_requests/${currentUser.uid}`).once('value', snap => {
+                const reqs = snap.val() || {};
+                const list = document.getElementById('friend-requests-list');
+                const sec = document.getElementById('friend-requests-section');
+                const entries = Object.entries(reqs);
+                if(entries.length > 0) {
+                    sec.classList.remove('hidden');
+                    list.innerHTML = entries.map(([uid, info]) => `
+                        <div class="flex items-center justify-between bg-[#120409] p-2 rounded-xl border border-amber-500/40">
+                            <span class="text-xs font-bold">${info.name}</span>
+                            <div class="flex gap-1">
+                                <button onclick="acceptFriend('${uid}', '${encodeURIComponent(info.name)}')" class="bg-emerald-600 text-white text-[10px] px-2 py-1 rounded font-bold">Kabul</button>
+                                <button onclick="db.ref('friend_requests/${currentUser.uid}/${uid}').remove(); loadOnlineUsersList();" class="bg-red-600/30 text-red-400 text-[10px] px-2 py-1 rounded font-bold">Red</button>
+                            </div>
+                        </div>
+                    `).join('');
+                } else { sec.classList.add('hidden'); }
+            });
+        }
+
+        window.acceptFriend = function(uid, encName) {
+            const name = decodeURIComponent(encName);
+            db.ref(`friends/${currentUser.uid}/${uid}`).set({ name });
+            db.ref(`friends/${uid}/${currentUser.uid}`).set({ name: getMyData().name });
+            db.ref(`friend_requests/${currentUser.uid}/${uid}`).remove();
+            loadOnlineUsersList();
+        }
+
+        function updateUsersUI() {
+            let count = 0; Object.values(activeUsersData).forEach(u => { if(u.state === 'online') count++; });
+            document.getElementById('online-count').textContent = Math.max(1, count);
+            
+            const fList = document.getElementById('my-friends-list');
+            const fEntries = Object.entries(myFriends);
+            fList.innerHTML = fEntries.length ? fEntries.map(([uid, info]) => {
+                const online = (activeUsersData[uid] || {}).state === 'online';
+                return `
+                    <div onclick="openUserProfileModal('${uid}', '${encodeURIComponent(info.name)}')" class="flex items-center justify-between bg-[#120409] p-2 rounded-xl border border-rose-500/30 cursor-pointer hover:border-amber-500">
+                        <span class="text-xs font-bold">${info.name} <span class="${online ? 'text-emerald-400' : 'text-rose-500'}">●</span></span>
+                        <span class="text-[10px] text-amber-400 font-bold">Profili Aç</span>
+                    </div>
+                `;
+            }).join('') : '<p class="text-xs text-rose-300/60 italic">Henüz arkadaşın yok.</p>';
+
+            db.ref('users_registry').once('value', snap => {
+                const all = snap.val() || {};
+                document.getElementById('all-users-list').innerHTML = Object.entries(all).filter(([uid]) => uid !== currentUser.uid).map(([uid, info]) => {
+                    const st = activeUsersData[uid] || {};
+                    const online = st.state === 'online';
+                    return `
+                        <div onclick="openUserProfileModal('${uid}', '${encodeURIComponent(info.name || 'İsimsiz')}')" class="flex items-center justify-between bg-[#120409] p-2.5 rounded-xl border border-rose-900/50 hover:border-amber-500 cursor-pointer transition">
+                            <div class="flex items-center gap-2">
+                                <img src="${info.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-8 h-8 rounded-full object-cover">
+                                <div class="text-left">
+                                    <p class="text-xs font-bold text-rose-100">${info.name} <span class="${online ? 'text-emerald-400' : 'text-rose-500'}">●</span></p>
+                                    <p class="text-[9px] text-rose-300/60">${online ? 'Çevrimiçi' : 'Çevrimdışı'}</p>
+                                </div>
+                            </div>
+                            <span class="text-[10px] text-amber-400 font-bold bg-amber-950/60 px-2 py-1 rounded-lg">Profili Aç</span>
+                        </div>
+                    `;
+                }).join('');
+            });
+        }
+
+        window.openUserProfileModal = function(targetUid, encName) {
+            closeModal('users-modal'); closeModal('menu-drawer-modal');
+            if(targetUid === currentUser.uid) { openMyProfile(); return; }
+            const targetName = decodeURIComponent(encName);
+            openModal('user-profile-modal');
+            document.getElementById('up-name').textContent = targetName;
+            const upAvatar = document.getElementById('up-avatar');
+            upAvatar.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(targetName) + '&background=e11d48&color=fff';
+
+            db.ref(`users_registry/${targetUid}`).once('value', snap => {
+                const uData = snap.val() || {};
+                if(uData.avatar) upAvatar.src = uData.avatar;
+                document.getElementById('up-bio').textContent = uData.bio || "WrtS Kullanıcısı";
+                
+                const badgeContainer = document.getElementById('up-badges-container');
+                badgeContainer.innerHTML = uData.badge ? `<span class="bg-amber-500/20 text-amber-300 text-[10px] px-2.5 py-0.5 rounded-full font-bold">${uData.badge}</span>` : '';
+            });
+
+            const st = activeUsersData[targetUid] || {};
+            const online = st.state === 'online';
+            const statusText = document.getElementById('up-status-text');
+            const lastSeenText = document.getElementById('up-last-seen');
+
+            if(online) {
+                statusText.textContent = "Çevrimiçi";
+                statusText.className = "font-bold text-emerald-400";
+                lastSeenText.textContent = "Şu an aktif";
+            } else {
+                statusText.textContent = "Çevrimdışı";
+                statusText.className = "font-bold text-rose-400";
+                lastSeenText.textContent = st.lastSeen ? new Date(st.lastSeen).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "Az önce";
+            }
+
+            const isFriend = !!myFriends[targetUid];
+            document.getElementById('up-actions').innerHTML = `
+                <button onclick="startDM('${targetUid}', '${encodeURIComponent(targetName)}'); closeModal('user-profile-modal');" class="flex-1 bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-xs font-bold text-white">💬 Özel Mesaj</button>
+                ${!isFriend ? `<button onclick="db.ref('friend_requests/${targetUid}/${currentUser.uid}').set({name: getMyData().name}); alert('İstek gönderildi!');" class="bg-rose-600/30 text-rose-200 px-3 py-2.5 rounded-xl text-xs font-bold">💖 Ekle</button>` : `<span class="bg-emerald-600/20 text-emerald-400 px-3 py-2.5 rounded-xl text-xs font-bold">✔ Arkadaş</span>`}
+            `;
+        }
+
+        window.startDM = function(targetUid, encName) {
+            const targetName = decodeURIComponent(encName);
+            const ids = [currentUser.uid, targetUid].sort();
+            const dmId = `özel_dm_${ids[0]}_${ids[1]}`;
+            
+            db.ref(`gizli_dm_listesi/${currentUser.uid}/${dmId}`).set({ targetUid, targetName, unread: false });
+            db.ref(`gizli_dm_listesi/${targetUid}/${dmId}`).update({ targetUid: currentUser.uid, targetName: getMyData().name });
+            
+            currentRoom = dmId;
+            document.getElementById('dm-banner').classList.remove('hidden');
+            document.getElementById('dm-banner-text').textContent = `💬 ${targetName} ile Özel Sohbet`;
+            loadRoom(dmId);
+        }
+
+        window.exitDM = function() {
+            document.getElementById('dm-banner').classList.add('hidden');
+            currentRoom = 'genel';
+            document.getElementById('room-select').value = 'genel';
+            loadRoom('genel');
+        }
+
+        window.openDMListModal = function() {
+            openModal('dm-list-modal');
+            const listDiv = document.getElementById('my-dms-list');
+            db.ref(`gizli_dm_listesi/${currentUser.uid}`).once('value', snap => {
+                const dms = snap.val() || {};
+                const entries = Object.entries(dms);
+                listDiv.innerHTML = entries.length ? entries.map(([dmId, info]) => `
+                    <div onclick="openDMFromList('${dmId}', '${encodeURIComponent(info.targetName)}')" class="flex items-center justify-between bg-[#120409] p-3 rounded-xl border border-rose-900/50 hover:border-amber-500 cursor-pointer">
+                        <span class="text-xs font-bold text-rose-100">💬 ${info.targetName} ${info.unread ? '🔴' : ''}</span>
+                        <span class="text-[10px] text-amber-400 font-bold">Sohbete Git</span>
+                    </div>
+                `).join('') : '<p class="text-xs text-rose-300/60 italic">Özel mesajın yok.</p>';
+            });
+        }
+        window.openDMFromList = function(dmId, encName) {
+            const targetName = decodeURIComponent(encName);
+            db.ref(`gizli_dm_listesi/${currentUser.uid}/${dmId}/unread`).set(false);
+            currentRoom = dmId;
+            closeModal('dm-list-modal');
+            document.getElementById('dm-banner').classList.remove('hidden');
+            document.getElementById('dm-banner-text').textContent = `💬 ${targetName} ile Özel Sohbet`;
+            loadRoom(dmId);
+        }
+
+        function listenRooms() {
+            db.ref('oda_listesi').on('value', snap => {
+                customRoomsData = snap.val() || {};
+                const roomSelect = document.getElementById('room-select');
+                roomSelect.innerHTML = `<option value="genel"># Genel</option><option value="sohbet"># Muhabbet</option><option value="oyun"># Oyun</option>`;
+                Object.entries(customRoomsData).forEach(([id, info]) => {
+                    if (id.startsWith('oda_')) {
+                        const opt = document.createElement('option'); opt.value = id; opt.textContent = `# ${info.name}`;
+                        roomSelect.appendChild(opt);
+                    }
+                });
+                if (!currentRoom.startsWith('özel_dm_')) roomSelect.value = currentRoom;
+            });
+        }
+        document.getElementById('create-room-btn').onclick = () => {
+            const name = document.getElementById('new-room-name').value.trim(); if(!name) return;
+            const id = 'oda_' + Date.now();
+            db.ref('oda_listesi/' + id).set({ name: filterBadWords(name), creator: currentUser.uid }).then(() => {
+                document.getElementById('new-room-name').value = ''; closeModal('room-modal');
+                document.getElementById('dm-banner').classList.add('hidden');
+                currentRoom = id; loadRoom(id);
+            });
+        };
+        document.getElementById('room-select').onchange = e => {
+            document.getElementById('dm-banner').classList.add('hidden');
+            currentRoom = e.target.value; loadRoom(currentRoom);
+        };
+        window.openRoomRolesModal = function() {
+            openModal('roles-modal');
+            const list = document.getElementById('room-members-roles-list');
+            db.ref('users_registry').once('value', snap => {
+                const users = snap.val() || {};
+                list.innerHTML = Object.entries(users).filter(([uid]) => uid !== currentUser.uid).map(([uid, info]) => `
+                    <div class="flex items-center justify-between bg-[#120409] p-2 rounded-xl border border-rose-900/50">
+                        <span class="text-xs font-bold">${info.name}</span>
+                        <button onclick="db.ref('room_mutes/${currentRoom}/${uid}').set(true); alert('Susturuldu!');" class="text-[10px] bg-red-600/30 text-red-400 px-2 py-1 rounded font-bold">Sustur</button>
+                    </div>
+                `).join('');
+            });
+        }
+        window.deleteCurrentRoom = () => {
+            if(confirm("Odayı silmek istediğine emin misin?")) {
+                db.ref('oda_listesi/' + currentRoom).remove();
+                closeModal('roles-modal');
+                currentRoom = 'genel'; loadRoom('genel');
+            }
+        };
+
+        function createMessageElement(snap, room) {
+            const data = snap.val(); const key = snap.key; const isMe = currentUser && data.uid === currentUser.uid;
+            const div = document.createElement('div'); div.id = `msg-${key}`; div.className = `flex gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'} items-end transition-transform duration-150`;
+
+            let content = '';
+            if (data.type === 'image' || data.type === 'gif') content = `<img src="${data.url}" class="rounded-xl max-h-48 object-cover cursor-pointer" onclick="window.open('${data.url}', '_blank')">`;
+            else if (data.type === 'audio') content = `<audio controls src="${data.url}" class="h-8 max-w-[190px]"></audio>`;
+            else if (data.type === 'sticker') content = `<span class="text-4xl block py-1">${data.mesaj}</span>`;
+            else if (data.type === 'code') content = `<div class="bg-[#120409] border border-rose-900/50 rounded-xl p-2.5 text-left my-1 overflow-x-auto max-w-[260px]"><pre class="text-[11px] text-emerald-300"><code>${data.code}</code></pre></div>`;
+            else if (data.type === 'poll') {
+                const votes = data.votes || {}; const v1 = Object.values(votes).filter(v => v === 1).length; const v2 = Object.values(votes).filter(v => v === 2).length;
+                content = `<div class="bg-[#120409]/90 border border-rose-900/50 rounded-xl p-2.5 space-y-1.5 min-w-[200px]"><p class="text-xs font-bold text-amber-300">📊 ${data.question}</p><button onclick="votePoll('${room}', '${key}', 1)" class="w-full flex justify-between bg-[#1c0910] px-2.5 py-1 rounded-lg text-xs"><span>${data.opt1}</span><span class="font-bold text-amber-400">${v1}</span></button><button onclick="votePoll('${room}', '${key}', 2)" class="w-full flex justify-between bg-[#1c0910] px-2.5 py-1 rounded-lg text-xs"><span>${data.opt2}</span><span class="font-bold text-amber-400">${v2}</span></button></div>`;
+            } else {
+                let msgText = filterBadWords(data.mesaj || '');
+                msgText = msgText.replace(/(@[^\s]+)/g, '<span class="bg-amber-500/30 text-amber-300 px-1 rounded font-bold">$1</span>');
+                content = `<p class="text-sm break-words">${msgText} ${data.edited ? '<span class="text-[9px] opacity-60">(düzenlendi)</span>' : ''}</p>`;
+            }
+
+            const timeStr = new Date(data.zaman || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const safePreview = (data.mesaj || 'Medya').replace(/'/g, '').replace(/"/g, '');
+
+            let reactionsHtml = '';
+            if (data.reactions) {
+                const counts = {};
+                Object.values(data.reactions).forEach(emo => counts[emo] = (counts[emo] || 0) + 1);
+                reactionsHtml = `<div class="flex gap-1 mt-1 flex-wrap">${Object.entries(counts).map(([emo, cnt]) => `<span class="bg-black/40 border border-rose-900/40 text-[10px] px-1.5 py-0.5 rounded-full">${emo} ${cnt}</span>`).join('')}</div>`;
+            }
+
+            div.innerHTML = `
+                <img onclick="openUserProfileModal('${data.uid}', '${encodeURIComponent(data.isim)}')" src="${data.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-6 h-6 rounded-full object-cover shrink-0 mb-1 cursor-pointer">
+                <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[80%]">
+                    <span class="text-[10px] font-bold text-rose-200 px-1">${data.isim}</span>
+                    <div onclick="document.getElementById('menu-${key}').classList.toggle('hidden')" class="cursor-pointer ${isMe ? 'bg-gradient-to-r from-rose-600 to-rose-700' : 'bg-[#280c16]'} px-3 py-2 rounded-2xl shadow relative">
+                        ${data.replyTo ? `<div onclick="event.stopPropagation(); scrollToMessage('${data.replyTo.key}')" class="mb-1 p-1.5 rounded bg-black/35 border-l-2 border-amber-400 text-[10px] cursor-pointer"><b>${data.replyTo.name}</b><br>${data.replyTo.text}</div>` : ''}
+                        ${content}
+                        <div class="text-[9px] opacity-75 text-right mt-0.5">${timeStr}</div>
+                    </div>
+                    ${reactionsHtml}
+                    <div id="menu-${key}" class="hidden flex flex-col gap-1.5 mt-1 bg-[#1c0910] border border-rose-900/60 p-2 rounded-xl text-xs z-10 shadow-xl">
+                        <div class="flex gap-2 border-b border-rose-900/40 pb-1.5">
+                            <button onclick="addReaction('${room}', '${key}', '❤️')" class="hover:scale-125 transition">❤️</button>
+                            <button onclick="addReaction('${room}', '${key}', '🔥')" class="hover:scale-125 transition">🔥</button>
+                            <button onclick="addReaction('${room}', '${key}', '😂')" class="hover:scale-125 transition">😂</button>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="setReplyTo('${key}', '${data.isim}', '${safePreview}')" class="text-amber-400 font-bold">Alıntıla</button>
+                            ${isMe && data.type === 'text' ? `<button onclick="startEditMessage('${key}', '${safePreview}')" class="text-sky-400 font-bold">Düzenle</button>` : ''}
+                            ${isMe ? `<button onclick="db.ref('odalar/${room}/${key}').remove()" class="text-red-400 font-bold">Sil</button>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+            return div;
+        }
+
+        window.addReaction = function(room, key, emoji) {
+            if(!currentUser) return;
+            db.ref(`odalar/${room}/${key}/reactions/${currentUser.uid}`).set(emoji);
+            document.getElementById(`menu-${key}`).classList.add('hidden');
+        }
+
+        window.scrollToMessage = function(key) {
+            const el = document.getElementById(`msg-${key}`);
+            if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('highlight-anim'); setTimeout(() => el.classList.remove('highlight-anim'), 2000); }
+        }
+
+        function loadRoom(room) {
+            if (roomRef) roomRef.off();
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML = ''; isInitialLoad = true;
+
+            const annBar = document.getElementById('announcement-bar');
+            const annText = document.getElementById('announcement-text');
+            const annDelBtn = document.getElementById('delete-announcement-btn');
+            const modBtn = document.getElementById('room-settings-btn');
+
+            if (customRoomsData[room] && customRoomsData[room].creator === currentUser.uid) modBtn.classList.remove('hidden');
+            else modBtn.classList.add('hidden');
+
+            if (!room.startsWith('özel_dm_')) {
+                annBar.classList.remove('hidden');
+                db.ref(`announcements/${room}`).on('value', snap => {
+                    const val = snap.val();
+                    if(val) { annText.textContent = `${val.text} (${val.by})`; annDelBtn.classList.remove('hidden'); }
+                    else { annText.textContent = "Bu odada duyuru yok."; annDelBtn.classList.add('hidden'); }
+                });
+            } else { annBar.classList.add('hidden'); }
+
+            roomRef = db.ref('odalar/' + room).limitToLast(60);
+            roomRef.once('value', () => { isInitialLoad = false; });
+            roomRef.on('child_added', snap => {
+                const d = snap.val(); messagesDiv.appendChild(createMessageElement(snap, room));
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                if (!isInitialLoad && currentUser && d.uid !== currentUser.uid) playWhatsAppSound('receive');
+            });
+            roomRef.on('child_changed', snap => {
+                const oldEl = document.getElementById(`msg-${snap.key}`);
+                if(oldEl) { oldEl.replaceWith(createMessageElement(snap, room)); }
+            });
+            roomRef.on('child_removed', snap => document.getElementById(`msg-${snap.key}`)?.remove());
+        }
+
+        let typingTimer = null;
+        const msgInput = document.getElementById('msg-input');
+        msgInput.addEventListener('input', e => {
+            if(!currentUser) return;
+            db.ref(`typing/${currentRoom}/${currentUser.uid}`).set(getMyData().name);
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => { db.ref(`typing/${currentRoom}/${currentUser.uid}`).remove(); }, 2000);
+        });
+
+        db.ref(`typing`).on('value', snap => {
+            const data = snap.val() || {};
+            const roomTyping = data[currentRoom] || {};
+            const others = Object.entries(roomTyping).filter(([uid]) => currentUser && uid !== currentUser.uid).map(([_, name]) => name);
+            const indicator = document.getElementById('typing-indicator');
+            indicator.textContent = others.length > 0 ? `${others.join(', ')} yazıyor...` : '';
+        });
+
+        // GELİŞTİRİLMİŞ DİNAMİK AI ASİSTAN (Artık hep aynı şeyi söylemiyor)
+        const aiResponses = [
+            "Bunu düşündüm de kanki, gayet mantıklı bir yaklaşım! 🚀",
+            "Harika bir konuya değindin. Bu konuda sistem kusursuz işliyor.",
+            "WrtS altyapısı bu tür fikirler için tam olarak tasarlandı. Aynen devam! 🔥",
+            "Notumu aldım kanki, bunu ilerleyen güncellemelerde daha da iyi hale getirebiliriz.",
+            "Kesinlikle katılıyorum! Başka hangi özellikleri ekleyelim?",
+            "Şu an sistem gayet akıcı çalışıyor, başka bir takıldığın yer var mı?"
+        ];
+
+        document.getElementById('msg-form').onsubmit = async e => {
+            e.preventDefault();
+            const text = msgInput.value.trim(); if (!text) return;
+            const muted = (await db.ref(`room_mutes/${currentRoom}/${currentUser.uid}`).once('value')).val();
+            if(muted) return alert("Bu odada susturuldun!");
+
+            if(editingMessageKey) {
+                db.ref(`odalar/${currentRoom}/${editingMessageKey}`).update({ mesaj: filterBadWords(text), edited: true });
+                cancelReplyOrEdit(); msgInput.value = ''; return;
+            }
+
+            const md = getMyData();
+            const cleanText = filterBadWords(text);
+            const msgData = { uid: currentUser.uid, isim: md.name, avatar: md.avatar, mesaj: cleanText, type: 'text', zaman: Date.now() };
+            if (replyingTo) { msgData.replyTo = replyingTo; cancelReplyOrEdit(); }
+            db.ref('odalar/' + currentRoom).push(msgData);
+            incrementUserStat('msgs', 1);
+
+            // Dinamik AI Yanıtı
+            if(cleanText.startsWith('@ai')) {
+                setTimeout(() => {
+                    const randomAns = aiResponses[Math.floor(Math.random() * aiResponses.length)];
+                    db.ref('odalar/' + currentRoom).push({
+                        uid: 'wrts_ai_bot',
+                        isim: '🤖 WrtS AI Asistan',
+                        avatar: 'https://ui-avatars.com/api/?name=AI&background=3b82f6&color=fff',
+                        mesaj: randomAns,
+                        type: 'text',
+                        zaman: Date.now()
+                    });
+                }, 1000);
+            }
+
+            if(currentRoom.startsWith('özel_dm_')) {
+                const parts = currentRoom.replace('özel_dm_', '').split('_');
+                const targetUid = parts.find(id => id !== currentUser.uid);
+                if(targetUid) db.ref(`gizli_dm_listesi/${targetUid}/${currentRoom}`).update({ targetUid: currentUser.uid, targetName: md.name, unread: true });
+            }
+
+            msgInput.value = '';
+            playWhatsAppSound('send');
+        };
+
+        window.setReplyTo = (key, name, text) => {
+            editingMessageKey = null;
+            replyingTo = { key, name, text };
+            document.getElementById('preview-mode-title').textContent = "Yanıtlanıyor:";
+            document.getElementById('reply-preview-text').textContent = `${name}: ${text}`;
+            document.getElementById('reply-preview-bar').classList.remove('hidden');
+            msgInput.focus();
+        };
+
+        window.startEditMessage = (key, text) => {
+            replyingTo = null; editingMessageKey = key;
+            msgInput.value = text;
+            document.getElementById('preview-mode-title').textContent = "Düzenleniyor:";
+            document.getElementById('reply-preview-text').textContent = text;
+            document.getElementById('reply-preview-bar').classList.remove('hidden');
+            msgInput.focus();
+        };
+
+        window.cancelReplyOrEdit = () => {
+            replyingTo = null; editingMessageKey = null;
+            document.getElementById('reply-preview-bar').classList.add('hidden');
+            msgInput.value = '';
+        };
+
+        window.sendCodeSnippet = function() {
+            const code = document.getElementById('code-content-input').value;
+            if(!code.trim()) return;
+            const md = getMyData();
+            db.ref('odalar/' + currentRoom).push({ uid: currentUser.uid, isim: md.name, avatar: md.avatar, type: 'code', code, zaman: Date.now() });
+            document.getElementById('code-content-input').value = ''; closeModal('code-modal'); playWhatsAppSound('send');
+        }
+        window.createPoll = function() {
+            const q = document.getElementById('poll-question').value.trim();
+            const o1 = document.getElementById('poll-opt1').value.trim();
+            const o2 = document.getElementById('poll-opt2').value.trim();
+            if(!q || !o1 || !o2) return;
+            const md = getMyData();
+            db.ref('odalar/' + currentRoom).push({ uid: currentUser.uid, isim: md.name, avatar: md.avatar, type: 'poll', question: filterBadWords(q), opt1: filterBadWords(o1), opt2: filterBadWords(o2), votes: {}, zaman: Date.now() });
+            closeModal('poll-modal'); playWhatsAppSound('send');
+        }
+        window.votePoll = (room, key, choice) => { if(currentUser) db.ref(`odalar/${room}/${key}/votes/${currentUser.uid}`).set(choice); };
+
+        document.getElementById('img-file').onchange = e => {
+            const f = e.target.files[0]; if(!f) return;
+            const r = new FileReader();
+            r.onload = ev => {
+                const md = getMyData();
+                db.ref('odalar/' + currentRoom).push({ uid: currentUser.uid, isim: md.name, avatar: md.avatar, url: ev.target.result, type: 'image', zaman: Date.now() });
+                playWhatsAppSound('send');
+            };
+            r.readAsDataURL(f);
+        };
+
+        let mediaRecorder, audioChunks = [];
+        const wtBtn = document.getElementById('walkie-talkie-btn');
+        wtBtn.onmousedown = wtBtn.ontouchstart = async (e) => {
+            e.preventDefault();
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream); audioChunks = [];
+                mediaRecorder.ondataavailable = ev => audioChunks.push(ev.data);
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const r = new FileReader();
+                    r.onloadend = () => {
+                        const md = getMyData();
+                        db.ref('odalar/' + currentRoom).push({ uid: currentUser.uid, isim: md.name, avatar: md.avatar, url: r.result, type: 'audio', zaman: Date.now() });
+                        playWhatsAppSound('send');
+                    };
+                    r.readAsDataURL(blob);
+                    stream.getTracks().forEach(t => t.stop());
+                };
+                mediaRecorder.start();
+                wtBtn.classList.add('bg-rose-600', 'text-white', 'animate-pulse');
+            } catch(e) { alert("Mikrofon izni verilmedi."); }
+        };
+        wtBtn.onmouseup = wtBtn.ontouchend = (e) => {
+            e.preventDefault();
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                wtBtn.classList.remove('bg-rose-600', 'text-white', 'animate-pulse');
+            }
+        };
+
+        document.getElementById('google-btn').onclick = () => auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+        document.getElementById('email-form').onsubmit = e => {
+            e.preventDefault();
+            auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('password').value)
+                .catch(() => auth.createUserWithEmailAndPassword(document.getElementById('email').value, document.getElementById('password').value));
+        };
+        document.getElementById('modal-logout').onclick = () => auth.signOut().then(() => window.location.reload());
+        window.toggleSearchBar = () => document.getElementById('search-bar').classList.toggle('hidden');
+        document.getElementById('msg-search-input').oninput = e => {
+            const t = e.target.value.toLowerCase();
+            document.querySelectorAll('#messages > div').forEach(el => el.style.display = el.innerText.toLowerCase().includes(t) ? 'flex' : 'none');
+        };
+
+        // OYUN SALONU MANTIĞI (Sıfırdan ve Hatasız Yenilendi)
+        window.switchGameTab = g => {
+            ['xox', 'battleship'].forEach(x => {
+                document.getElementById(`game-panel-${x}`).classList.toggle('hidden', x !== g);
+                document.getElementById(`tab-${x}`).className = x === g ? 'flex-1 py-1.5 rounded-lg text-xs font-bold bg-rose-600 text-white' : 'flex-1 py-1.5 rounded-lg text-xs font-bold text-rose-300/60';
+            });
+        };
+        window.initGames = function() {
+            db.ref(`games/${currentRoom}/xox`).on('value', s => {
+                const g = s.val() || { board: Array(9).fill(''), turn: 'X', winner: '' };
+                for (let i = 0; i < 9; i++) document.getElementById(`cell-${i}`).textContent = g.board[i] || '';
+                document.getElementById('xox-status').textContent = g.winner ? `Kazanan: ${g.winner}!` : `Sıra: ${g.turn}`;
+            });
+            listenBattleship();
+        }
+        window.makeXOXMove = i => {
+            db.ref(`games/${currentRoom}/xox`).once('value', s => {
+                let g = s.val() || { board: Array(9).fill(''), turn: 'X', winner: '' };
+                if (g.board[i] || g.winner) return;
+                g.board[i] = g.turn;
+                const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+                if (wins.some(w => g.board[w[0]] && g.board[w[0]] === g.board[w[1]] && g.board[w[1]] === g.board[w[2]])) {
+                    g.winner = g.turn; addScorePoints(15);
+                } else {
+                    g.turn = g.turn === 'X' ? 'O' : 'X';
+                }
+                db.ref(`games/${currentRoom}/xox`).set(g);
+            });
+        };
+        window.resetXOXGame = () => db.ref(`games/${currentRoom}/xox`).set({ board: Array(9).fill(''), turn: 'X', winner: '' });
+
+        function listenBattleship() {
+            db.ref(`games/${currentRoom}/bs`).on('value', s => {
+                let g = s.val();
+                if (!g) { resetBattleship(); return; }
+                const grid = document.getElementById('bs-grid');
+                grid.innerHTML = '';
+                let found = 0;
+                for (let i = 0; i < 25; i++) {
+                    const hit = g.revealed && g.revealed[i];
+                    const isShip = g.ships && g.ships.includes(i);
+                    if (hit && isShip) found++;
+                    const btn = document.createElement('button');
+                    btn.className = `w-10 h-10 rounded-lg font-bold text-xs border border-rose-900/50 ${hit ? (isShip ? 'bg-emerald-600 text-white' : 'bg-rose-950/60 text-rose-500') : 'bg-[#120409]'}`;
+                    btn.textContent = hit ? (isShip ? '🚢' : '❌') : '?';
+                    btn.onclick = () => {
+                        if (!hit && found < 3) {
+                            db.ref(`games/${currentRoom}/bs/revealed/${i}`).set(true);
+                            if (isShip && found + 1 === 3) addScorePoints(20);
+                        }
+                    };
+                    grid.appendChild(btn);
+                }
+                document.getElementById('bs-status').textContent = found >= 3 ? 'Tebrikler! Tüm gemiler bulundu (+20 Puan)' : `Bulunan Gemi: ${found}/3`;
+            });
+        }
+        window.resetBattleship = () => {
+            const ships = [];
+            while (ships.length < 3) {
+                const r = Math.floor(Math.random() * 25);
+                if (!ships.includes(r)) ships.push(r);
+            }
+            db.ref(`games/${currentRoom}/bs`).set({ ships, revealed: {} });
+        };
+    </script>
+</body>
+</html>
