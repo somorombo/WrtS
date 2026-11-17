@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WrtS - Crimson Gold Edition</title>
+    <title>WrtS - Dev Güncelleme Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -19,7 +19,6 @@
         ::-webkit-scrollbar-thumb { background: #e11d48; border-radius: 4px; }
         pre code { font-family: 'Courier New', Courier, monospace; }
         
-        /* SADECE SKOR BİRİNCİSİNE ÖZEL ALTIN-KIZIL ANİMASYONLU ÇERÇEVE */
         @keyframes championGlow {
             0% { border-color: #f59e0b; box-shadow: 0 0 8px rgba(245,158,11,0.6); }
             50% { border-color: #fb7185; box-shadow: 0 0 18px rgba(251,113,133,0.9); }
@@ -30,6 +29,14 @@
             animation: championGlow 2s infinite;
         }
 
+        @keyframes messageHighlight {
+            0% { background-color: rgba(245, 158, 11, 0.5); }
+            100% { background-color: transparent; }
+        }
+        .highlight-anim {
+            animation: messageHighlight 2s ease-out;
+        }
+
         @keyframes snowfall {
             0% { transform: translateY(-10px) translateX(0); opacity: 0.7; }
             100% { transform: translateY(100%) translateX(10px); opacity: 0.2; }
@@ -37,6 +44,15 @@
         .snowflake {
             position: absolute; top: -10px; background: #ffe4e6; border-radius: 50%; pointer-events: none; z-index: 5;
             animation: snowfall linear infinite;
+        }
+
+        @keyframes firework {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-100px) scale(0.5); opacity: 0; }
+        }
+        .firefly {
+            position: absolute; background: #f43f5e; border-radius: 50%; pointer-events: none; z-index: 5;
+            animation: firework linear infinite;
         }
     </style>
 </head>
@@ -92,7 +108,7 @@
         <button onclick="toggleSearchBar()" class="text-xs text-rose-300 hover:text-white px-2">Kapat</button>
     </div>
 
-    <!-- DUYURU BANNER ALANI (Sadece Genel ve Muhabbet Odalarında) -->
+    <!-- DUYURU BANNER ALANI -->
     <div id="announcement-bar" class="hidden bg-gradient-to-r from-amber-950 via-[#2b0d18] to-amber-950 border-b border-amber-500/40 px-3 py-2 flex items-center justify-between text-xs shrink-0 z-15 shadow-md">
         <div class="flex items-center gap-2 overflow-hidden flex-1">
             <span class="text-amber-400 font-bold shrink-0">📢 Duyuru:</span>
@@ -104,9 +120,9 @@
         </div>
     </div>
 
-    <!-- MESAJ ALANI VE KAR YAĞIŞI -->
+    <!-- MESAJ ALANI VE DİNAMİK EFEKTLER -->
     <div class="flex-1 relative overflow-hidden flex flex-col">
-        <div id="snow-container" class="absolute inset-0 pointer-events-none overflow-hidden z-0"></div>
+        <div id="dynamic-bg-container" class="absolute inset-0 pointer-events-none overflow-hidden z-0"></div>
         <main id="messages" class="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 w-full max-w-4xl mx-auto z-10 relative"></main>
     </div>
 
@@ -122,7 +138,7 @@
         <button onclick="cancelReplyOrEdit()" class="text-rose-300 hover:text-white font-bold text-xs px-2">✕</button>
     </div>
 
-    <!-- EKSTRA ARAÇ ÇEKMECESİ (+ BUTONU) -->
+    <!-- EKSTRA ARAÇ ÇEKMECESİ -->
     <div id="tools-drawer" class="hidden bg-[#1a070e] border-t border-rose-900/60 p-2.5 w-full max-w-4xl mx-auto grid grid-cols-5 gap-2 shrink-0 z-20">
         <button type="button" onclick="document.getElementById('img-file').click(); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-[#120409] p-2 rounded-xl border border-rose-900/50 text-xs"><span>🖼️</span><span class="text-[10px]">Fotoğraf</span></button>
         <button type="button" onclick="openModal('gif-modal'); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-[#120409] p-2 rounded-xl border border-rose-900/50 text-xs"><span>🎞️</span><span class="text-[10px]">GIF</span></button>
@@ -131,13 +147,13 @@
         <button type="button" onclick="openModal('poll-modal'); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-[#120409] p-2 rounded-xl border border-rose-900/50 text-xs"><span>📊</span><span class="text-[10px]">Anket</span></button>
     </div>
 
-    <!-- ALT MESAJ ÇUBUĞU -->
+    <!-- ALT MESAJ ÇUBUĞU (SESLİ NOT BAS-KONUŞ DAHİL) -->
     <footer id="main-footer" class="bg-[#1a070e] border-t border-rose-900/60 p-2 sm:p-3 w-full max-w-4xl mx-auto shrink-0 z-20">
         <form id="msg-form" class="flex items-center gap-1.5 w-full">
             <button type="button" onclick="toggleToolsDrawer()" class="w-9 h-9 rounded-full bg-[#2b0d18] hover:bg-rose-900/60 text-amber-400 font-black text-lg flex items-center justify-center shrink-0" title="Ekstra Araçlar">+</button>
-            <button type="button" id="record-btn" class="w-9 h-9 rounded-full bg-[#2b0d18] hover:bg-rose-900/60 text-rose-400 flex items-center justify-center shrink-0" title="Ses Kaydet">🎙️</button>
+            <button type="button" id="walkie-talkie-btn" class="w-9 h-9 rounded-full bg-[#2b0d18] hover:bg-rose-900/60 text-rose-400 flex items-center justify-center shrink-0 text-sm" title="Bas-Konuş Sesli Not">🎙️</button>
             <input type="file" id="img-file" accept="image/*" class="hidden">
-            <input type="text" id="msg-input" placeholder="Mesaj yaz..." autocomplete="off" class="flex-1 min-w-0 bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
+            <input type="text" id="msg-input" placeholder="Mesaj yaz veya @etiketle..." autocomplete="off" class="flex-1 min-w-0 bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
             <button type="submit" class="bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm shrink-0 text-white shadow">Gönder</button>
         </form>
     </footer>
@@ -151,7 +167,6 @@
                 <h3 class="font-bold text-amber-400">📢 Yeni Duyuru Yayınla</h3>
                 <button onclick="closeModal('announcement-modal')" class="text-rose-300 font-bold">✕</button>
             </div>
-            <p class="text-[11px] text-rose-200/70">Bu duyuru Genel ve Muhabbet odalarının üstünde herkese görünür.</p>
             <textarea id="announcement-input" rows="3" placeholder="Duyuru metnini yaz..." class="w-full bg-[#120409] border border-rose-900/60 rounded-xl p-3 text-xs focus:outline-none focus:border-amber-500"></textarea>
             <button onclick="publishAnnouncement()" class="w-full bg-gradient-to-r from-amber-600 to-rose-600 py-2.5 rounded-xl text-xs font-bold text-white">Duyuruyu Yayınla</button>
         </div>
@@ -178,7 +193,7 @@
         </div>
     </div>
 
-    <!-- KULLANICI PROFİL DETAY MODALI (Tıklayınca Direkt Açılır) -->
+    <!-- KULLANICI PROFİL DETAY MODALI (DİREKT AÇILIR) -->
     <div id="user-profile-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-6 w-full max-w-sm space-y-4 text-center relative shadow-2xl">
             <button onclick="closeModal('user-profile-modal')" class="absolute top-4 right-4 text-rose-300 font-bold">✕</button>
@@ -196,9 +211,9 @@
         </div>
     </div>
 
-    <!-- ORTAK FİLM & SİNEMA ODASI (ALTINDA ÖZEL SİNEMA SOHBETİ İLE BİRLİKTE) -->
+    <!-- ORTAK SİNEMA & FİLM STİCKER SOHBETİ -->
     <div id="music-modal" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center p-3">
-        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-4 w-full max-w-md space-y-2.5 max-h-[92vh] flex flex-col">
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-4 w-full max-w-md space-y-2.5 max-h-[95vh] flex flex-col">
             <div class="flex justify-between items-center shrink-0">
                 <h3 class="font-bold text-amber-400 text-sm">🎬 Ortak Sinema Salonu</h3>
                 <button onclick="closeModal('music-modal')" class="text-rose-300 font-bold">✕</button>
@@ -215,9 +230,17 @@
                 <button onclick="stopAndDeleteMusic()" class="bg-rose-950 text-rose-300 border border-rose-700/50 px-2.5 py-1 rounded-lg text-[10px] font-bold shrink-0">🗑️ Kapat</button>
             </div>
             
-            <!-- SADECE FİLMİN ALTINDA GÖRÜNEN ÖZEL SİNEMA SOHBETİ -->
-            <div class="flex-1 bg-[#120409] border border-rose-900/50 rounded-2xl p-2.5 flex flex-col min-h-[140px] max-h-[180px]">
-                <span class="text-[10px] text-amber-400 font-bold mb-1 border-b border-rose-900/40 pb-1">🍿 Sinema İçi Canlı Sohbet (Odalarda Görünmez)</span>
+            <!-- SİNEMA İÇİ SOHBET + FİLM STİCKERLARI -->
+            <div class="flex-1 bg-[#120409] border border-rose-900/50 rounded-2xl p-2.5 flex flex-col min-h-[140px] max-h-[170px]">
+                <div class="flex justify-between items-center border-b border-rose-900/40 pb-1 mb-1">
+                    <span class="text-[10px] text-amber-400 font-bold">🍿 Sinema Sohbeti (Film Sticker Desteği)</span>
+                    <div class="flex gap-1">
+                        <button onclick="sendCinemaSticker('🍿')" class="text-sm">🍿</button>
+                        <button onclick="sendCinemaSticker('🎬')" class="text-sm">🎬</button>
+                        <button onclick="sendCinemaSticker('⭐')" class="text-sm">⭐</button>
+                        <button onclick="sendCinemaSticker('😭')" class="text-sm">😭</button>
+                    </div>
+                </div>
                 <div id="cinema-messages" class="flex-1 overflow-y-auto space-y-1.5 pr-1 text-xs"></div>
                 <form onsubmit="sendCinemaMessage(event)" class="flex gap-1 mt-1.5 shrink-0">
                     <input type="text" id="cinema-msg-input" placeholder="Film hakkında yorum yaz..." autocomplete="off" class="flex-1 bg-[#1c0910] border border-rose-900/50 rounded-lg px-2.5 py-1 text-xs focus:outline-none">
@@ -227,7 +250,7 @@
         </div>
     </div>
 
-    <!-- KULLANICILAR & ÇEVRİMİÇİ LİSTESİ -->
+    <!-- KULLANICILAR LİSTESİ -->
     <div id="users-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-4 max-h-[85vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">Kullanıcılar & Üyeler</h3><button onclick="closeModal('users-modal')">✕</button></div>
@@ -241,17 +264,17 @@
             </div>
             <hr class="border-rose-900/50">
             <div>
-                <h4 class="text-xs font-bold text-amber-300 mb-2">👥 Tüm Üyeler (Profile Gitmek İçin Tıkla)</h4>
+                <h4 class="text-xs font-bold text-amber-300 mb-2">👥 Tüm Üyeler (Direkt Profile Gitmek İçin Tıkla)</h4>
                 <div id="all-users-list" class="space-y-2"></div>
             </div>
         </div>
     </div>
 
-    <!-- SKOR TABLOSU (BİRİNCİYE ÖZEL ANİMASYONLU ÇERÇEVE) -->
+    <!-- SKOR TABLOSU (ŞAMPİYONLUK LİGİ) -->
     <div id="leaderboard-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-4 max-h-[85vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">🏆 Şampiyonlar Ligi</h3><button onclick="closeModal('leaderboard-modal')">✕</button></div>
-            <p class="text-[11px] text-rose-200/70">1. sıradaki şampiyon özel altın-kızıl animasyonlu çerçeveye sahip olur!</p>
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">🏆 Şampiyonlar Ligi & Turnuva</h3><button onclick="closeModal('leaderboard-modal')">✕</button></div>
+            <p class="text-[11px] text-rose-200/70">1. sıradaki şampiyon altın-kızıl çerçeveye ve "Günün Şampiyonu" unvanına sahip olur!</p>
             <div id="leaderboard-list" class="space-y-2"></div>
         </div>
     </div>
@@ -354,16 +377,17 @@
         </div>
     </div>
 
+    <!-- OYUN SALONU & TURNUVA -->
     <div id="games-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-md space-y-3 text-center">
-            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">🎮 Oyun Salonu</h3><button onclick="closeModal('games-modal')">✕</button></div>
+            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">🎮 Oyun Salonu (Turnuva Modu)</h3><button onclick="closeModal('games-modal')">✕</button></div>
             <div class="flex gap-1 bg-[#120409] p-1 rounded-xl">
                 <button onclick="switchGameTab('xox')" id="tab-xox" class="flex-1 py-1.5 rounded-lg text-xs font-bold bg-rose-600 text-white">❌ XOX</button>
                 <button onclick="switchGameTab('battleship')" id="tab-battleship" class="flex-1 py-1.5 rounded-lg text-xs font-bold text-rose-300/60">🚢 Amiral</button>
                 <button onclick="switchGameTab('word')" id="tab-word" class="flex-1 py-1.5 rounded-lg text-xs font-bold text-rose-300/60">🔤 Bilmece</button>
             </div>
             <div id="game-panel-xox" class="space-y-2">
-                <p id="xox-status" class="text-xs">Sıra: X</p>
+                <p id="xox-status" class="text-xs">Sıra: X (Kazanana +15 Puan)</p>
                 <div class="grid grid-cols-3 gap-1.5 w-44 mx-auto">
                     <button onclick="makeXOXMove(0)" id="cell-0" class="w-12 h-12 bg-[#120409] border border-rose-900/50 rounded-xl font-bold"></button>
                     <button onclick="makeXOXMove(1)" id="cell-1" class="w-12 h-12 bg-[#120409] border border-rose-900/50 rounded-xl font-bold"></button>
@@ -378,7 +402,7 @@
                 <button onclick="resetXOXGame()" class="w-full bg-[#2b0d18] py-1.5 rounded-xl text-xs font-bold">Sıfırla</button>
             </div>
             <div id="game-panel-battleship" class="hidden space-y-2">
-                <p id="bs-status" class="text-xs">3 gemiyi bul!</p>
+                <p id="bs-status" class="text-xs">3 gemiyi bul! (Kazanana +20 Puan)</p>
                 <div id="bs-grid" class="grid grid-cols-5 gap-1 w-56 mx-auto"></div>
                 <button onclick="resetBattleship()" class="w-full bg-[#2b0d18] py-1.5 rounded-xl text-xs font-bold">Yeni Harita</button>
             </div>
@@ -391,10 +415,10 @@
         </div>
     </div>
 
-    <!-- KENDİ PROFİLİM & AYARLAR -->
+    <!-- KENDİ PROFİLİM & SES/EFEKT AYARLARI -->
     <div id="profile-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">Profilim & Ayarlar</h3><button onclick="closeModal('profile-modal')">✕</button></div>
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">Profilim & Efekt Ayarları</h3><button onclick="closeModal('profile-modal')">✕</button></div>
             <div class="flex flex-col items-center gap-2">
                 <img id="preview-avatar" src="" class="w-16 h-16 rounded-full object-cover border-2 border-amber-500">
                 <input type="file" id="upload-avatar-file" accept="image/*" class="hidden">
@@ -405,8 +429,25 @@
                 <input type="text" id="edit-name" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
             </div>
             <div>
-                <label class="block text-[11px] text-rose-300/70">Anlık Durum Rozeti</label>
-                <input type="text" id="edit-status-badge" placeholder="Kızıl Mod 🔥" maxlength="40" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
+                <label class="block text-[11px] text-rose-300/70">Açıklama / Rozet</label>
+                <input type="text" id="edit-status-badge" maxlength="40" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
+            </div>
+            <div>
+                <label class="block text-[11px] text-rose-300/70">Arka Plan Efekti</label>
+                <select id="bg-effect-select" onchange="changeBgEffect(this.value)" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs text-amber-300 font-semibold">
+                    <option value="snow">❄️ Kar Yağışı</option>
+                    <option value="cyber">🌆 Cyber Gece Şehri</option>
+                    <option value="fire">🔥 Kızıl Ateş Parçacıkları</option>
+                    <option value="space">🌌 Yıldızlı Uzay</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-[11px] text-rose-300/70">Ses Efekti Teması</label>
+                <select id="sound-theme-select" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs text-amber-300 font-semibold">
+                    <option value="retro">🕹️ Retro Oyun</option>
+                    <option value="tok">🪵 Tok Tok</option>
+                    <option value="cyber">⚡ Cyber Çınlama</option>
+                </select>
             </div>
             <div class="flex gap-2 pt-1">
                 <button id="save-profile" class="flex-1 bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-xs font-bold text-white">Kaydet</button>
@@ -451,7 +492,7 @@
         let typingRef = null;
         let topChampionUid = null;
 
-        // SKOR LİDERİNİ TAKİP ET (Sadece 1. olana animasyonlu çerçeve)
+        // SKOR LİDERİNİ TAKİP ET (Şampiyonluk Çerçevesi)
         db.ref('leaderboard').on('value', snap => {
             const data = snap.val() || {};
             const sorted = Object.entries(data).sort((a,b) => b[1].score - a[1].score);
@@ -465,17 +506,50 @@
             else headerAv.classList.remove('champion-ring');
         }
 
-        // KAR YAĞIŞI
-        const snowContainer = document.getElementById('snow-container');
-        for (let i = 0; i < 20; i++) {
-            const flake = document.createElement('div');
-            flake.className = 'snowflake';
-            flake.style.left = Math.random() * 100 + '%';
-            flake.style.width = (Math.random() * 3 + 2) + 'px';
-            flake.style.height = flake.style.width;
-            flake.style.animationDuration = (Math.random() * 5 + 3) + 's';
-            flake.style.animationDelay = (Math.random() * 5) + 's';
-            snowContainer.appendChild(flake);
+        // DİNAMİK ARKA PLAN EFEKTLERİ
+        function initBgEffect(type) {
+            const c = document.getElementById('dynamic-bg-container');
+            c.innerHTML = '';
+            if (type === 'snow') {
+                for (let i = 0; i < 20; i++) {
+                    const flake = document.createElement('div');
+                    flake.className = 'snowflake';
+                    flake.style.left = Math.random() * 100 + '%';
+                    flake.style.width = (Math.random() * 3 + 2) + 'px';
+                    flake.style.height = flake.style.width;
+                    flake.style.animationDuration = (Math.random() * 5 + 3) + 's';
+                    flake.style.animationDelay = (Math.random() * 5) + 's';
+                    c.appendChild(flake);
+                }
+            } else if (type === 'fire' || type === 'cyber') {
+                for (let i = 0; i < 15; i++) {
+                    const f = document.createElement('div');
+                    f.className = 'firefly';
+                    f.style.left = Math.random() * 100 + '%';
+                    f.style.bottom = '0px';
+                    f.style.width = (Math.random() * 4 + 2) + 'px';
+                    f.style.height = f.style.width;
+                    f.style.background = type === 'cyber' ? '#38bdf8' : '#f43f5e';
+                    f.style.animationDuration = (Math.random() * 4 + 2) + 's';
+                    f.style.animationDelay = (Math.random() * 4) + 's';
+                    c.appendChild(f);
+                }
+            } else if (type === 'space') {
+                for (let i = 0; i < 25; i++) {
+                    const s = document.createElement('div');
+                    s.className = 'absolute bg-white rounded-full animate-pulse';
+                    s.style.left = Math.random() * 100 + '%';
+                    s.style.top = Math.random() * 100 + '%';
+                    s.style.width = (Math.random() * 2 + 1) + 'px';
+                    s.style.height = s.style.width;
+                    s.style.animationDuration = (Math.random() * 3 + 1) + 's';
+                    c.appendChild(s);
+                }
+            }
+        }
+        window.changeBgEffect = function(val) {
+            if(currentUser) localStorage.setItem('wrts_bgef_' + currentUser.uid, val);
+            initBgEffect(val);
         }
 
         window.openModal = id => document.getElementById(id).classList.remove('hidden');
@@ -487,17 +561,33 @@
             openModal('profile-modal');
         }
 
+        // ÖZEL SES EFEKTLERİ PAKETİ
         function playSoundEffect(type) {
             try {
+                const theme = currentUser ? (localStorage.getItem('wrts_snd_' + currentUser.uid) || 'retro') : 'retro';
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
                 osc.connect(gain); gain.connect(ctx.destination);
                 const now = ctx.currentTime;
-                if (type === 'notify') {
-                    osc.type = 'sine'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(900, now + 0.12);
-                    gain.gain.setValueAtTime(0.12, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-                    osc.start(now); osc.stop(now + 0.25);
+                
+                if (theme === 'retro') {
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(type === 'win' ? 880 : 587, now);
+                    osc.frequency.exponentialRampToValueAtTime(type === 'win' ? 1760 : 440, now + 0.15);
+                    gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+                    osc.start(now); osc.stop(now + 0.2);
+                } else if (theme === 'tok') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(300, now);
+                    gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+                    osc.start(now); osc.stop(now + 0.08);
+                } else {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(1200, now);
+                    osc.frequency.exponentialRampToValueAtTime(400, now + 0.1);
+                    gain.gain.setValueAtTime(0.08, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+                    osc.start(now); osc.stop(now + 0.15);
                 }
             } catch(e) {}
         }
@@ -512,12 +602,10 @@
             });
         }
         window.deleteAnnouncement = function() {
-            if(confirm("Duyuruyu silmek istiyor musun?")) {
-                db.ref('global_announcement').remove();
-            }
+            if(confirm("Duyuruyu silmek istiyor musun?")) db.ref('global_announcement').remove();
         }
 
-        // ORTAK SİNEMA SİSTEMİ (Herkeste Otomatik Açılır + Özel Alt Sohbet)
+        // SİNEMA SİSTEMİ & FİLM STİKERSLARI
         let cinemaChatInitialized = false;
         window.openCinemaModal = function() {
             openModal('music-modal');
@@ -534,7 +622,6 @@
                 });
             }
         }
-
         window.sendCinemaMessage = function(e) {
             e.preventDefault();
             const inp = document.getElementById('cinema-msg-input');
@@ -543,24 +630,23 @@
             db.ref('cinema_chat').push({ isim: getMyData().name, mesaj: val, zaman: Date.now() });
             inp.value = '';
         }
-
+        window.sendCinemaSticker = function(st) {
+            if(!currentUser) return;
+            db.ref('cinema_chat').push({ isim: getMyData().name, mesaj: `Sticker gönderdi: ${st}`, zaman: Date.now() });
+        }
         window.syncYoutubeVideo = function() {
             const url = document.getElementById('yt-url-input').value.trim();
             const match = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
             if (!match) return alert("Geçerli bir YouTube linki gir!");
-            // Tüm kullanıcılar için global sinema yayını başlatır
             db.ref('global_cinema').set({ videoId: match[1], by: getMyData().name, time: Date.now() });
             document.getElementById('yt-url-input').value = '';
         }
-
         window.stopAndDeleteMusic = function() {
             db.ref('global_cinema').remove().then(() => {
                 document.getElementById('yt-player-frame').src = "";
                 document.getElementById('music-sync-info').textContent = "Sinema salonu boş.";
             });
         }
-
-        // GLOBAL SİNEMA DİNLEYİCİSİ: Birisi film açtığında herkeste otomatik açılır!
         let lastPlayedCinemaTime = 0;
         db.ref('global_cinema').on('value', s => {
             const d = s.val();
@@ -577,6 +663,7 @@
             }
         });
 
+        // PUAN SİSTEMİ & TURNUVALAR
         window.addScorePoints = function(pts) {
             if (!currentUser) return;
             const md = getMyData();
@@ -588,8 +675,8 @@
                 currentData.avatar = md.avatar;
                 return currentData;
             });
+            playSoundEffect('win');
         }
-
         window.loadLeaderboard = function() {
             const listDiv = document.getElementById('leaderboard-list');
             listDiv.innerHTML = '<p class="text-xs text-rose-300/60 italic">Yükleniyor...</p>';
@@ -602,7 +689,10 @@
                         <div class="flex items-center gap-2.5">
                             <span class="font-bold text-xs ${idx === 0 ? 'text-amber-400' : idx === 1 ? 'text-rose-200' : 'text-rose-400/60'}">#${idx+1}</span>
                             <img src="${info.avatar}" class="w-7 h-7 rounded-full object-cover ${idx === 0 ? 'champion-ring' : ''}">
-                            <span class="text-xs font-bold text-rose-100">${info.name} ${idx === 0 ? '👑' : ''}</span>
+                            <div class="text-left">
+                                <span class="text-xs font-bold text-rose-100 block">${info.name} ${idx === 0 ? '👑' : ''}</span>
+                                ${idx === 0 ? '<span class="text-[9px] text-amber-400 font-bold">Günün Şampiyonu</span>' : ''}
+                            </div>
                         </div>
                         <span class="text-xs font-black text-amber-400">${info.score} Puan</span>
                     </div>
@@ -614,15 +704,12 @@
             "https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif",
             "https://media.giphy.com/media/13HgwGsXF0aiGY/giphy.gif",
             "https://media.giphy.com/media/9uIZuMGuWExxBLagNa/giphy.gif",
-            "https://media.giphy.com/media/mlvseq9yvZhba/giphy.gif",
-            "https://media.giphy.com/media/3o7abKhOpu0NwenH3O/giphy.gif",
-            "https://media.giphy.com/media/26n6WUWwSPpWhkMGY/giphy.gif"
+            "https://media.giphy.com/media/mlvseq9yvZhba/giphy.gif"
         ];
         function renderGifs() {
             document.getElementById('gif-grid').innerHTML = gifList.map(url => `<img src="${url}" class="w-full h-24 object-cover rounded-xl cursor-pointer hover:opacity-80 transition" onclick="sendGIF('${url}')">`).join('');
         }
         setTimeout(renderGifs, 100);
-
         window.sendGIF = url => {
             const md = getMyData();
             db.ref('odalar/' + currentRoom).push({ uid: currentUser.uid, isim: md.name, avatar: md.avatar, badge: md.badge, url, type: 'gif', zaman: Date.now() });
@@ -646,9 +733,7 @@
                 };
                 const drawDot = (x, y, color, isEraser, sync = true) => {
                     ctx.fillStyle = isEraser ? '#120409' : color;
-                    ctx.beginPath(); 
-                    ctx.arc(x, y, isEraser ? 10 : 3, 0, Math.PI * 2); 
-                    ctx.fill();
+                    ctx.beginPath(); ctx.arc(x, y, isEraser ? 10 : 3, 0, Math.PI * 2); ctx.fill();
                     if (sync) db.ref(`whiteboard/${currentRoom}`).push({ x, y, color: isEraser ? '#120409' : color, isEraser });
                 };
                 canvas.addEventListener('mousedown', e => { wbDrawing = true; const p = getPos(e); drawDot(p.x, p.y, wbColor, wbIsEraser); });
@@ -662,12 +747,7 @@
             db.ref(`whiteboard/${currentRoom}`).off();
             db.ref(`whiteboard/${currentRoom}`).on('child_added', snap => {
                 const d = snap.val(); 
-                if (d) { 
-                    ctx.fillStyle = d.color; 
-                    ctx.beginPath(); 
-                    ctx.arc(d.x, d.y, d.isEraser ? 10 : 3, 0, Math.PI * 2); 
-                    ctx.fill(); 
-                }
+                if (d) { ctx.fillStyle = d.color; ctx.beginPath(); ctx.arc(d.x, d.y, d.isEraser ? 10 : 3, 0, Math.PI * 2); ctx.fill(); }
             });
             db.ref(`whiteboard/${currentRoom}`).on('child_removed', () => ctx.clearRect(0, 0, canvas.width, canvas.height));
         }
@@ -718,14 +798,11 @@
             closeModal('poll-modal');
         }
         window.votePoll = (room, key, choice) => { if (currentUser) db.ref(`odalar/${room}/${key}/votes/${currentUser.uid}`).set(choice); };
-
-        window.reactToMessage = function(room, key, emoji) {
+        window.reactToMessage = (room, key, emoji) => {
             if (!currentUser) return;
             const ref = db.ref(`odalar/${room}/${key}/reactions/${currentUser.uid}`);
-            ref.once('value', snap => {
-                if (snap.val() === emoji) ref.remove(); else ref.set(emoji);
-            });
-        }
+            ref.once('value', snap => { if (snap.val() === emoji) ref.remove(); else ref.set(emoji); });
+        };
 
         function renderStickers() {
             const def = ['🔥', '👑', '⚡', '❄️', '🎮', '🚀', '😂', '🥳', '💯', '🎯', '💎', '🌹'];
@@ -748,6 +825,15 @@
             if (user) {
                 currentUser = user;
                 document.getElementById('login-screen').classList.add('hidden');
+                
+                // Varsayılan arka plan ve ses efekti ayarlarını yükle
+                const savedBgef = localStorage.getItem('wrts_bgef_' + user.uid) || 'snow';
+                document.getElementById('bg-effect-select').value = savedBgef;
+                initBgEffect(savedBgef);
+
+                const savedSnd = localStorage.getItem('wrts_snd_' + user.uid) || 'retro';
+                document.getElementById('sound-theme-select').value = savedSnd;
+
                 const statusRef = db.ref('status/' + user.uid);
                 db.ref('.info/connected').on('value', snap => {
                     if (snap.val() === true) {
@@ -755,13 +841,12 @@
                         const md = getMyData();
                         statusRef.set({ state: 'online', name: md.name, avatar: md.avatar, badge: md.badge, lastSeen: Date.now() });
                         
-                        // Üyelik tarihi yoksa bir kez kaydet
                         db.ref('users_registry/' + user.uid).once('value', uSnap => {
                             const existing = uSnap.val() || {};
                             db.ref('users_registry/' + user.uid).update({
                                 name: md.name,
                                 avatar: md.avatar,
-                                badge: md.badge,
+                                badge: md.badge || "WrtS Kullanıcısı",
                                 joinedAt: existing.joinedAt || Date.now()
                             });
                         });
@@ -796,7 +881,7 @@
         function getMyData() {
             const name = localStorage.getItem('wrts_name_' + currentUser.uid) || currentUser.displayName || currentUser.email.split('@')[0];
             const avatar = localStorage.getItem('wrts_avatar_' + currentUser.uid) || currentUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=e11d48&color=fff`;
-            const badge = localStorage.getItem('wrts_badge_' + currentUser.uid) || 'Kızıl Mod 🔥';
+            const badge = localStorage.getItem('wrts_badge_' + currentUser.uid) || 'WrtS Kullanıcısı';
             return { name, avatar, badge };
         }
 
@@ -809,9 +894,13 @@
         }
 
         document.getElementById('save-profile').onclick = () => {
-            const n = document.getElementById('edit-name').value.trim(); const b = document.getElementById('edit-status-badge').value.trim();
+            const n = document.getElementById('edit-name').value.trim(); 
+            const b = document.getElementById('edit-status-badge').value.trim() || "WrtS Kullanıcısı";
+            const snd = document.getElementById('sound-theme-select').value;
             if (!n) return;
-            localStorage.setItem('wrts_name_' + currentUser.uid, n); localStorage.setItem('wrts_badge_' + currentUser.uid, b);
+            localStorage.setItem('wrts_name_' + currentUser.uid, n); 
+            localStorage.setItem('wrts_badge_' + currentUser.uid, b);
+            localStorage.setItem('wrts_snd_' + currentUser.uid, snd);
             if (tempBase64Avatar) localStorage.setItem('wrts_avatar_' + currentUser.uid, tempBase64Avatar);
             loadUserDataToUI(); closeModal('profile-modal');
             const md = getMyData();
@@ -842,9 +931,7 @@
             db.ref(`friend_requests/${currentUser.uid}/${uid}`).remove();
         };
 
-        window.loadOnlineUsersList = function() {
-            updateUsersUI();
-        }
+        window.loadOnlineUsersList = function() { updateUsersUI(); }
 
         function updateUsersUI() {
             let count = 0; Object.values(activeUsersData).forEach(u => { if (u.state === 'online') count++; });
@@ -853,7 +940,7 @@
             fDiv.innerHTML = fEntries.length ? fEntries.map(([uid, info]) => `
                 <div onclick="openUserProfileModal('${uid}', '${encodeURIComponent(info.name)}')" class="flex items-center justify-between bg-[#120409] p-2 rounded-xl border border-rose-500/30 cursor-pointer">
                     <span class="text-xs font-bold">${info.name}</span>
-                    <span class="text-[10px] text-amber-400 font-bold">Profile Git</span>
+                    <span class="text-[10px] text-amber-400 font-bold">Profili Gör</span>
                 </div>
             `).join('') : '<p class="text-xs text-rose-300/60 italic">Arkadaş yok.</p>';
 
@@ -867,24 +954,21 @@
                         <div onclick="openUserProfileModal('${uid}', '${encodeURIComponent(info.name || 'İsimsiz')}')" class="flex items-center justify-between bg-[#120409] p-2.5 rounded-xl border border-rose-900/50 hover:border-amber-500 cursor-pointer transition">
                             <div class="flex items-center gap-2">
                                 <img src="${info.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-8 h-8 rounded-full object-cover ${isChamp ? 'champion-ring' : ''}">
-                                <div>
+                                <div class="text-left">
                                     <p class="text-xs font-bold text-rose-100">${info.name} <span class="text-[9px] ${online ? 'text-emerald-400' : 'text-rose-400/50'}">●</span></p>
-                                    <p class="text-[9px] text-rose-300/60">${online ? 'Çevrimiçi' : 'Çevrimdışı'}</p>
+                                    <p class="text-[9px] text-rose-300/60">${info.badge || 'WrtS Kullanıcısı'}</p>
                                 </div>
                             </div>
-                            <span class="text-[10px] text-amber-400 font-bold bg-amber-950/60 px-2 py-1 rounded-lg">Profili Gör</span>
+                            <span class="text-[10px] text-amber-400 font-bold bg-amber-950/60 px-2 py-1 rounded-lg">Direkt Profili Aç</span>
                         </div>
                     `;
                 }).join('');
             });
         }
 
-        // PROFİLE TIKLANINCA DİREKT AÇILAN DETAY PENCERESİ
+        // PROFİLE TIKLANINCA DİREKT AÇILAN KART (ARADA BEKLEME YOK)
         window.openUserProfileModal = function(targetUid, encName) {
-            if(targetUid === currentUser.uid) {
-                openMyProfile();
-                return;
-            }
+            if(targetUid === currentUser.uid) { openMyProfile(); return; }
             const targetName = decodeURIComponent(encName);
             openModal('user-profile-modal');
             document.getElementById('up-name').textContent = targetName;
@@ -895,47 +979,28 @@
             document.getElementById('up-status-text').textContent = "Çevrimdışı";
             document.getElementById('up-last-seen').textContent = "Hesaplanıyor...";
             document.getElementById('up-joined').textContent = "Yükleniyor...";
-            document.getElementById('up-badge').textContent = "Üye 🔥";
+            document.getElementById('up-badge').textContent = "WrtS Kullanıcısı";
 
             db.ref(`users_registry/${targetUid}`).once('value', snap => {
                 const uData = snap.val() || {};
                 if(uData.avatar) upAvatar.src = uData.avatar;
                 if(uData.badge) document.getElementById('up-badge').textContent = uData.badge;
                 if(uData.joinedAt) {
-                    const dateStr = new Date(uData.joinedAt).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
-                    document.getElementById('up-joined').textContent = dateStr;
-                } else {
-                    document.getElementById('up-joined').textContent = "Kurucu Üye";
-                }
+                    document.getElementById('up-joined').textContent = new Date(uData.joinedAt).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
+                } else { document.getElementById('up-joined').textContent = "Kurucu Üye"; }
             });
 
             const statusObj = activeUsersData[targetUid] || {};
             const online = statusObj.state === 'online';
-            const statusTextEl = document.getElementById('up-status-text');
-            const lastSeenEl = document.getElementById('up-last-seen');
-
-            if(online) {
-                statusTextEl.textContent = "Çevrimiçi";
-                statusTextEl.className = "font-bold text-emerald-400";
-                lastSeenEl.textContent = "Şuan aktif";
-            } else {
-                statusTextEl.textContent = "Çevrimdışı";
-                statusTextEl.className = "font-bold text-rose-400/70";
-                if(statusObj.lastSeen) {
-                    const diffMin = Math.floor((Date.now() - statusObj.lastSeen) / 60000);
-                    if(diffMin < 1) lastSeenEl.textContent = "Az önce";
-                    else if(diffMin < 60) lastSeenEl.textContent = `${diffMin} dk önce`;
-                    else lastSeenEl.textContent = new Date(statusObj.lastSeen).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                } else {
-                    lastSeenEl.textContent = "Bilinmiyor";
-                }
-            }
+            document.getElementById('up-status-text').textContent = online ? "Çevrimiçi" : "Çevrimdışı";
+            document.getElementById('up-status-text').className = online ? "font-bold text-emerald-400" : "font-bold text-rose-400/70";
+            document.getElementById('up-last-seen').textContent = online ? "Şuan aktif" : "Bir süre önce";
 
             const actionsDiv = document.getElementById('up-actions');
             const isFriend = !!myFriends[targetUid];
             actionsDiv.innerHTML = `
                 <button onclick="startDM('${targetUid}', '${encodeURIComponent(targetName)}'); closeModal('user-profile-modal'); closeModal('users-modal');" class="flex-1 bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-xs font-bold text-white transition">💬 DM Gönder</button>
-                ${!isFriend ? `<button onclick="db.ref('friend_requests/${targetUid}/${currentUser.uid}').set({name:getMyData().name, avatar:getMyData().avatar}); alert('Arkadaşlık isteği gönderildi!');" class="flex-1 bg-rose-600/20 text-rose-300 border border-rose-500/40 hover:bg-rose-600/30 py-2.5 rounded-xl text-xs font-bold transition">💖 Arkadaş Ekle</button>` : `<span class="flex-1 bg-emerald-950/40 border border-emerald-500/30 py-2.5 rounded-xl text-xs font-bold text-emerald-400 flex items-center justify-center">✓ Arkadaşsınız</span>`}
+                ${!isFriend ? `<button onclick="db.ref('friend_requests/${targetUid}/${currentUser.uid}').set({name:getMyData().name, avatar:getMyData().avatar}); alert('Arkadaşlık isteği gönderildi!');" class="flex-1 bg-rose-600/20 text-rose-300 border border-rose-500/40 py-2.5 rounded-xl text-xs font-bold">💖 Arkadaş Ekle</button>` : `<span class="flex-1 bg-emerald-950/40 border border-emerald-500/30 py-2.5 rounded-xl text-xs font-bold text-emerald-400 flex items-center justify-center">✓ Arkadaşsınız</span>`}
             `;
         }
 
@@ -943,13 +1008,9 @@
             const targetName = decodeURIComponent(encName);
             const ids = [currentUser.uid, targetUid].sort();
             const dmId = `özel_dm_${ids[0]}_${ids[1]}`;
-            
             db.ref(`gizli_dm_listesi/${currentUser.uid}/${dmId}`).set({ targetUid, targetName, createdAt: Date.now() });
             db.ref(`gizli_dm_listesi/${targetUid}/${dmId}`).set({ targetUid: currentUser.uid, targetName: getMyData().name, createdAt: Date.now() });
-            
-            currentRoom = dmId; 
-            closeModal('users-modal'); 
-            closeModal('menu-drawer-modal');
+            currentRoom = dmId; closeModal('users-modal'); closeModal('menu-drawer-modal');
             loadRoom(dmId);
         }
 
@@ -982,7 +1043,6 @@
                 updateRoomRoleButton();
             });
         }
-
         function updateRoomRoleButton() {
             const info = customRoomsData[currentRoom]; const btn = document.getElementById('room-settings-btn');
             if ((info && info.creator === currentUser?.uid) || roomRoles[currentUser?.uid]) btn.classList.remove('hidden'); else btn.classList.add('hidden');
@@ -996,9 +1056,9 @@
                 currentRoom = id; document.getElementById('room-select').value = id; loadRoom(id);
             });
         };
-
         document.getElementById('room-select').onchange = e => { currentRoom = e.target.value; loadRoom(currentRoom); };
 
+        // MESAJ GÖSTERİMİ & ALINTILAMA ANİMASYONU
         function createMessageElement(snap, room) {
             const data = snap.val(); const key = snap.key; const isMe = currentUser && data.uid === currentUser.uid;
             const div = document.createElement('div'); div.id = `msg-${key}`; div.className = `flex gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'} items-end`;
@@ -1011,23 +1071,28 @@
             else if (data.type === 'poll') {
                 const votes = data.votes || {}; const v1 = Object.values(votes).filter(v => v === 1).length; const v2 = Object.values(votes).filter(v => v === 2).length;
                 content = `<div class="bg-[#120409]/90 border border-rose-900/50 rounded-xl p-2.5 space-y-1.5 min-w-[200px]"><p class="text-xs font-bold text-amber-300">📊 ${data.question}</p><button onclick="votePoll('${room}', '${key}', 1)" class="w-full flex justify-between bg-[#1c0910] px-2.5 py-1 rounded-lg text-xs"><span>${data.opt1}</span><span class="font-bold text-amber-400">${v1}</span></button><button onclick="votePoll('${room}', '${key}', 2)" class="w-full flex justify-between bg-[#1c0910] px-2.5 py-1 rounded-lg text-xs"><span>${data.opt2}</span><span class="font-bold text-amber-400">${v2}</span></button></div>`;
-            } else { content = `<p class="text-sm break-words">${data.mesaj}</p>${data.edited ? '<span class="text-[9px] text-rose-200/60 italic">(düzenlendi)</span>' : ''}`; }
+            } else { 
+                let formattedMsg = data.mesaj;
+                // @ETİKETLEME RENKLENDİRME
+                if(currentUser && formattedMsg.includes('@' + getMyData().name)) {
+                    formattedMsg = `<span class="bg-amber-500/30 text-amber-300 px-1 rounded font-bold">@${getMyData().name}</span>` + formattedMsg.replace('@' + getMyData().name, '');
+                }
+                content = `<p class="text-sm break-words">${formattedMsg}</p>${data.edited ? '<span class="text-[9px] text-rose-200/60 italic">(düzenlendi)</span>' : ''}`; 
+            }
 
             const reactions = data.reactions || {};
             const reactionHTML = Object.entries(reactions).map(([uId, em]) => `<span class="bg-[#120409] px-1.5 py-0.5 rounded-full text-[10px] border border-rose-900/50">${em}</span>`).join('');
-
             const isSeen = data.seenBy && Object.keys(data.seenBy).length > 1;
             const seenHTML = isMe ? `<span class="text-[9px] ${isSeen ? 'text-amber-300 font-bold' : 'text-rose-200/60'}">${isSeen ? '✓✓ Görüldü' : '✓ İletildi'}</span>` : '';
-
             const timeStr = new Date(data.zaman || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             const isChamp = topChampionUid === data.uid;
 
             div.innerHTML = `
-                <img onclick="openUserProfileModal('${data.uid}', '${encodeURIComponent(data.isim)}')" src="${data.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-6 h-6 rounded-full object-cover shrink-0 mb-1 cursor-pointer ${isChamp ? 'champion-ring' : ''}" title="Profili Gör">
+                <img onclick="openUserProfileModal('${data.uid}', '${encodeURIComponent(data.isim)}')" src="${data.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-6 h-6 rounded-full object-cover shrink-0 mb-1 cursor-pointer ${isChamp ? 'champion-ring' : ''}">
                 <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[80%]">
-                    <div onclick="openUserProfileModal('${data.uid}', '${encodeURIComponent(data.isim)}')" class="flex items-center gap-1 px-1 mb-0.5 cursor-pointer hover:underline"><span class="text-[10px] font-bold text-rose-200">${roomRoles[data.uid] ? '🛡️' : ''} ${data.isim}</span>${data.badge ? `<span class="text-[9px] bg-amber-500/20 text-amber-300 px-1.5 rounded-full">${data.badge}</span>` : ''}</div>
+                    <div onclick="openUserProfileModal('${data.uid}', '${encodeURIComponent(data.isim)}')" class="flex items-center gap-1 px-1 mb-0.5 cursor-pointer"><span class="text-[10px] font-bold text-rose-200">${roomRoles[data.uid] ? '🛡️' : ''} ${data.isim}</span><span class="text-[9px] bg-amber-500/20 text-amber-300 px-1.5 rounded-full">${data.badge || 'WrtS Kullanıcısı'}</span></div>
                     <div onclick="document.getElementById('menu-${key}').classList.toggle('hidden')" class="cursor-pointer ${isMe ? 'bg-gradient-to-r from-rose-600 to-rose-700' : 'bg-[#280c16]'} px-3 py-2 rounded-2xl shadow relative">
-                        ${data.replyTo ? `<div class="mb-1 p-1.5 rounded bg-black/30 border-l-2 border-amber-400 text-[10px]"><b>${data.replyTo.name}</b><br>${data.replyTo.text}</div>` : ''}
+                        ${data.replyTo ? `<div onclick="scrollToMessage('${data.replyTo.key}')" class="mb-1 p-1.5 rounded bg-black/35 border-l-2 border-amber-400 text-[10px] cursor-pointer hover:bg-black/50"><b>${data.replyTo.name}</b><br>${data.replyTo.text}</div>` : ''}
                         ${content}
                         <div class="flex items-center justify-end gap-1.5 text-[9px] opacity-80 mt-0.5">
                             ${seenHTML}
@@ -1041,15 +1106,24 @@
                         <button onclick="reactToMessage('${room}', '${key}', '🔥')" title="Ateş">🔥</button>
                         <button onclick="reactToMessage('${room}', '${key}', '👍')" title="Beğen">👍</button>
                         ${isMe && data.mesaj ? `<button onclick="startEditMessage('${key}', '${data.mesaj.replace(/'/g, '')}')" title="Düzenle">✏️</button>` : ''}
-                        ${(isMe || roomRoles[currentUser?.uid]) ? `<button onclick="db.ref('odalar/${room}/${key}').remove()" class="text-red-400" title="Mesajı Sil">🗑️</button>` : ''}
+                        ${(isMe || roomRoles[currentUser?.uid]) ? `<button onclick="db.ref('odalar/${room}/${key}').remove()" class="text-red-400" title="Sil">🗑️</button>` : ''}
                     </div>
                 </div>
             `;
-
             if (currentUser && data.uid !== currentUser.uid && (!data.seenBy || !data.seenBy[currentUser.uid])) {
                 db.ref(`odalar/${room}/${key}/seenBy/${currentUser.uid}`).set(true);
             }
             return div;
+        }
+
+        // MESAJLARA KAYDIRMA (SCROLL) VE PARLAMA ANİMASYONU
+        window.scrollToMessage = function(key) {
+            const targetEl = document.getElementById(`msg-${key}`);
+            if (targetEl) {
+                targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                targetEl.classList.add('highlight-anim');
+                setTimeout(() => targetEl.classList.remove('highlight-anim'), 2000);
+            }
         }
 
         function loadRoom(room) {
@@ -1059,7 +1133,6 @@
             db.ref(`room_roles/${room}`).on('value', s => { roomRoles = s.val() || {}; updateRoomRoleButton(); });
             db.ref(`room_mutes/${room}`).on('value', s => { mutedUsers = s.val() || {}; });
 
-            // DUYURU ÇUBUĞU KONTROLÜ (Genel ve Muhabbet odalarında görünür)
             const annBar = document.getElementById('announcement-bar');
             const annText = document.getElementById('announcement-text');
             const annDelBtn = document.getElementById('delete-announcement-btn');
@@ -1068,17 +1141,10 @@
                 annBar.classList.remove('hidden');
                 db.ref('global_announcement').on('value', snap => {
                     const val = snap.val();
-                    if(val) {
-                        annText.textContent = val.text;
-                        annDelBtn.classList.remove('hidden');
-                    } else {
-                        annText.textContent = "Şu an aktif bir duyuru yok.";
-                        annDelBtn.classList.add('hidden');
-                    }
+                    if(val) { annText.textContent = val.text; annDelBtn.classList.remove('hidden'); }
+                    else { annText.textContent = "Şu an aktif bir duyuru yok."; annDelBtn.classList.add('hidden'); }
                 });
-            } else {
-                annBar.classList.add('hidden');
-            }
+            } else { annBar.classList.add('hidden'); }
 
             roomRef = db.ref('odalar/' + room).limitToLast(50);
             roomRef.once('value', () => { isInitialLoad = false; });
@@ -1098,26 +1164,18 @@
             if (typingRef) typingRef.off();
             const indicatorEl = document.getElementById('typing-indicator');
             const msgInput = document.getElementById('msg-input');
-            
             typingRef = db.ref(`typing/${room}`);
             let typingTimer;
             msgInput.oninput = () => {
                 if (!currentUser) return;
                 typingRef.child(currentUser.uid).set(getMyData().name);
                 clearTimeout(typingTimer);
-                typingTimer = setTimeout(() => {
-                    typingRef.child(currentUser.uid).remove();
-                }, 2000);
+                typingTimer = setTimeout(() => typingRef.child(currentUser.uid).remove(), 2000);
             };
-
             typingRef.on('value', snap => {
                 const data = snap.val() || {};
                 const activeTypers = Object.entries(data).filter(([uid]) => uid !== currentUser?.uid).map(([_, name]) => name);
-                if (activeTypers.length > 0) {
-                    indicatorEl.textContent = activeTypers.join(', ') + " yazıyor...";
-                } else {
-                    indicatorEl.textContent = "";
-                }
+                indicatorEl.textContent = activeTypers.length > 0 ? activeTypers.join(', ') + " yazıyor..." : "";
             });
         }
 
@@ -1130,15 +1188,14 @@
 
             if (editingMessageKey) {
                 db.ref(`odalar/${currentRoom}/${editingMessageKey}`).update({ mesaj: text, edited: true });
-                cancelReplyOrEdit();
-                input.value = '';
-                return;
+                cancelReplyOrEdit(); input.value = ''; return;
             }
 
             const msgData = { uid: currentUser.uid, isim: md.name, avatar: md.avatar, badge: md.badge, mesaj: text, type: 'text', zaman: Date.now() };
             if (replyingTo) { msgData.replyTo = replyingTo; cancelReplyOrEdit(); }
             db.ref('odalar/' + currentRoom).push(msgData);
             input.value = '';
+            playSoundEffect('send');
         };
 
         window.setReplyTo = (key, name, text) => {
@@ -1148,22 +1205,49 @@
             document.getElementById('reply-preview-text').textContent = `${name}: ${text}`;
             document.getElementById('reply-preview-bar').classList.remove('hidden');
         };
-
         window.startEditMessage = (key, text) => {
-            replyingTo = null;
-            editingMessageKey = key;
-            document.getElementById('preview-mode-title').textContent = "Mesajı Düzenle:";
+            replyingTo = null; editingMessageKey = key;
+            document.getElementById('preview-mode-title').textContent = "Düzenle:";
             document.getElementById('reply-preview-text').textContent = text;
             document.getElementById('reply-preview-bar').classList.remove('hidden');
             document.getElementById('msg-input').value = text;
             document.getElementById('msg-input').focus();
         };
-
         window.cancelReplyOrEdit = () => {
-            replyingTo = null;
-            editingMessageKey = null;
+            replyingTo = null; editingMessageKey = null;
             document.getElementById('reply-preview-bar').classList.add('hidden');
             document.getElementById('msg-input').value = '';
+        };
+
+        // SESLİ NOT (BAS-KONUŞ / WALKIE-TALKIE)
+        let mediaRecorder, audioChunks = [];
+        const wtBtn = document.getElementById('walkie-talkie-btn');
+        wtBtn.onmousedown = wtBtn.ontouchstart = async (e) => {
+            e.preventDefault();
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream); audioChunks = [];
+                mediaRecorder.ondataavailable = ev => audioChunks.push(ev.data);
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const r = new FileReader();
+                    r.onloadend = () => {
+                        const md = getMyData();
+                        db.ref('odalar/' + currentRoom).push({ uid: currentUser.uid, isim: md.name, avatar: md.avatar, badge: md.badge, url: r.result, type: 'audio', zaman: Date.now() });
+                    };
+                    r.readAsDataURL(blob);
+                    stream.getTracks().forEach(t => t.stop());
+                };
+                mediaRecorder.start();
+                wtBtn.classList.add('bg-rose-600', 'text-white', 'animate-pulse');
+            } catch(e) { alert("Mikrofon izni alınamadı."); }
+        };
+        wtBtn.onmouseup = wtBtn.ontouchend = (e) => {
+            e.preventDefault();
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                wtBtn.classList.remove('bg-rose-600', 'text-white', 'animate-pulse');
+            }
         };
 
         document.getElementById('img-file').onchange = e => {
@@ -1182,43 +1266,16 @@
             r.readAsDataURL(f);
         };
 
-        let mediaRecorder, audioChunks = [];
-        const recordBtn = document.getElementById('record-btn');
-        recordBtn.onclick = async () => {
-            if (!mediaRecorder || mediaRecorder.state === 'inactive') {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorder = new MediaRecorder(stream); audioChunks = [];
-                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-                    mediaRecorder.onstop = () => {
-                        const blob = new Blob(audioChunks, { type: 'audio/webm' });
-                        const r = new FileReader();
-                        r.onloadend = () => {
-                            const md = getMyData();
-                            db.ref('odalar/' + currentRoom).push({ uid: currentUser.uid, isim: md.name, avatar: md.avatar, badge: md.badge, url: r.result, type: 'audio', zaman: Date.now() });
-                        };
-                        r.readAsDataURL(blob);
-                        stream.getTracks().forEach(t => t.stop());
-                    };
-                    mediaRecorder.start(); recordBtn.classList.add('bg-rose-600', 'text-white', 'animate-pulse');
-                } catch(e) { alert("Mikrofon izni yok."); }
-            } else { mediaRecorder.stop(); recordBtn.classList.remove('bg-rose-600', 'text-white', 'animate-pulse'); }
-        };
-
         document.getElementById('google-btn').onclick = () => auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e => alert(e.message));
         document.getElementById('email-form').onsubmit = e => {
             e.preventDefault(); const em = document.getElementById('email').value, pw = document.getElementById('password').value;
             auth.signInWithEmailAndPassword(em, pw).catch(() => auth.createUserWithEmailAndPassword(em, pw).catch(err => alert(err.message)));
         };
-
         document.getElementById('modal-logout').onclick = () => {
             if (confirm("Çıkış yapılsın mı?")) {
-                db.ref('status/' + currentUser.uid).set({ state: 'offline', lastSeen: Date.now() }).then(() => {
-                    auth.signOut().then(() => { window.location.reload(); });
-                });
+                db.ref('status/' + currentUser.uid).set({ state: 'offline', lastSeen: Date.now() }).then(() => auth.signOut().then(() => window.location.reload()));
             }
         };
-
         window.requestAccountDeletion = async function() {
             const pwdInput = document.getElementById('delete-confirm-password').value;
             if (!pwdInput) return alert("Şifreni gir!");
@@ -1228,8 +1285,7 @@
                 await currentUser.reauthenticateWithCredential(cred);
                 await db.ref('status/' + currentUser.uid).remove();
                 await db.ref('users_registry/' + currentUser.uid).remove();
-                await currentUser.delete();
-                window.location.reload();
+                await currentUser.delete(); window.location.reload();
             } catch (err) { alert("Hata: " + err.message); }
         };
 
@@ -1256,7 +1312,6 @@
                 callRef.child('answerCandidates').on('child_added', s => { if (s.val()) peerConnection.addIceCandidate(new RTCIceCandidate(s.val())); });
             } catch(e) { alert("Kamera/Mikrofon başlatılamadı."); }
         };
-
         window.joinWebRTCCall = async () => {
             const callRef = db.ref(`webrtc/${currentRoom}`); const offer = (await callRef.child('offer').once('value')).val();
             if (!offer) return alert("Aktif arama yok.");
@@ -1272,7 +1327,6 @@
             callRef.child('offerCandidates').on('child_added', s => { if (s.val()) peerConnection.addIceCandidate(new RTCIceCandidate(s.val())); });
             document.getElementById('call-status').textContent = "Bağlandı!";
         };
-
         window.endWebRTCCall = () => { 
             if (localStream) localStream.getTracks().forEach(t => t.stop()); 
             if (peerConnection) peerConnection.close(); 
@@ -1300,7 +1354,7 @@
                 if (g.board[i] || g.status.includes('Kazanan')) return;
                 g.board[i] = g.turn;
                 const w = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]].some(([a,b,c]) => g.board[a] && g.board[a]===g.board[b] && g.board[a]===g.board[c]);
-                if (w) { g.status = `Kazanan: ${g.turn} 🎉`; addScorePoints(10); }
+                if (w) { g.status = `Kazanan: ${g.turn} 🎉 (+15 Puan)`; addScorePoints(15); }
                 else if (!g.board.includes('')) g.status = 'Berabere!';
                 else g.status = `Sıra: ${g.turn = g.turn==='X'?'O':'X'}`;
                 db.ref(`games/${currentRoom}/xox`).set(g);
@@ -1320,7 +1374,7 @@
                     b.onclick = () => {
                         if (!rev && d.shots > 0) {
                             d.rev[i] = true; d.shots--;
-                            if (hits + (ship ? 1 : 0) >= 3) { document.getElementById('bs-status').textContent = "Kazandın! (+15 Puan)"; addScorePoints(15); }
+                            if (hits + (ship ? 1 : 0) >= 3) { document.getElementById('bs-status').textContent = "Kazandın! (+20 Puan)"; addScorePoints(20); }
                             db.ref(`games/${currentRoom}/bs`).set(d);
                         }
                     };
@@ -1338,25 +1392,20 @@
             { w: "ÇANAKKALE", h: "Tarihi şehitlikler diyarı boğaz" },
             { w: "KAPADOKYA", h: "Peri bacaları ve sıcak hava balonları" },
             { w: "GÖBEKLITEPE", h: "Dünyanın bilinen en eski tapınak merkezi" },
-            { w: "TOPKAPI", h: "İstanbul'un tarihi padişah sarayı" },
-            { w: "KARAGÖZ", h: "Geleneksel Türk gölge oyunu karakteri" },
-            { w: "EFES", h: "İzmir'de antik Roma kenti" },
-            { w: "NEMRUT", h: "Dev devasa heykellerin olduğu dağ" },
-            { w: "PAMUKKALE", h: "Beyaz travertenleriyle ünlü şifalı sular" }
+            { w: "TOPKAPI", h: "İstanbul'un tarihi padişah sarayı" }
         ];
-
         function listenWordGame(r) {
             db.ref(`games/${r}/word`).on('value', s => {
                 const d = s.val(); if (!d) return resetWordGame();
-                document.getElementById('word-hint').textContent = "Kültürel İpucu: " + d.h;
-                document.getElementById('word-display').textContent = d.solved ? `🎉 ${d.w} (+20 Puan)` : d.w.split('').map((c,i) => i===0||i===d.w.length-1?c:'_').join(' ');
+                document.getElementById('word-hint').textContent = "İpucu: " + d.h;
+                document.getElementById('word-display').textContent = d.solved ? `🎉 ${d.w} (+10 Puan)` : d.w.split('').map((c,i) => i===0||i===d.w.length-1?c:'_').join(' ');
             });
         }
         window.submitWordGuess = () => {
             const v = document.getElementById('word-guess-input').value.trim().toUpperCase();
             db.ref(`games/${currentRoom}/word`).once('value', s => {
                 if (s.val()?.w === v && !s.val()?.solved) {
-                    db.ref(`games/${currentRoom}/word/solved`).set(true); addScorePoints(20);
+                    db.ref(`games/${currentRoom}/word/solved`).set(true); addScorePoints(10);
                 }
             });
             document.getElementById('word-guess-input').value = '';
