@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WrtS Ultra - Cyber Kış Üssü</title>
+    <title>WrtS - Crimson Gold Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -11,23 +11,23 @@
     <style>
         body { 
             overscroll-behavior-y: none; 
-            background: linear-gradient(135deg, #020617 0%, #090d16 100%);
+            background: radial-gradient(circle at top right, #2e0916, #14050a 45%, #090306 100%);
         }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-thumb { background: #38bdf8; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #e11d48; border-radius: 4px; }
         pre code { font-family: 'Courier New', Courier, monospace; }
         
-        /* ANİMASYONLU PROFİL ÇERÇEVELERİ (RGB NEON & BUZ) */
-        @keyframes neonGlow {
-            0% { border-color: #38bdf8; box-shadow: 0 0 5px rgba(56,189,248,0.5); }
-            50% { border-color: #ec4899; box-shadow: 0 0 15px rgba(236,72,153,0.8); }
-            100% { border-color: #38bdf8; box-shadow: 0 0 5px rgba(56,189,248,0.5); }
+        /* SADECE SKOR BİRİNCİSİNE ÖZEL ALTIN-KIZIL ANİMASYONLU ÇERÇEVE */
+        @keyframes championGlow {
+            0% { border-color: #f59e0b; box-shadow: 0 0 8px rgba(245,158,11,0.6); }
+            50% { border-color: #fb7185; box-shadow: 0 0 18px rgba(251,113,133,0.9); }
+            100% { border-color: #f59e0b; box-shadow: 0 0 8px rgba(245,158,11,0.6); }
         }
-        .animated-ring {
-            border: 2.5px solid #38bdf8;
-            animation: neonGlow 3s infinite;
+        .champion-ring {
+            border: 2.5px solid #f59e0b !important;
+            animation: championGlow 2s infinite;
         }
 
         @keyframes snowfall {
@@ -35,24 +35,24 @@
             100% { transform: translateY(100%) translateX(10px); opacity: 0.2; }
         }
         .snowflake {
-            position: absolute; top: -10px; background: white; border-radius: 50%; pointer-events: none; z-index: 5;
+            position: absolute; top: -10px; background: #ffe4e6; border-radius: 50%; pointer-events: none; z-index: 5;
             animation: snowfall linear infinite;
         }
     </style>
 </head>
-<body id="app-body" class="text-white h-[100dvh] w-full overflow-hidden flex flex-col justify-between relative">
+<body id="app-body" class="text-rose-50 h-[100dvh] w-full overflow-hidden flex flex-col justify-between relative">
 
     <!-- GİRİŞ EKRANI -->
-    <div id="login-screen" class="fixed inset-0 bg-slate-950/95 z-50 flex items-center justify-center p-4 overflow-y-auto">
-        <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl w-full max-w-sm space-y-4 shadow-2xl backdrop-blur-md">
-            <h1 class="text-3xl font-black text-center text-cyan-400 tracking-wider">WrtS ⚡</h1>
+    <div id="login-screen" class="fixed inset-0 bg-[#0d0407]/95 z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-[#1c0910] border border-rose-900/60 p-6 rounded-3xl w-full max-w-sm space-y-4 shadow-2xl backdrop-blur-md">
+            <h1 class="text-3xl font-black text-center text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-rose-500 tracking-wider">WrtS 🔥</h1>
             <form id="email-form" class="space-y-3">
-                <input type="email" id="email" placeholder="E-posta" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500">
-                <input type="password" id="password" placeholder="Şifre (En az 6 karakter)" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500">
-                <button type="submit" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 py-3 rounded-xl font-bold text-sm transition shadow-lg shadow-cyan-900/40">Giriş Yap / Kayıt Ol</button>
+                <input type="email" id="email" placeholder="E-posta" required class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500">
+                <input type="password" id="password" placeholder="Şifre (En az 6 karakter)" required class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500">
+                <button type="submit" class="w-full bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 py-3 rounded-xl font-bold text-sm transition shadow-lg shadow-rose-900/40 text-white">Giriş Yap / Kayıt Ol</button>
             </form>
-            <div class="text-center text-xs text-slate-500">veya</div>
-            <button id="google-btn" type="button" class="w-full bg-white text-slate-900 hover:bg-slate-200 py-3 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2">
+            <div class="text-center text-xs text-rose-300/50">veya</div>
+            <button id="google-btn" type="button" class="w-full bg-white text-slate-900 hover:bg-rose-50 py-3 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2">
                 <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
                 <span>Google ile Giriş Yap</span>
             </button>
@@ -60,46 +60,48 @@
     </div>
 
     <!-- ÜST BAR -->
-    <header id="main-header" class="bg-slate-900/90 backdrop-blur border-b border-slate-800/80 px-3 py-2.5 flex items-center justify-between gap-2 shrink-0 z-20 shadow-lg">
+    <header id="main-header" class="bg-[#1a070e]/95 backdrop-blur border-b border-rose-900/60 px-3 py-2.5 flex items-center justify-between gap-2 shrink-0 z-20 shadow-lg">
         <div class="flex items-center gap-2 shrink-0">
-            <button onclick="openModal('menu-drawer-modal')" class="bg-slate-800 hover:bg-slate-700 text-cyan-400 p-2 rounded-xl text-base font-bold flex items-center justify-center transition" title="Menü">☰</button>
-            <span class="font-black text-base text-cyan-400 tracking-wider">WrtS</span>
-            <select id="room-select" class="bg-slate-950 border border-slate-800 text-xs rounded-xl px-2.5 py-1.5 text-cyan-300 font-semibold focus:outline-none max-w-[110px] truncate">
+            <button onclick="openModal('menu-drawer-modal')" class="bg-[#2b0d18] hover:bg-rose-900/50 text-amber-400 p-2 rounded-xl text-base font-bold flex items-center justify-center transition" title="Menü">☰</button>
+            <span class="font-black text-base text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-rose-400 tracking-wider">WrtS</span>
+            <select id="room-select" class="bg-[#120409] border border-rose-900/60 text-xs rounded-xl px-2.5 py-1.5 text-amber-300 font-semibold focus:outline-none max-w-[110px] truncate">
                 <option value="genel"># Genel</option>
                 <option value="sohbet"># Muhabbet</option>
                 <option value="oyun"># Oyun</option>
-                <option value="itiraf"># İtiraf 🤫</option>
             </select>
-            <button onclick="openModal('room-modal')" class="bg-cyan-600/20 text-cyan-400 border border-cyan-500/30 w-7 h-7 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 hover:bg-cyan-600/30 transition" title="Oda Kur">+</button>
-            <button id="room-settings-btn" onclick="openRoomRolesModal()" class="hidden bg-amber-600/20 text-amber-400 border border-amber-500/30 w-7 h-7 rounded-xl flex items-center justify-center text-xs shrink-0" title="Moderatör">🛡️</button>
+            <button onclick="openModal('room-modal')" class="bg-amber-500/20 text-amber-400 border border-amber-500/30 w-7 h-7 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 hover:bg-amber-500/30 transition" title="Oda Kur">+</button>
+            <button id="room-settings-btn" onclick="openRoomRolesModal()" class="hidden bg-rose-600/20 text-rose-400 border border-rose-500/30 w-7 h-7 rounded-xl flex items-center justify-center text-xs shrink-0" title="Moderatör">🛡️</button>
         </div>
 
         <div class="flex items-center gap-2 shrink-0">
-            <button onclick="toggleSearchBar()" class="bg-slate-800 text-slate-300 p-2 rounded-xl text-xs font-bold hover:bg-slate-700 transition">🔍</button>
-            <button onclick="openModal('users-modal'); loadOnlineUsersList();" class="relative bg-slate-800 px-2.5 py-1.5 rounded-xl border border-slate-700 text-xs text-emerald-400 flex items-center gap-1.5">
+            <button onclick="toggleSearchBar()" class="bg-[#2b0d18] text-rose-200 p-2 rounded-xl text-xs font-bold hover:bg-rose-900/50 transition">🔍</button>
+            <button onclick="openModal('users-modal'); loadOnlineUsersList();" class="relative bg-[#2b0d18] px-2.5 py-1.5 rounded-xl border border-rose-800/60 text-xs text-emerald-400 flex items-center gap-1.5">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 <span id="online-count">1</span>
                 <span id="req-badge" class="hidden absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">!</span>
             </button>
-            <button onclick="openModal('profile-modal')" class="flex items-center gap-1 bg-slate-800 p-1 rounded-full border border-slate-700">
-                <img id="header-avatar" src="" class="w-6 h-6 rounded-full object-cover animated-ring">
+            <button onclick="openMyProfile()" class="flex items-center gap-1 bg-[#2b0d18] p-1 rounded-full border border-rose-800/60">
+                <img id="header-avatar" src="" class="w-6 h-6 rounded-full object-cover">
             </button>
         </div>
     </header>
 
     <!-- MESAJ ARAMA ÇUBUĞU -->
-    <div id="search-bar" class="hidden bg-slate-900 border-b border-slate-800 px-4 py-2 flex items-center gap-2 w-full mx-auto shrink-0 z-20">
-        <input type="text" id="msg-search-input" placeholder="Sohbette ara..." class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs focus:outline-none">
-        <button onclick="toggleSearchBar()" class="text-xs text-slate-400 hover:text-white px-2">Kapat</button>
+    <div id="search-bar" class="hidden bg-[#1a070e] border-b border-rose-900/60 px-4 py-2 flex items-center gap-2 w-full mx-auto shrink-0 z-20">
+        <input type="text" id="msg-search-input" placeholder="Sohbette ara..." class="flex-1 bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-1.5 text-xs focus:outline-none">
+        <button onclick="toggleSearchBar()" class="text-xs text-rose-300 hover:text-white px-2">Kapat</button>
     </div>
 
-    <!-- DUYURU BANNER ALANI (Sadece Sohbet Odasında / Yönetici Ekleyebilir) -->
-    <div id="announcement-bar" class="hidden bg-gradient-to-r from-amber-950/80 via-slate-900 to-amber-950/80 border-b border-amber-500/30 px-4 py-2 flex items-center justify-between text-xs shrink-0 z-15">
-        <div class="flex items-center gap-2 overflow-hidden">
+    <!-- DUYURU BANNER ALANI (Sadece Genel ve Muhabbet Odalarında) -->
+    <div id="announcement-bar" class="hidden bg-gradient-to-r from-amber-950 via-[#2b0d18] to-amber-950 border-b border-amber-500/40 px-3 py-2 flex items-center justify-between text-xs shrink-0 z-15 shadow-md">
+        <div class="flex items-center gap-2 overflow-hidden flex-1">
             <span class="text-amber-400 font-bold shrink-0">📢 Duyuru:</span>
-            <span id="announcement-text" class="text-slate-200 truncate font-medium"></span>
+            <span id="announcement-text" class="text-amber-100 truncate font-medium">Duyuru yok.</span>
         </div>
-        <button id="delete-announcement-btn" onclick="deleteAnnouncement()" class="hidden text-red-400 hover:text-red-300 font-bold text-[10px] bg-red-950/40 border border-red-500/30 px-2 py-0.5 rounded shrink-0 ml-2">Kaldır</button>
+        <div class="flex items-center gap-1.5 shrink-0 ml-2">
+            <button onclick="openModal('announcement-modal')" class="bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-1 rounded-lg text-[10px] font-bold hover:bg-amber-500/30">+ Duyuru</button>
+            <button id="delete-announcement-btn" onclick="deleteAnnouncement()" class="hidden text-rose-300 hover:text-white font-bold text-[10px] bg-rose-900/60 border border-rose-500/40 px-2 py-1 rounded-lg">Sil</button>
+        </div>
     </div>
 
     <!-- MESAJ ALANI VE KAR YAĞIŞI -->
@@ -109,285 +111,311 @@
     </div>
 
     <!-- YAZIYOR BİLGİSİ -->
-    <div id="typing-indicator" class="px-4 py-1 text-[11px] text-slate-400 italic w-full max-w-4xl mx-auto h-6 shrink-0 z-20"></div>
+    <div id="typing-indicator" class="px-4 py-1 text-[11px] text-amber-300/80 italic w-full max-w-4xl mx-auto h-6 shrink-0 z-20"></div>
 
     <!-- YANITLANAN VEYA DÜZENLENEN ÖNİZLEME -->
-    <div id="reply-preview-bar" class="hidden w-full max-w-4xl mx-auto px-4 py-1.5 bg-slate-900 border-t border-slate-800 flex justify-between items-center shrink-0 z-20">
+    <div id="reply-preview-bar" class="hidden w-full max-w-4xl mx-auto px-4 py-1.5 bg-[#1a070e] border-t border-rose-900/60 flex justify-between items-center shrink-0 z-20">
         <div class="flex items-center gap-2 truncate text-xs">
-            <span id="preview-mode-title" class="text-cyan-400 font-bold">Yanıtlanıyor:</span>
-            <span id="reply-preview-text" class="text-slate-300 truncate"></span>
+            <span id="preview-mode-title" class="text-amber-400 font-bold">Yanıtlanıyor:</span>
+            <span id="reply-preview-text" class="text-rose-200 truncate"></span>
         </div>
-        <button onclick="cancelReplyOrEdit()" class="text-slate-400 hover:text-white font-bold text-xs px-2">✕</button>
+        <button onclick="cancelReplyOrEdit()" class="text-rose-300 hover:text-white font-bold text-xs px-2">✕</button>
     </div>
 
     <!-- EKSTRA ARAÇ ÇEKMECESİ (+ BUTONU) -->
-    <div id="tools-drawer" class="hidden bg-slate-900 border-t border-slate-800 p-2.5 w-full max-w-4xl mx-auto grid grid-cols-5 gap-2 shrink-0 z-20">
-        <button type="button" onclick="document.getElementById('img-file').click(); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-slate-950 p-2 rounded-xl border border-slate-800 text-xs"><span>🖼️</span><span class="text-[10px]">Fotoğraf</span></button>
-        <button type="button" onclick="openModal('gif-modal'); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-slate-950 p-2 rounded-xl border border-slate-800 text-xs"><span>🎞️</span><span class="text-[10px]">GIF</span></button>
-        <button type="button" onclick="openModal('sticker-modal'); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-slate-950 p-2 rounded-xl border border-slate-800 text-xs"><span>✨</span><span class="text-[10px]">Sticker</span></button>
-        <button type="button" onclick="openModal('code-modal'); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-slate-950 p-2 rounded-xl border border-slate-800 text-xs"><span>💻</span><span class="text-[10px]">Kod</span></button>
-        <button type="button" onclick="openModal('poll-modal'); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-slate-950 p-2 rounded-xl border border-slate-800 text-xs"><span>📊</span><span class="text-[10px]">Anket</span></button>
+    <div id="tools-drawer" class="hidden bg-[#1a070e] border-t border-rose-900/60 p-2.5 w-full max-w-4xl mx-auto grid grid-cols-5 gap-2 shrink-0 z-20">
+        <button type="button" onclick="document.getElementById('img-file').click(); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-[#120409] p-2 rounded-xl border border-rose-900/50 text-xs"><span>🖼️</span><span class="text-[10px]">Fotoğraf</span></button>
+        <button type="button" onclick="openModal('gif-modal'); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-[#120409] p-2 rounded-xl border border-rose-900/50 text-xs"><span>🎞️</span><span class="text-[10px]">GIF</span></button>
+        <button type="button" onclick="openModal('sticker-modal'); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-[#120409] p-2 rounded-xl border border-rose-900/50 text-xs"><span>✨</span><span class="text-[10px]">Sticker</span></button>
+        <button type="button" onclick="openModal('code-modal'); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-[#120409] p-2 rounded-xl border border-rose-900/50 text-xs"><span>💻</span><span class="text-[10px]">Kod</span></button>
+        <button type="button" onclick="openModal('poll-modal'); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-[#120409] p-2 rounded-xl border border-rose-900/50 text-xs"><span>📊</span><span class="text-[10px]">Anket</span></button>
     </div>
 
     <!-- ALT MESAJ ÇUBUĞU -->
-    <footer id="main-footer" class="bg-slate-900 border-t border-slate-800 p-2 sm:p-3 w-full max-w-4xl mx-auto shrink-0 z-20">
+    <footer id="main-footer" class="bg-[#1a070e] border-t border-rose-900/60 p-2 sm:p-3 w-full max-w-4xl mx-auto shrink-0 z-20">
         <form id="msg-form" class="flex items-center gap-1.5 w-full">
-            <button type="button" onclick="toggleToolsDrawer()" class="w-9 h-9 rounded-full bg-slate-800 hover:bg-slate-700 text-cyan-400 font-black text-lg flex items-center justify-center shrink-0" title="Ekstra Araçlar">+</button>
-            <button type="button" id="record-btn" class="w-9 h-9 rounded-full bg-slate-800 hover:bg-slate-700 text-rose-400 flex items-center justify-center shrink-0" title="Ses Kaydet">🎙️</button>
+            <button type="button" onclick="toggleToolsDrawer()" class="w-9 h-9 rounded-full bg-[#2b0d18] hover:bg-rose-900/60 text-amber-400 font-black text-lg flex items-center justify-center shrink-0" title="Ekstra Araçlar">+</button>
+            <button type="button" id="record-btn" class="w-9 h-9 rounded-full bg-[#2b0d18] hover:bg-rose-900/60 text-rose-400 flex items-center justify-center shrink-0" title="Ses Kaydet">🎙️</button>
             <input type="file" id="img-file" accept="image/*" class="hidden">
-            <input type="text" id="msg-input" placeholder="Mesaj yaz..." autocomplete="off" class="flex-1 min-w-0 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-cyan-500">
-            <button type="submit" class="bg-cyan-600 hover:bg-cyan-500 px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm shrink-0">Gönder</button>
+            <input type="text" id="msg-input" placeholder="Mesaj yaz..." autocomplete="off" class="flex-1 min-w-0 bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
+            <button type="submit" class="bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm shrink-0 text-white shadow">Gönder</button>
         </form>
     </footer>
 
     <!-- ==================== MODALLAR ==================== -->
 
+    <!-- DUYURU EKLEME MODALI -->
+    <div id="announcement-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#1c0910] border border-amber-500/40 rounded-3xl p-5 w-full max-w-sm space-y-3">
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2">
+                <h3 class="font-bold text-amber-400">📢 Yeni Duyuru Yayınla</h3>
+                <button onclick="closeModal('announcement-modal')" class="text-rose-300 font-bold">✕</button>
+            </div>
+            <p class="text-[11px] text-rose-200/70">Bu duyuru Genel ve Muhabbet odalarının üstünde herkese görünür.</p>
+            <textarea id="announcement-input" rows="3" placeholder="Duyuru metnini yaz..." class="w-full bg-[#120409] border border-rose-900/60 rounded-xl p-3 text-xs focus:outline-none focus:border-amber-500"></textarea>
+            <button onclick="publishAnnouncement()" class="w-full bg-gradient-to-r from-amber-600 to-rose-600 py-2.5 rounded-xl text-xs font-bold text-white">Duyuruyu Yayınla</button>
+        </div>
+    </div>
+
     <!-- HAMBURGER MENÜ MODALI -->
     <div id="menu-drawer-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-sm space-y-3">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                <h3 class="font-bold text-cyan-400">🧭 Hızlı Menü & Araçlar</h3>
-                <button onclick="closeModal('menu-drawer-modal')" class="text-slate-400 font-bold">✕</button>
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3">
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2">
+                <h3 class="font-bold text-amber-400">🧭 Hızlı Menü & Araçlar</h3>
+                <button onclick="closeModal('menu-drawer-modal')" class="text-rose-300 font-bold">✕</button>
             </div>
             <div class="grid grid-cols-2 gap-2 pt-1">
-                <button onclick="closeModal('menu-drawer-modal'); openDMListModal();" class="relative bg-slate-950 border border-slate-800 hover:border-cyan-500 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left">
+                <button onclick="closeModal('menu-drawer-modal'); openDMListModal();" class="relative bg-[#120409] border border-rose-900/50 hover:border-amber-500 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left">
                     <span>💬</span> Özel DM <span id="menu-inbox-dot" class="hidden w-2 h-2 rounded-full bg-red-500 ml-auto"></span>
                 </button>
-                <button onclick="closeModal('menu-drawer-modal'); openModal('whiteboard-modal'); initWhiteboard();" class="bg-slate-950 border border-slate-800 hover:border-cyan-500 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎨</span> Ortak Tahta</button>
-                <button onclick="closeModal('menu-drawer-modal'); openModal('music-modal');" class="bg-slate-950 border border-slate-800 hover:border-cyan-500 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎬</span> Film & Video</button>
-                <button onclick="closeModal('menu-drawer-modal'); openModal('games-modal');" class="bg-slate-950 border border-slate-800 hover:border-cyan-500 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎮</span> Oyun Salonu</button>
-                <button onclick="closeModal('menu-drawer-modal'); openModal('leaderboard-modal'); loadLeaderboard();" class="bg-slate-950 border border-slate-800 hover:border-cyan-500 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🏆</span> Skor Tablosu</button>
-                <button onclick="closeModal('menu-drawer-modal'); openModal('call-modal');" class="bg-slate-950 border border-slate-800 hover:border-cyan-500 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>📹</span> Sesli Görüşme</button>
-                <button onclick="closeModal('menu-drawer-modal'); openModal('profile-modal');" class="bg-slate-950 border border-slate-800 hover:border-cyan-500 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left col-span-2"><span>⚙️</span> Ayarlar & Profil</button>
+                <button onclick="closeModal('menu-drawer-modal'); openModal('whiteboard-modal'); initWhiteboard();" class="bg-[#120409] border border-rose-900/50 hover:border-amber-500 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎨</span> Ortak Tahta</button>
+                <button onclick="closeModal('menu-drawer-modal'); openCinemaModal();" class="bg-[#120409] border border-rose-900/50 hover:border-amber-500 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎬</span> Ortak Sinema</button>
+                <button onclick="closeModal('menu-drawer-modal'); openModal('games-modal');" class="bg-[#120409] border border-rose-900/50 hover:border-amber-500 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎮</span> Oyun Salonu</button>
+                <button onclick="closeModal('menu-drawer-modal'); openModal('leaderboard-modal'); loadLeaderboard();" class="bg-[#120409] border border-rose-900/50 hover:border-amber-500 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🏆</span> Skor Tablosu</button>
+                <button onclick="closeModal('menu-drawer-modal'); openModal('call-modal');" class="bg-[#120409] border border-rose-900/50 hover:border-amber-500 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>📹</span> Sesli Görüşme</button>
+                <button onclick="closeModal('menu-drawer-modal'); openMyProfile();" class="bg-[#120409] border border-rose-900/50 hover:border-amber-500 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left col-span-2"><span>👤</span> Profilim & Ayarlar</button>
             </div>
         </div>
     </div>
 
-    <!-- KULLANICI PROFİL DETAY MODALI (Detaylı Bilgiler) -->
+    <!-- KULLANICI PROFİL DETAY MODALI (Tıklayınca Direkt Açılır) -->
     <div id="user-profile-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-sm space-y-4 text-center relative">
-            <button onclick="closeModal('user-profile-modal')" class="absolute top-4 right-4 text-slate-400 font-bold">✕</button>
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-6 w-full max-w-sm space-y-4 text-center relative shadow-2xl">
+            <button onclick="closeModal('user-profile-modal')" class="absolute top-4 right-4 text-rose-300 font-bold">✕</button>
             <div class="flex flex-col items-center gap-2">
-                <img id="up-avatar" src="" class="w-20 h-20 rounded-full object-cover animated-ring shadow-xl">
-                <h3 id="up-name" class="font-black text-lg text-slate-100 mt-1"></h3>
-                <span id="up-badge" class="text-xs bg-cyan-500/20 text-cyan-300 px-2.5 py-0.5 rounded-full font-semibold"></span>
+                <img id="up-avatar" src="" class="w-20 h-20 rounded-full object-cover border-2 border-amber-500 shadow-xl">
+                <h3 id="up-name" class="font-black text-lg text-rose-50 mt-1"></h3>
+                <span id="up-badge" class="text-xs bg-amber-500/20 text-amber-300 px-3 py-0.5 rounded-full font-semibold"></span>
             </div>
-            <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800 space-y-2.5 text-left text-xs">
-                <div class="flex justify-between items-center"><span class="text-slate-400">Durum:</span><span id="up-status-text" class="font-bold text-emerald-400">Çevrimiçi</span></div>
-                <div class="flex justify-between items-center"><span class="text-slate-400">Son Görülme:</span><span id="up-last-seen" class="text-slate-200">Az önce</span></div>
-                <div class="flex justify-between items-center"><span class="text-slate-400">Kayıt / Üyelik:</span><span id="up-joined" class="text-cyan-400 font-bold">Bilinmiyor</span></div>
+            <div class="bg-[#120409] p-3.5 rounded-2xl border border-rose-900/50 space-y-2.5 text-left text-xs">
+                <div class="flex justify-between items-center"><span class="text-rose-300/70">Durum:</span><span id="up-status-text" class="font-bold text-emerald-400">Çevrimiçi</span></div>
+                <div class="flex justify-between items-center"><span class="text-rose-300/70">Son Görülme:</span><span id="up-last-seen" class="text-rose-100">Az önce</span></div>
+                <div class="flex justify-between items-center"><span class="text-rose-300/70">Üyelik Tarihi:</span><span id="up-joined" class="text-amber-400 font-bold">Bilinmiyor</span></div>
             </div>
-            <div id="up-actions" class="flex gap-2 pt-1">
-                <!-- Dinamik DM ve Arkadaşlık Butonları -->
-            </div>
+            <div id="up-actions" class="flex gap-2 pt-1"></div>
         </div>
     </div>
 
-    <!-- ORTAK FİLM & VİDEO İZLEME ODASI -->
-    <div id="music-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-md space-y-3">
-            <div class="flex justify-between items-center"><h3 class="font-bold text-rose-400">🎬 Ortak Film & Video Sineması</h3><button onclick="closeModal('music-modal')">✕</button></div>
-            <div class="flex gap-1.5">
-                <input type="text" id="yt-url-input" placeholder="YouTube video linki..." class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs">
-                <button onclick="syncYoutubeVideo()" class="bg-rose-600 hover:bg-rose-500 px-3 py-2 rounded-xl text-xs font-bold">Oynat</button>
+    <!-- ORTAK FİLM & SİNEMA ODASI (ALTINDA ÖZEL SİNEMA SOHBETİ İLE BİRLİKTE) -->
+    <div id="music-modal" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center p-3">
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-4 w-full max-w-md space-y-2.5 max-h-[92vh] flex flex-col">
+            <div class="flex justify-between items-center shrink-0">
+                <h3 class="font-bold text-amber-400 text-sm">🎬 Ortak Sinema Salonu</h3>
+                <button onclick="closeModal('music-modal')" class="text-rose-300 font-bold">✕</button>
             </div>
-            <div class="aspect-video bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 relative shadow-2xl">
+            <div class="flex gap-1.5 shrink-0">
+                <input type="text" id="yt-url-input" placeholder="YouTube linki yapıştır..." class="flex-1 bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-1.5 text-xs">
+                <button onclick="syncYoutubeVideo()" class="bg-gradient-to-r from-rose-600 to-amber-600 px-3 py-1.5 rounded-xl text-xs font-bold text-white">Herkeste Aç</button>
+            </div>
+            <div class="aspect-video bg-black rounded-2xl overflow-hidden border border-rose-900/50 relative shrink-0 shadow-xl">
                 <iframe id="yt-player-frame" class="w-full h-full" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
             </div>
-            <div class="flex items-center justify-between">
-                <p id="music-sync-info" class="text-[11px] text-slate-400 truncate">Sinema salonu boş.</p>
-                <button onclick="stopAndDeleteMusic()" class="bg-red-600/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-xl text-xs font-bold shrink-0">🗑️ Sinemayı Kapat</button>
+            <div class="flex items-center justify-between shrink-0">
+                <p id="music-sync-info" class="text-[11px] text-rose-200/70 truncate">Sinema salonu boş.</p>
+                <button onclick="stopAndDeleteMusic()" class="bg-rose-950 text-rose-300 border border-rose-700/50 px-2.5 py-1 rounded-lg text-[10px] font-bold shrink-0">🗑️ Kapat</button>
+            </div>
+            
+            <!-- SADECE FİLMİN ALTINDA GÖRÜNEN ÖZEL SİNEMA SOHBETİ -->
+            <div class="flex-1 bg-[#120409] border border-rose-900/50 rounded-2xl p-2.5 flex flex-col min-h-[140px] max-h-[180px]">
+                <span class="text-[10px] text-amber-400 font-bold mb-1 border-b border-rose-900/40 pb-1">🍿 Sinema İçi Canlı Sohbet (Odalarda Görünmez)</span>
+                <div id="cinema-messages" class="flex-1 overflow-y-auto space-y-1.5 pr-1 text-xs"></div>
+                <form onsubmit="sendCinemaMessage(event)" class="flex gap-1 mt-1.5 shrink-0">
+                    <input type="text" id="cinema-msg-input" placeholder="Film hakkında yorum yaz..." autocomplete="off" class="flex-1 bg-[#1c0910] border border-rose-900/50 rounded-lg px-2.5 py-1 text-xs focus:outline-none">
+                    <button type="submit" class="bg-amber-600 px-2.5 py-1 rounded-lg text-xs font-bold text-white">At</button>
+                </form>
             </div>
         </div>
     </div>
 
     <!-- KULLANICILAR & ÇEVRİMİÇİ LİSTESİ -->
     <div id="users-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-sm space-y-4 max-h-[85vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-2"><h3 class="font-bold">Kullanıcılar & Profil İncele</h3><button onclick="closeModal('users-modal')">✕</button></div>
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-4 max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">Kullanıcılar & Üyeler</h3><button onclick="closeModal('users-modal')">✕</button></div>
             <div id="friend-requests-section" class="hidden">
                 <h4 class="text-xs font-bold text-amber-400 mb-2">📩 Arkadaşlık İstekleri</h4>
                 <div id="friend-requests-list" class="space-y-2 mb-2"></div>
             </div>
             <div>
-                <h4 class="text-xs font-bold text-pink-400 mb-2">💖 Arkadaşlarım</h4>
+                <h4 class="text-xs font-bold text-rose-400 mb-2">💖 Arkadaşlarım</h4>
                 <div id="my-friends-list" class="space-y-2"></div>
             </div>
-            <hr class="border-slate-800">
+            <hr class="border-rose-900/50">
             <div>
-                <h4 class="text-xs font-bold text-cyan-400 mb-2">👥 Tüm Üyeler (Profili İncele)</h4>
+                <h4 class="text-xs font-bold text-amber-300 mb-2">👥 Tüm Üyeler (Profile Gitmek İçin Tıkla)</h4>
                 <div id="all-users-list" class="space-y-2"></div>
             </div>
         </div>
     </div>
 
-    <!-- DİĞER MODALLAR (GIF, SKOR, TAHTA, OYUN, KOD, ANKET, STICKER, DM, ODA, SESLİ, PROFİL) -->
-    <div id="gif-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-md space-y-3 max-h-[85vh] flex flex-col">
-            <div class="flex justify-between items-center"><h3 class="font-bold text-cyan-400">🎞️ GIF Seç</h3><button onclick="closeModal('gif-modal')">✕</button></div>
-            <div id="gif-grid" class="grid grid-cols-2 gap-2 overflow-y-auto max-h-64 p-1"></div>
-        </div>
-    </div>
-
+    <!-- SKOR TABLOSU (BİRİNCİYE ÖZEL ANİMASYONLU ÇERÇEVE) -->
     <div id="leaderboard-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-sm space-y-4 max-h-[85vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-2"><h3 class="font-bold text-yellow-400">🏆 Kış Ligi (Skor Tablosu)</h3><button onclick="closeModal('leaderboard-modal')">✕</button></div>
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-4 max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">🏆 Şampiyonlar Ligi</h3><button onclick="closeModal('leaderboard-modal')">✕</button></div>
+            <p class="text-[11px] text-rose-200/70">1. sıradaki şampiyon özel altın-kızıl animasyonlu çerçeveye sahip olur!</p>
             <div id="leaderboard-list" class="space-y-2"></div>
         </div>
     </div>
 
+    <!-- DİĞER MODALLAR -->
+    <div id="gif-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-md space-y-3 max-h-[85vh] flex flex-col">
+            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">🎞️ GIF Seç</h3><button onclick="closeModal('gif-modal')">✕</button></div>
+            <div id="gif-grid" class="grid grid-cols-2 gap-2 overflow-y-auto max-h-64 p-1"></div>
+        </div>
+    </div>
+
     <div id="whiteboard-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-3">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 w-full max-w-md space-y-3">
-            <div class="flex justify-between items-center"><h3 class="font-bold text-cyan-400">🎨 Canlı Ortak Tahta</h3><button onclick="closeModal('whiteboard-modal')">✕</button></div>
-            <div class="flex items-center justify-between gap-2 bg-slate-950 p-2 rounded-xl border border-slate-800 flex-wrap">
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-4 w-full max-w-md space-y-3">
+            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">🎨 Canlı Ortak Tahta</h3><button onclick="closeModal('whiteboard-modal')">✕</button></div>
+            <div class="flex items-center justify-between gap-2 bg-[#120409] p-2 rounded-xl border border-rose-900/50 flex-wrap">
                 <div class="flex gap-1.5 items-center">
-                    <button onclick="wbColor='#38bdf8'; wbIsEraser=false;" class="w-6 h-6 rounded-full bg-sky-400 border border-white/20"></button>
+                    <button onclick="wbColor='#fbbf24'; wbIsEraser=false;" class="w-6 h-6 rounded-full bg-amber-400 border border-white/20"></button>
                     <button onclick="wbColor='#f43f5e'; wbIsEraser=false;" class="w-6 h-6 rounded-full bg-rose-500 border border-white/20"></button>
-                    <button onclick="wbColor='#facc15'; wbIsEraser=false;" class="w-6 h-6 rounded-full bg-yellow-400 border border-white/20"></button>
+                    <button onclick="wbColor='#38bdf8'; wbIsEraser=false;" class="w-6 h-6 rounded-full bg-sky-400 border border-white/20"></button>
                     <button onclick="wbColor='#4ade80'; wbIsEraser=false;" class="w-6 h-6 rounded-full bg-green-400 border border-white/20"></button>
                     <button onclick="wbColor='#ffffff'; wbIsEraser=false;" class="w-6 h-6 rounded-full bg-white border border-white/20"></button>
-                    <button onclick="wbIsEraser=true;" class="bg-slate-800 text-slate-200 px-2 py-1 rounded-lg text-xs font-bold">🧹 Silgi</button>
+                    <button onclick="wbIsEraser=true;" class="bg-[#2b0d18] text-rose-200 px-2 py-1 rounded-lg text-xs font-bold">🧹 Silgi</button>
                 </div>
                 <button onclick="clearWhiteboard()" class="bg-red-500/20 text-red-400 px-2.5 py-1 rounded-lg text-xs font-bold">Temizle</button>
             </div>
-            <canvas id="wb-canvas" width="340" height="280" class="w-full bg-slate-950 border border-slate-700 rounded-2xl touch-none cursor-crosshair"></canvas>
+            <canvas id="wb-canvas" width="340" height="280" class="w-full bg-[#120409] border border-rose-900/60 rounded-2xl touch-none cursor-crosshair"></canvas>
         </div>
     </div>
 
     <div id="roles-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-sm space-y-3 max-h-[80vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-2"><h3 class="font-bold text-amber-400">🛡️ Moderasyon Paneli</h3><button onclick="closeModal('roles-modal')">✕</button></div>
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3 max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">🛡️ Moderasyon Paneli</h3><button onclick="closeModal('roles-modal')">✕</button></div>
             <div id="room-members-roles-list" class="space-y-2"></div>
             <button onclick="deleteCurrentRoom()" class="w-full bg-red-600/20 text-red-400 border border-red-500/30 py-2 rounded-xl text-xs font-bold">Odayı Sil</button>
         </div>
     </div>
 
     <div id="code-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-md space-y-3">
-            <div class="flex justify-between items-center"><h3 class="font-bold text-cyan-400">💻 Kod Paylaş</h3><button onclick="closeModal('code-modal')">✕</button></div>
-            <select id="code-lang" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs">
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-md space-y-3">
+            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">💻 Kod Paylaş</h3><button onclick="closeModal('code-modal')">✕</button></div>
+            <select id="code-lang" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
                 <option value="HTML / CSS">HTML / CSS</option><option value="JavaScript">JavaScript</option><option value="Python">Python</option>
             </select>
-            <textarea id="code-content-input" rows="5" placeholder="Kodunu yapıştır..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs font-mono focus:outline-none"></textarea>
-            <button onclick="sendCodeSnippet()" class="w-full bg-cyan-600 py-2.5 rounded-xl text-xs font-bold">Gönder</button>
+            <textarea id="code-content-input" rows="5" placeholder="Kodunu yapıştır..." class="w-full bg-[#120409] border border-rose-900/50 rounded-xl p-3 text-xs font-mono focus:outline-none"></textarea>
+            <button onclick="sendCodeSnippet()" class="w-full bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-xs font-bold text-white">Gönder</button>
         </div>
     </div>
 
     <div id="poll-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-sm space-y-3">
-            <div class="flex justify-between items-center"><h3 class="font-bold text-emerald-400">📊 Canlı Anket</h3><button onclick="closeModal('poll-modal')">✕</button></div>
-            <input type="text" id="poll-question" placeholder="Soru..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs">
-            <input type="text" id="poll-opt1" placeholder="1. Seçenek" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs">
-            <input type="text" id="poll-opt2" placeholder="2. Seçenek" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs">
-            <button onclick="createPoll()" class="w-full bg-emerald-600 py-2.5 rounded-xl text-xs font-bold">Başlat</button>
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3">
+            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">📊 Canlı Anket</h3><button onclick="closeModal('poll-modal')">✕</button></div>
+            <input type="text" id="poll-question" placeholder="Soru..." class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
+            <input type="text" id="poll-opt1" placeholder="1. Seçenek" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
+            <input type="text" id="poll-opt2" placeholder="2. Seçenek" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
+            <button onclick="createPoll()" class="w-full bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-xs font-bold text-white">Başlat</button>
         </div>
     </div>
 
     <div id="sticker-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-sm space-y-3">
-            <div class="flex justify-between items-center"><h3 class="font-bold text-pink-400">✨ Sticker Paketi</h3><button onclick="closeModal('sticker-modal')">✕</button></div>
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3">
+            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">✨ Sticker Paketi</h3><button onclick="closeModal('sticker-modal')">✕</button></div>
             <div class="flex gap-1.5">
-                <input type="text" id="custom-sticker-input" placeholder="Emoji ekle..." class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs">
-                <button onclick="addCustomSticker()" class="bg-pink-600 px-3 py-2 rounded-xl text-xs font-bold">Ekle</button>
+                <input type="text" id="custom-sticker-input" placeholder="Emoji ekle..." class="flex-1 bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
+                <button onclick="addCustomSticker()" class="bg-rose-600 px-3 py-2 rounded-xl text-xs font-bold text-white">Ekle</button>
             </div>
             <div id="sticker-grid" class="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto pt-1"></div>
         </div>
     </div>
 
     <div id="dm-list-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-sm space-y-3 max-h-[85vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-2"><h3 class="font-bold text-cyan-400">💬 Özel Mesajlarım (Gizli DM)</h3><button onclick="closeModal('dm-list-modal')">✕</button></div>
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3 max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">💬 Özel Mesajlarım (Gizli DM)</h3><button onclick="closeModal('dm-list-modal')">✕</button></div>
             <div id="my-dms-list" class="space-y-2 pt-1"></div>
         </div>
     </div>
 
     <div id="room-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-sm space-y-3">
-            <div class="flex justify-between items-center"><h3 class="font-bold">Yeni Oda Kur</h3><button onclick="closeModal('room-modal')">✕</button></div>
-            <input type="text" id="new-room-name" placeholder="Oda adı..." maxlength="20" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm">
-            <button id="create-room-btn" class="w-full bg-cyan-600 py-2.5 rounded-xl text-sm font-bold">Oluştur</button>
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3">
+            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">Yeni Oda Kur</h3><button onclick="closeModal('room-modal')">✕</button></div>
+            <input type="text" id="new-room-name" placeholder="Oda adı..." maxlength="20" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-sm">
+            <button id="create-room-btn" class="w-full bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-sm font-bold text-white">Oluştur</button>
         </div>
     </div>
 
     <div id="call-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-md space-y-3 text-center">
-            <div class="flex justify-between items-center"><h3 class="font-bold text-purple-400">📹 Sesli / Görüntülü Sohbet</h3><button onclick="endWebRTCCall()">✕</button></div>
-            <p id="call-status" class="text-xs text-slate-400">Bağlantı bekleniyor...</p>
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-md space-y-3 text-center">
+            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">📹 Sesli / Görüntülü Sohbet</h3><button onclick="endWebRTCCall()">✕</button></div>
+            <p id="call-status" class="text-xs text-rose-200/70">Bağlantı bekleniyor...</p>
             <div class="grid grid-cols-2 gap-2">
-                <video id="local-video" autoplay muted playsinline class="w-full aspect-video bg-slate-950 rounded-xl object-cover"></video>
-                <video id="remote-video" autoplay playsinline class="w-full aspect-video bg-slate-950 rounded-xl object-cover"></video>
+                <video id="local-video" autoplay muted playsinline class="w-full aspect-video bg-[#120409] rounded-xl object-cover"></video>
+                <video id="remote-video" autoplay playsinline class="w-full aspect-video bg-[#120409] rounded-xl object-cover"></video>
             </div>
             <div class="flex flex-wrap gap-2 justify-center">
-                <button onclick="startWebRTCCall(false)" class="bg-emerald-600 px-3 py-2 rounded-xl text-xs font-bold">🎙️ Sesli Başlat</button>
-                <button onclick="startWebRTCCall(true)" class="bg-cyan-600 px-3 py-2 rounded-xl text-xs font-bold">📹 Görüntülü Başlat</button>
-                <button onclick="joinWebRTCCall()" class="bg-amber-600 px-3 py-2 rounded-xl text-xs font-bold">📲 Katıl</button>
-                <button onclick="endWebRTCCall()" class="bg-red-600 px-3 py-2 rounded-xl text-xs font-bold">Ayrıl</button>
+                <button onclick="startWebRTCCall(false)" class="bg-emerald-600 px-3 py-2 rounded-xl text-xs font-bold text-white">🎙️ Sesli Başlat</button>
+                <button onclick="startWebRTCCall(true)" class="bg-amber-600 px-3 py-2 rounded-xl text-xs font-bold text-white">📹 Görüntülü Başlat</button>
+                <button onclick="joinWebRTCCall()" class="bg-rose-600 px-3 py-2 rounded-xl text-xs font-bold text-white">📲 Katıl</button>
+                <button onclick="endWebRTCCall()" class="bg-red-700 px-3 py-2 rounded-xl text-xs font-bold text-white">Ayrıl</button>
             </div>
         </div>
     </div>
 
     <div id="games-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-md space-y-3 text-center">
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-md space-y-3 text-center">
             <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">🎮 Oyun Salonu</h3><button onclick="closeModal('games-modal')">✕</button></div>
-            <div class="flex gap-1 bg-slate-950 p-1 rounded-xl">
-                <button onclick="switchGameTab('xox')" id="tab-xox" class="flex-1 py-1.5 rounded-lg text-xs font-bold bg-cyan-600">❌ XOX</button>
-                <button onclick="switchGameTab('battleship')" id="tab-battleship" class="flex-1 py-1.5 rounded-lg text-xs font-bold text-slate-400">🚢 Amiral</button>
-                <button onclick="switchGameTab('word')" id="tab-word" class="flex-1 py-1.5 rounded-lg text-xs font-bold text-slate-400">🔤 Bilmece</button>
+            <div class="flex gap-1 bg-[#120409] p-1 rounded-xl">
+                <button onclick="switchGameTab('xox')" id="tab-xox" class="flex-1 py-1.5 rounded-lg text-xs font-bold bg-rose-600 text-white">❌ XOX</button>
+                <button onclick="switchGameTab('battleship')" id="tab-battleship" class="flex-1 py-1.5 rounded-lg text-xs font-bold text-rose-300/60">🚢 Amiral</button>
+                <button onclick="switchGameTab('word')" id="tab-word" class="flex-1 py-1.5 rounded-lg text-xs font-bold text-rose-300/60">🔤 Bilmece</button>
             </div>
             <div id="game-panel-xox" class="space-y-2">
                 <p id="xox-status" class="text-xs">Sıra: X</p>
                 <div class="grid grid-cols-3 gap-1.5 w-44 mx-auto">
-                    <button onclick="makeXOXMove(0)" id="cell-0" class="w-12 h-12 bg-slate-950 border border-slate-800 rounded-xl font-bold"></button>
-                    <button onclick="makeXOXMove(1)" id="cell-1" class="w-12 h-12 bg-slate-950 border border-slate-800 rounded-xl font-bold"></button>
-                    <button onclick="makeXOXMove(2)" id="cell-2" class="w-12 h-12 bg-slate-950 border border-slate-800 rounded-xl font-bold"></button>
-                    <button onclick="makeXOXMove(3)" id="cell-3" class="w-12 h-12 bg-slate-950 border border-slate-800 rounded-xl font-bold"></button>
-                    <button onclick="makeXOXMove(4)" id="cell-4" class="w-12 h-12 bg-slate-950 border border-slate-800 rounded-xl font-bold"></button>
-                    <button onclick="makeXOXMove(5)" id="cell-5" class="w-12 h-12 bg-slate-950 border border-slate-800 rounded-xl font-bold"></button>
-                    <button onclick="makeXOXMove(6)" id="cell-6" class="w-12 h-12 bg-slate-950 border border-slate-800 rounded-xl font-bold"></button>
-                    <button onclick="makeXOXMove(7)" id="cell-7" class="w-12 h-12 bg-slate-950 border border-slate-800 rounded-xl font-bold"></button>
-                    <button onclick="makeXOXMove(8)" id="cell-8" class="w-12 h-12 bg-slate-950 border border-slate-800 rounded-xl font-bold"></button>
+                    <button onclick="makeXOXMove(0)" id="cell-0" class="w-12 h-12 bg-[#120409] border border-rose-900/50 rounded-xl font-bold"></button>
+                    <button onclick="makeXOXMove(1)" id="cell-1" class="w-12 h-12 bg-[#120409] border border-rose-900/50 rounded-xl font-bold"></button>
+                    <button onclick="makeXOXMove(2)" id="cell-2" class="w-12 h-12 bg-[#120409] border border-rose-900/50 rounded-xl font-bold"></button>
+                    <button onclick="makeXOXMove(3)" id="cell-3" class="w-12 h-12 bg-[#120409] border border-rose-900/50 rounded-xl font-bold"></button>
+                    <button onclick="makeXOXMove(4)" id="cell-4" class="w-12 h-12 bg-[#120409] border border-rose-900/50 rounded-xl font-bold"></button>
+                    <button onclick="makeXOXMove(5)" id="cell-5" class="w-12 h-12 bg-[#120409] border border-rose-900/50 rounded-xl font-bold"></button>
+                    <button onclick="makeXOXMove(6)" id="cell-6" class="w-12 h-12 bg-[#120409] border border-rose-900/50 rounded-xl font-bold"></button>
+                    <button onclick="makeXOXMove(7)" id="cell-7" class="w-12 h-12 bg-[#120409] border border-rose-900/50 rounded-xl font-bold"></button>
+                    <button onclick="makeXOXMove(8)" id="cell-8" class="w-12 h-12 bg-[#120409] border border-rose-900/50 rounded-xl font-bold"></button>
                 </div>
-                <button onclick="resetXOXGame()" class="w-full bg-slate-800 py-1.5 rounded-xl text-xs font-bold">Sıfırla</button>
+                <button onclick="resetXOXGame()" class="w-full bg-[#2b0d18] py-1.5 rounded-xl text-xs font-bold">Sıfırla</button>
             </div>
             <div id="game-panel-battleship" class="hidden space-y-2">
                 <p id="bs-status" class="text-xs">3 gemiyi bul!</p>
                 <div id="bs-grid" class="grid grid-cols-5 gap-1 w-56 mx-auto"></div>
-                <button onclick="resetBattleship()" class="w-full bg-slate-800 py-1.5 rounded-xl text-xs font-bold">Yeni Harita</button>
+                <button onclick="resetBattleship()" class="w-full bg-[#2b0d18] py-1.5 rounded-xl text-xs font-bold">Yeni Harita</button>
             </div>
             <div id="game-panel-word" class="hidden space-y-2">
-                <div id="word-display" class="text-xl font-black text-cyan-400 py-2 bg-slate-950 rounded-xl">_ _ _</div>
-                <p id="word-hint" class="text-xs text-amber-300"></p>
-                <div class="flex gap-1"><input type="text" id="word-guess-input" placeholder="Tahmin..." class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs"><button onclick="submitWordGuess()" class="bg-cyan-600 px-3 py-1.5 rounded-xl text-xs font-bold">Dene</button></div>
-                <button onclick="resetWordGame()" class="w-full bg-slate-800 py-1.5 rounded-xl text-xs font-bold">Yeni Bilmece</button>
+                <div id="word-display" class="text-xl font-black text-amber-400 py-2 bg-[#120409] rounded-xl">_ _ _</div>
+                <p id="word-hint" class="text-xs text-rose-300"></p>
+                <div class="flex gap-1"><input type="text" id="word-guess-input" placeholder="Tahmin..." class="flex-1 bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-1.5 text-xs"><button onclick="submitWordGuess()" class="bg-rose-600 px-3 py-1.5 rounded-xl text-xs font-bold text-white">Dene</button></div>
+                <button onclick="resetWordGame()" class="w-full bg-[#2b0d18] py-1.5 rounded-xl text-xs font-bold">Yeni Bilmece</button>
             </div>
         </div>
     </div>
 
-    <!-- PROFİL & AYARLAR -->
+    <!-- KENDİ PROFİLİM & AYARLAR -->
     <div id="profile-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-sm space-y-3 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-2"><h3 class="font-bold">Ayarlar & Profil</h3><button onclick="closeModal('profile-modal')">✕</button></div>
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">Profilim & Ayarlar</h3><button onclick="closeModal('profile-modal')">✕</button></div>
             <div class="flex flex-col items-center gap-2">
-                <img id="preview-avatar" src="" class="w-16 h-16 rounded-full object-cover animated-ring">
+                <img id="preview-avatar" src="" class="w-16 h-16 rounded-full object-cover border-2 border-amber-500">
                 <input type="file" id="upload-avatar-file" accept="image/*" class="hidden">
-                <button type="button" onclick="document.getElementById('upload-avatar-file').click()" class="bg-slate-800 text-xs px-3 py-1 rounded-lg">Fotoğraf Değiştir</button>
+                <button type="button" onclick="document.getElementById('upload-avatar-file').click()" class="bg-[#2b0d18] text-xs px-3 py-1 rounded-lg">Fotoğraf Değiştir</button>
             </div>
             <div>
-                <label class="block text-[11px] text-slate-400">Görünen Ad</label>
-                <input type="text" id="edit-name" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs">
+                <label class="block text-[11px] text-rose-300/70">Görünen Ad</label>
+                <input type="text" id="edit-name" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
             </div>
             <div>
-                <label class="block text-[11px] text-slate-400">Anlık Durum Rozeti</label>
-                <input type="text" id="edit-status-badge" placeholder="Cyber Mod ⚡" maxlength="40" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs">
+                <label class="block text-[11px] text-rose-300/70">Anlık Durum Rozeti</label>
+                <input type="text" id="edit-status-badge" placeholder="Kızıl Mod 🔥" maxlength="40" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
             </div>
             <div class="flex gap-2 pt-1">
-                <button id="save-profile" class="flex-1 bg-cyan-600 py-2.5 rounded-xl text-xs font-bold">Kaydet</button>
+                <button id="save-profile" class="flex-1 bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-xs font-bold text-white">Kaydet</button>
                 <button id="modal-logout" class="bg-amber-600/20 text-amber-400 border border-amber-500/30 px-3 py-2.5 rounded-xl text-xs font-bold">Çıkış</button>
             </div>
-            <hr class="border-slate-800 my-2">
-            <div class="bg-red-950/20 border border-red-500/30 p-3 rounded-xl space-y-2">
+            <hr class="border-rose-900/50 my-2">
+            <div class="bg-red-950/30 border border-red-500/30 p-3 rounded-xl space-y-2">
                 <h4 class="text-xs font-bold text-red-400">⚠️ Hesap Silme</h4>
-                <input type="password" id="delete-confirm-password" placeholder="Mevcut şifren..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs">
+                <input type="password" id="delete-confirm-password" placeholder="Mevcut şifren..." class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
                 <button onclick="requestAccountDeletion()" class="w-full bg-red-600 hover:bg-red-500 py-2 rounded-xl text-xs font-bold text-white transition">Hesabımı Sil</button>
             </div>
         </div>
@@ -421,13 +449,21 @@
         let roomRoles = {};
         let mutedUsers = {};
         let typingRef = null;
+        let topChampionUid = null;
 
-        // SKORLARI SIFIRLAMA (Kod açılışında otomatik temizler, tuş yok)
-        db.ref('leaderboard').once('value', snap => {
-            if (snap.exists()) {
-                db.ref('leaderboard').remove();
-            }
+        // SKOR LİDERİNİ TAKİP ET (Sadece 1. olana animasyonlu çerçeve)
+        db.ref('leaderboard').on('value', snap => {
+            const data = snap.val() || {};
+            const sorted = Object.entries(data).sort((a,b) => b[1].score - a[1].score);
+            topChampionUid = (sorted.length > 0 && sorted[0][1].score > 0) ? sorted[0][0] : null;
+            updateChampionRings();
         });
+
+        function updateChampionRings() {
+            const headerAv = document.getElementById('header-avatar');
+            if(currentUser && topChampionUid === currentUser.uid) headerAv.classList.add('champion-ring');
+            else headerAv.classList.remove('champion-ring');
+        }
 
         // KAR YAĞIŞI
         const snowContainer = document.getElementById('snow-container');
@@ -446,6 +482,11 @@
         window.closeModal = id => document.getElementById(id).classList.add('hidden');
         window.toggleToolsDrawer = () => document.getElementById('tools-drawer').classList.toggle('hidden');
 
+        window.openMyProfile = function() {
+            loadUserDataToUI();
+            openModal('profile-modal');
+        }
+
         function playSoundEffect(type) {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -460,6 +501,81 @@
                 }
             } catch(e) {}
         }
+
+        // DUYURU SİSTEMİ
+        window.publishAnnouncement = function() {
+            const text = document.getElementById('announcement-input').value.trim();
+            if(!text) return alert("Duyuru metni boş olamaz!");
+            db.ref('global_announcement').set({ text, by: currentUser.uid, time: Date.now() }).then(() => {
+                document.getElementById('announcement-input').value = '';
+                closeModal('announcement-modal');
+            });
+        }
+        window.deleteAnnouncement = function() {
+            if(confirm("Duyuruyu silmek istiyor musun?")) {
+                db.ref('global_announcement').remove();
+            }
+        }
+
+        // ORTAK SİNEMA SİSTEMİ (Herkeste Otomatik Açılır + Özel Alt Sohbet)
+        let cinemaChatInitialized = false;
+        window.openCinemaModal = function() {
+            openModal('music-modal');
+            if(!cinemaChatInitialized) {
+                cinemaChatInitialized = true;
+                const cBox = document.getElementById('cinema-messages');
+                db.ref('cinema_chat').limitToLast(30).on('child_added', snap => {
+                    const m = snap.val();
+                    const p = document.createElement('div');
+                    p.className = "bg-[#1c0910] px-2 py-1 rounded-lg border border-rose-900/30";
+                    p.innerHTML = `<span class="font-bold text-amber-400">${m.isim}:</span> <span class="text-rose-100">${m.mesaj}</span>`;
+                    cBox.appendChild(p);
+                    cBox.scrollTop = cBox.scrollHeight;
+                });
+            }
+        }
+
+        window.sendCinemaMessage = function(e) {
+            e.preventDefault();
+            const inp = document.getElementById('cinema-msg-input');
+            const val = inp.value.trim();
+            if(!val || !currentUser) return;
+            db.ref('cinema_chat').push({ isim: getMyData().name, mesaj: val, zaman: Date.now() });
+            inp.value = '';
+        }
+
+        window.syncYoutubeVideo = function() {
+            const url = document.getElementById('yt-url-input').value.trim();
+            const match = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+            if (!match) return alert("Geçerli bir YouTube linki gir!");
+            // Tüm kullanıcılar için global sinema yayını başlatır
+            db.ref('global_cinema').set({ videoId: match[1], by: getMyData().name, time: Date.now() });
+            document.getElementById('yt-url-input').value = '';
+        }
+
+        window.stopAndDeleteMusic = function() {
+            db.ref('global_cinema').remove().then(() => {
+                document.getElementById('yt-player-frame').src = "";
+                document.getElementById('music-sync-info').textContent = "Sinema salonu boş.";
+            });
+        }
+
+        // GLOBAL SİNEMA DİNLEYİCİSİ: Birisi film açtığında herkeste otomatik açılır!
+        let lastPlayedCinemaTime = 0;
+        db.ref('global_cinema').on('value', s => {
+            const d = s.val();
+            if (d && d.videoId) {
+                document.getElementById('yt-player-frame').src = `https://www.youtube.com/embed/${d.videoId}?autoplay=1`;
+                document.getElementById('music-sync-info').textContent = `🎬 ${d.by} şu an oynatıyor`;
+                if (d.time !== lastPlayedCinemaTime) {
+                    lastPlayedCinemaTime = d.time;
+                    openCinemaModal();
+                }
+            } else {
+                document.getElementById('yt-player-frame').src = "";
+                document.getElementById('music-sync-info').textContent = "Sinema salonu boş.";
+            }
+        });
 
         window.addScorePoints = function(pts) {
             if (!currentUser) return;
@@ -476,19 +592,19 @@
 
         window.loadLeaderboard = function() {
             const listDiv = document.getElementById('leaderboard-list');
-            listDiv.innerHTML = '<p class="text-xs text-slate-500 italic">Yükleniyor...</p>';
+            listDiv.innerHTML = '<p class="text-xs text-rose-300/60 italic">Yükleniyor...</p>';
             db.ref('leaderboard').orderByChild('score').once('value', snap => {
                 const data = snap.val() || {};
                 const sorted = Object.entries(data).sort((a,b) => b[1].score - a[1].score);
-                if (sorted.length === 0) { listDiv.innerHTML = '<p class="text-xs text-slate-500 italic">Henüz skor yok.</p>'; return; }
+                if (sorted.length === 0) { listDiv.innerHTML = '<p class="text-xs text-rose-300/60 italic">Henüz skor yok.</p>'; return; }
                 listDiv.innerHTML = sorted.map(([uid, info], idx) => `
-                    <div class="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                    <div class="flex items-center justify-between bg-[#120409] p-2.5 rounded-xl border ${idx === 0 ? 'border-amber-500/60' : 'border-rose-900/50'}">
                         <div class="flex items-center gap-2.5">
-                            <span class="font-bold text-xs ${idx === 0 ? 'text-yellow-400' : idx === 1 ? 'text-slate-300' : 'text-slate-500'}">#${idx+1}</span>
-                            <img src="${info.avatar}" class="w-7 h-7 rounded-full object-cover animated-ring">
-                            <span class="text-xs font-bold text-slate-200">${info.name}</span>
+                            <span class="font-bold text-xs ${idx === 0 ? 'text-amber-400' : idx === 1 ? 'text-rose-200' : 'text-rose-400/60'}">#${idx+1}</span>
+                            <img src="${info.avatar}" class="w-7 h-7 rounded-full object-cover ${idx === 0 ? 'champion-ring' : ''}">
+                            <span class="text-xs font-bold text-rose-100">${info.name} ${idx === 0 ? '👑' : ''}</span>
                         </div>
-                        <span class="text-xs font-black text-cyan-400">${info.score} Puan</span>
+                        <span class="text-xs font-black text-amber-400">${info.score} Puan</span>
                     </div>
                 `).join('');
             });
@@ -513,7 +629,7 @@
             closeModal('gif-modal');
         };
 
-        let wbColor = '#38bdf8';
+        let wbColor = '#fbbf24';
         let wbIsEraser = false;
         let wbDrawing = false;
         let wbInitialized = false;
@@ -529,11 +645,11 @@
                     return { x: (clientX - rect.left) * (canvas.width / rect.width), y: (clientY - rect.top) * (canvas.height / rect.height) };
                 };
                 const drawDot = (x, y, color, isEraser, sync = true) => {
-                    ctx.fillStyle = isEraser ? '#030712' : color;
+                    ctx.fillStyle = isEraser ? '#120409' : color;
                     ctx.beginPath(); 
                     ctx.arc(x, y, isEraser ? 10 : 3, 0, Math.PI * 2); 
                     ctx.fill();
-                    if (sync) db.ref(`whiteboard/${currentRoom}`).push({ x, y, color: isEraser ? '#030712' : color, isEraser });
+                    if (sync) db.ref(`whiteboard/${currentRoom}`).push({ x, y, color: isEraser ? '#120409' : color, isEraser });
                 };
                 canvas.addEventListener('mousedown', e => { wbDrawing = true; const p = getPos(e); drawDot(p.x, p.y, wbColor, wbIsEraser); });
                 canvas.addEventListener('mousemove', e => { if (wbDrawing) { const p = getPos(e); drawDot(p.x, p.y, wbColor, wbIsEraser); } });
@@ -557,20 +673,6 @@
         }
         window.clearWhiteboard = () => db.ref(`whiteboard/${currentRoom}`).remove();
 
-        window.syncYoutubeVideo = function() {
-            const url = document.getElementById('yt-url-input').value.trim();
-            const match = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-            if (!match) return alert("Geçerli bir YouTube linki gir!");
-            db.ref(`music_sync/${currentRoom}`).set({ videoId: match[1], by: getMyData().name, time: Date.now() });
-        }
-
-        window.stopAndDeleteMusic = function() {
-            db.ref(`music_sync/${currentRoom}`).remove().then(() => {
-                document.getElementById('yt-player-frame').src = "";
-                document.getElementById('music-sync-info').textContent = "Sinema salonu boş.";
-            });
-        }
-
         window.openRoomRolesModal = function() {
             openModal('roles-modal');
             const list = document.getElementById('room-members-roles-list');
@@ -581,7 +683,7 @@
                     if (uid === currentUser.uid) return;
                     const isMod = !!roomRoles[uid]; const isMuted = !!mutedUsers[uid];
                     const row = document.createElement('div');
-                    row.className = "flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800";
+                    row.className = "flex items-center justify-between bg-[#120409] p-2 rounded-xl border border-rose-900/50";
                     row.innerHTML = `
                         <span class="text-xs font-bold">${info.name} ${isMod ? '🛡️' : ''} ${isMuted ? '🔇' : ''}</span>
                         <div class="flex gap-1">
@@ -626,9 +728,9 @@
         }
 
         function renderStickers() {
-            const def = ['⚡', '❄️', '⛄', '🏂', '🔥', '🎮', '🚀', '👑', '😂', '🥳', '💯', '🎯'];
+            const def = ['🔥', '👑', '⚡', '❄️', '🎮', '🚀', '😂', '🥳', '💯', '🎯', '💎', '🌹'];
             const custom = JSON.parse(localStorage.getItem('wrts_stickers_' + currentUser.uid) || '[]');
-            document.getElementById('sticker-grid').innerHTML = [...custom, ...def].map(s => `<button onclick="sendSticker('${s}')" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-xl py-2.5 text-2xl transition">${s}</button>`).join('');
+            document.getElementById('sticker-grid').innerHTML = [...custom, ...def].map(s => `<button onclick="sendSticker('${s}')" class="bg-[#120409] hover:bg-rose-900/40 border border-rose-900/50 rounded-xl py-2.5 text-2xl transition">${s}</button>`).join('');
         }
         window.addCustomSticker = function() {
             const val = document.getElementById('custom-sticker-input').value.trim(); if (!val) return;
@@ -652,11 +754,16 @@
                         statusRef.onDisconnect().set({ state: 'offline', lastSeen: Date.now() });
                         const md = getMyData();
                         statusRef.set({ state: 'online', name: md.name, avatar: md.avatar, badge: md.badge, lastSeen: Date.now() });
-                        db.ref('users_registry/' + user.uid).update({ 
-                            name: md.name, 
-                            avatar: md.avatar, 
-                            badge: md.badge,
-                            joinedAt: db.ServerValue.TIMESTAMP 
+                        
+                        // Üyelik tarihi yoksa bir kez kaydet
+                        db.ref('users_registry/' + user.uid).once('value', uSnap => {
+                            const existing = uSnap.val() || {};
+                            db.ref('users_registry/' + user.uid).update({
+                                name: md.name,
+                                avatar: md.avatar,
+                                badge: md.badge,
+                                joinedAt: existing.joinedAt || Date.now()
+                            });
                         });
                     }
                 });
@@ -668,9 +775,9 @@
                     const badge = document.getElementById('req-badge'); const sec = document.getElementById('friend-requests-section');
                     if (entries.length > 0) { badge.classList.remove('hidden'); badge.textContent = entries.length; sec.classList.remove('hidden');
                         document.getElementById('friend-requests-list').innerHTML = entries.map(([uid, info]) => `
-                            <div class="flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-amber-500/40">
+                            <div class="flex items-center justify-between bg-[#120409] p-2 rounded-xl border border-amber-500/40">
                                 <span class="text-xs font-bold">${info.name}</span>
-                                <div class="flex gap-1"><button onclick="acceptFriendRequest('${uid}', '${encodeURIComponent(info.name)}', '${encodeURIComponent(info.avatar || '')}')" class="bg-emerald-600 text-[10px] px-2 py-1 rounded font-bold">Kabul</button><button onclick="db.ref('friend_requests/${user.uid}/${uid}').remove()" class="bg-red-600/30 text-red-400 text-[10px] px-2 py-1 rounded font-bold">Red</button></div>
+                                <div class="flex gap-1"><button onclick="acceptFriendRequest('${uid}', '${encodeURIComponent(info.name)}', '${encodeURIComponent(info.avatar || '')}')" class="bg-emerald-600 text-[10px] px-2 py-1 rounded font-bold text-white">Kabul</button><button onclick="db.ref('friend_requests/${user.uid}/${uid}').remove()" class="bg-red-600/30 text-red-400 text-[10px] px-2 py-1 rounded font-bold">Red</button></div>
                             </div>
                         `).join('');
                     } else { badge.classList.add('hidden'); sec.classList.add('hidden'); }
@@ -682,14 +789,14 @@
                     if (Object.keys(dms).length > 0) inboxDot.classList.remove('hidden'); else inboxDot.classList.add('hidden');
                 });
 
-                loadUserDataToUI(); renderStickers(); listenRooms(); loadRoom(currentRoom);
+                loadUserDataToUI(); updateChampionRings(); renderStickers(); listenRooms(); loadRoom(currentRoom);
             } else { currentUser = null; document.getElementById('login-screen').classList.remove('hidden'); }
         });
 
         function getMyData() {
             const name = localStorage.getItem('wrts_name_' + currentUser.uid) || currentUser.displayName || currentUser.email.split('@')[0];
-            const avatar = localStorage.getItem('wrts_avatar_' + currentUser.uid) || currentUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0284c7&color=fff`;
-            const badge = localStorage.getItem('wrts_badge_' + currentUser.uid)  || 'Cyber Mod ⚡';
+            const avatar = localStorage.getItem('wrts_avatar_' + currentUser.uid) || currentUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=e11d48&color=fff`;
+            const badge = localStorage.getItem('wrts_badge_' + currentUser.uid) || 'Kızıl Mod 🔥';
             return { name, avatar, badge };
         }
 
@@ -744,53 +851,61 @@
             document.getElementById('online-count').textContent = count;
             const fDiv = document.getElementById('my-friends-list'); const fEntries = Object.entries(myFriends);
             fDiv.innerHTML = fEntries.length ? fEntries.map(([uid, info]) => `
-                <div class="flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-pink-500/30">
+                <div onclick="openUserProfileModal('${uid}', '${encodeURIComponent(info.name)}')" class="flex items-center justify-between bg-[#120409] p-2 rounded-xl border border-rose-500/30 cursor-pointer">
                     <span class="text-xs font-bold">${info.name}</span>
-                    <button onclick="startDM('${uid}', '${encodeURIComponent(info.name)}')" class="text-[10px] bg-emerald-600/20 text-emerald-400 px-2 py-1 rounded font-bold">DM Aç</button>
+                    <span class="text-[10px] text-amber-400 font-bold">Profile Git</span>
                 </div>
-            `).join('') : '<p class="text-xs text-slate-500 italic">Arkadaş yok.</p>';
+            `).join('') : '<p class="text-xs text-rose-300/60 italic">Arkadaş yok.</p>';
 
             db.ref('users_registry').once('value', snap => {
                 const all = snap.val() || {};
                 document.getElementById('all-users-list').innerHTML = Object.entries(all).filter(([uid]) => uid !== currentUser.uid).map(([uid, info]) => {
                     const statusObj = activeUsersData[uid] || {};
                     const online = statusObj.state === 'online';
+                    const isChamp = topChampionUid === uid;
                     return `
-                        <div onclick="openUserProfileModal('${uid}', '${encodeURIComponent(info.name || 'İsimsiz')}');" class="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800 hover:border-cyan-500 cursor-pointer transition">
+                        <div onclick="openUserProfileModal('${uid}', '${encodeURIComponent(info.name || 'İsimsiz')}')" class="flex items-center justify-between bg-[#120409] p-2.5 rounded-xl border border-rose-900/50 hover:border-amber-500 cursor-pointer transition">
                             <div class="flex items-center gap-2">
-                                <img src="${info.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-8 h-8 rounded-full object-cover animated-ring">
+                                <img src="${info.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-8 h-8 rounded-full object-cover ${isChamp ? 'champion-ring' : ''}">
                                 <div>
-                                    <p class="text-xs font-bold text-slate-200">${info.name} <span class="text-[9px] ${online ? 'text-emerald-400' : 'text-slate-500'}">●</span></p>
-                                    <p class="text-[9px] text-slate-400">${online ? 'Çevrimiçi' : 'Çevrimdışı'}</p>
+                                    <p class="text-xs font-bold text-rose-100">${info.name} <span class="text-[9px] ${online ? 'text-emerald-400' : 'text-rose-400/50'}">●</span></p>
+                                    <p class="text-[9px] text-rose-300/60">${online ? 'Çevrimiçi' : 'Çevrimdışı'}</p>
                                 </div>
                             </div>
-                            <span class="text-[10px] text-cyan-400 font-bold bg-cyan-950/60 px-2 py-1 rounded-lg">Profili Gör</span>
+                            <span class="text-[10px] text-amber-400 font-bold bg-amber-950/60 px-2 py-1 rounded-lg">Profili Gör</span>
                         </div>
                     `;
                 }).join('');
             });
         }
 
-        // PROFİLE TIKLANINCA: ÜYELİK TARİHİ, DM, ARKADAŞLIK VE SON GÖRÜLME BİLGİLERİ
+        // PROFİLE TIKLANINCA DİREKT AÇILAN DETAY PENCERESİ
         window.openUserProfileModal = function(targetUid, encName) {
+            if(targetUid === currentUser.uid) {
+                openMyProfile();
+                return;
+            }
             const targetName = decodeURIComponent(encName);
             openModal('user-profile-modal');
             document.getElementById('up-name').textContent = targetName;
-            document.getElementById('up-avatar').src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(targetName) + '&background=0284c7&color=fff';
+            const upAvatar = document.getElementById('up-avatar');
+            upAvatar.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(targetName) + '&background=e11d48&color=fff';
+            if(topChampionUid === targetUid) upAvatar.classList.add('champion-ring'); else upAvatar.classList.remove('champion-ring');
+
             document.getElementById('up-status-text').textContent = "Çevrimdışı";
             document.getElementById('up-last-seen').textContent = "Hesaplanıyor...";
             document.getElementById('up-joined').textContent = "Yükleniyor...";
-            document.getElementById('up-badge').textContent = "Cyber Üye ⚡";
+            document.getElementById('up-badge').textContent = "Üye 🔥";
 
             db.ref(`users_registry/${targetUid}`).once('value', snap => {
                 const uData = snap.val() || {};
-                if(uData.avatar) document.getElementById('up-avatar').src = uData.avatar;
+                if(uData.avatar) upAvatar.src = uData.avatar;
                 if(uData.badge) document.getElementById('up-badge').textContent = uData.badge;
                 if(uData.joinedAt) {
                     const dateStr = new Date(uData.joinedAt).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
                     document.getElementById('up-joined').textContent = dateStr;
                 } else {
-                    document.getElementById('up-joined').textContent = "Eski Üye";
+                    document.getElementById('up-joined').textContent = "Kurucu Üye";
                 }
             });
 
@@ -805,7 +920,7 @@
                 lastSeenEl.textContent = "Şuan aktif";
             } else {
                 statusTextEl.textContent = "Çevrimdışı";
-                statusTextEl.className = "font-bold text-slate-400";
+                statusTextEl.className = "font-bold text-rose-400/70";
                 if(statusObj.lastSeen) {
                     const diffMin = Math.floor((Date.now() - statusObj.lastSeen) / 60000);
                     if(diffMin < 1) lastSeenEl.textContent = "Az önce";
@@ -819,8 +934,8 @@
             const actionsDiv = document.getElementById('up-actions');
             const isFriend = !!myFriends[targetUid];
             actionsDiv.innerHTML = `
-                <button onclick="startDM('${targetUid}', '${encodeURIComponent(targetName)}'); closeModal('user-profile-modal'); closeModal('users-modal');" class="flex-1 bg-cyan-600 hover:bg-cyan-500 py-2.5 rounded-xl text-xs font-bold text-white transition">💬 DM Gönder</button>
-                ${!isFriend ? `<button onclick="db.ref('friend_requests/${targetUid}/${currentUser.uid}').set({name:getMyData().name, avatar:getMyData().avatar}); alert('Arkadaşlık isteği gönderildi!');" class="flex-1 bg-pink-600/20 text-pink-400 border border-pink-500/30 hover:bg-pink-600/30 py-2.5 rounded-xl text-xs font-bold transition">💖 Arkadaş Ekle</button>` : `<span class="flex-1 bg-emerald-950/40 border border-emerald-500/30 py-2.5 rounded-xl text-xs font-bold text-emerald-400 flex items-center justify-center">✓ Arkadaşsınız</span>`}
+                <button onclick="startDM('${targetUid}', '${encodeURIComponent(targetName)}'); closeModal('user-profile-modal'); closeModal('users-modal');" class="flex-1 bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-xs font-bold text-white transition">💬 DM Gönder</button>
+                ${!isFriend ? `<button onclick="db.ref('friend_requests/${targetUid}/${currentUser.uid}').set({name:getMyData().name, avatar:getMyData().avatar}); alert('Arkadaşlık isteği gönderildi!');" class="flex-1 bg-rose-600/20 text-rose-300 border border-rose-500/40 hover:bg-rose-600/30 py-2.5 rounded-xl text-xs font-bold transition">💖 Arkadaş Ekle</button>` : `<span class="flex-1 bg-emerald-950/40 border border-emerald-500/30 py-2.5 rounded-xl text-xs font-bold text-emerald-400 flex items-center justify-center">✓ Arkadaşsınız</span>`}
             `;
         }
 
@@ -844,11 +959,11 @@
             db.ref(`gizli_dm_listesi/${currentUser.uid}`).once('value', snap => {
                 const dms = snap.val() || {}; const entries = Object.entries(dms);
                 listDiv.innerHTML = entries.length ? entries.map(([dmId, info]) => `
-                    <div onclick="currentRoom='${dmId}'; closeModal('dm-list-modal'); loadRoom('${dmId}');" class="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-slate-800 hover:border-cyan-500 cursor-pointer transition">
-                        <span class="text-xs font-bold text-slate-200">💬 ${info.targetName}</span>
-                        <span class="text-[10px] text-cyan-400 font-bold bg-cyan-950 px-2 py-1 rounded-lg">Sohbete Git</span>
+                    <div onclick="currentRoom='${dmId}'; closeModal('dm-list-modal'); loadRoom('${dmId}');" class="flex items-center justify-between bg-[#120409] p-3 rounded-xl border border-rose-900/50 hover:border-amber-500 cursor-pointer transition">
+                        <span class="text-xs font-bold text-rose-100">💬 ${info.targetName}</span>
+                        <span class="text-[10px] text-amber-400 font-bold bg-amber-950/60 px-2 py-1 rounded-lg">Sohbete Git</span>
                     </div>
-                `).join('') : '<p class="text-xs text-slate-500 italic">Henüz özel mesajın yok.</p>';
+                `).join('') : '<p class="text-xs text-rose-300/60 italic">Henüz özel mesajın yok.</p>';
             });
         };
 
@@ -856,7 +971,7 @@
             db.ref('oda_listesi').on('value', snap => {
                 customRoomsData = snap.val() || {};
                 const roomSelect = document.getElementById('room-select');
-                roomSelect.innerHTML = `<option value="genel"># Genel</option><option value="sohbet"># Muhabbet</option><option value="oyun"># Oyun</option><option value="itiraf"># İtiraf 🤫</option>`;
+                roomSelect.innerHTML = `<option value="genel"># Genel</option><option value="sohbet"># Muhabbet</option><option value="oyun"># Oyun</option>`;
                 Object.entries(customRoomsData).forEach(([id, info]) => {
                     if (id.startsWith('oda_') && !id.startsWith('özel_dm_')) {
                         const opt = document.createElement('option'); opt.value = id; opt.textContent = `# ${info.name}`;
@@ -889,41 +1004,30 @@
             const div = document.createElement('div'); div.id = `msg-${key}`; div.className = `flex gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'} items-end`;
 
             let content = '';
-            if (currentRoom === 'itiraf') {
-                content = `<p class="text-sm break-words italic text-amber-200">🤫 Anonim İtiraf: "${data.mesaj}"</p>`;
-            } else if (data.type === 'image' || data.type === 'gif') {
-                content = `<img src="${data.url}" class="rounded-xl max-h-48 object-cover cursor-pointer" onclick="window.open('${data.url}', '_blank')">`;
-            } else if (data.type === 'audio') {
-                content = `<audio controls src="${data.url}" class="h-8 max-w-[190px]"></audio>`;
-            } else if (data.type === 'sticker') {
-                content = `<span class="text-4xl block py-1">${data.sticker}</span>`;
-            } else if (data.type === 'code') {
-                content = `<div class="bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-left my-1 overflow-x-auto max-w-[260px]"><span class="text-[9px] text-cyan-400 font-bold block mb-1">${data.lang}</span><pre class="text-[11px] text-emerald-300"><code>${data.code.replace(/</g, '&lt;')}</code></pre></div>`;
-            } else if (data.type === 'poll') {
+            if (data.type === 'image' || data.type === 'gif') content = `<img src="${data.url}" class="rounded-xl max-h-48 object-cover cursor-pointer" onclick="window.open('${data.url}', '_blank')">`;
+            else if (data.type === 'audio') content = `<audio controls src="${data.url}" class="h-8 max-w-[190px]"></audio>`;
+            else if (data.type === 'sticker') content = `<span class="text-4xl block py-1">${data.sticker}</span>`;
+            else if (data.type === 'code') content = `<div class="bg-[#120409] border border-rose-900/50 rounded-xl p-2.5 text-left my-1 overflow-x-auto max-w-[260px]"><span class="text-[9px] text-amber-400 font-bold block mb-1">${data.lang}</span><pre class="text-[11px] text-emerald-300"><code>${data.code.replace(/</g, '&lt;')}</code></pre></div>`;
+            else if (data.type === 'poll') {
                 const votes = data.votes || {}; const v1 = Object.values(votes).filter(v => v === 1).length; const v2 = Object.values(votes).filter(v => v === 2).length;
-                content = `<div class="bg-slate-950/90 border border-slate-700 rounded-xl p-2.5 space-y-1.5 min-w-[200px]"><p class="text-xs font-bold text-amber-300">📊 ${data.question}</p><button onclick="votePoll('${room}', '${key}', 1)" class="w-full flex justify-between bg-slate-900 px-2.5 py-1 rounded-lg text-xs"><span>${data.opt1}</span><span class="font-bold text-cyan-400">${v1}</span></button><button onclick="votePoll('${room}', '${key}', 2)" class="w-full flex justify-between bg-slate-900 px-2.5 py-1 rounded-lg text-xs"><span>${data.opt2}</span><span class="font-bold text-cyan-400">${v2}</span></button></div>`;
-            } else {
-                content = `<p class="text-sm break-words">${data.mesaj}</p>${data.edited ? '<span class="text-[9px] text-slate-400 italic">(düzenlendi)</span>' : ''}`;
-            }
+                content = `<div class="bg-[#120409]/90 border border-rose-900/50 rounded-xl p-2.5 space-y-1.5 min-w-[200px]"><p class="text-xs font-bold text-amber-300">📊 ${data.question}</p><button onclick="votePoll('${room}', '${key}', 1)" class="w-full flex justify-between bg-[#1c0910] px-2.5 py-1 rounded-lg text-xs"><span>${data.opt1}</span><span class="font-bold text-amber-400">${v1}</span></button><button onclick="votePoll('${room}', '${key}', 2)" class="w-full flex justify-between bg-[#1c0910] px-2.5 py-1 rounded-lg text-xs"><span>${data.opt2}</span><span class="font-bold text-amber-400">${v2}</span></button></div>`;
+            } else { content = `<p class="text-sm break-words">${data.mesaj}</p>${data.edited ? '<span class="text-[9px] text-rose-200/60 italic">(düzenlendi)</span>' : ''}`; }
 
             const reactions = data.reactions || {};
-            const reactionHTML = Object.entries(reactions).map(([uId, em]) => `<span class="bg-slate-900 px-1.5 py-0.5 rounded-full text-[10px] border border-slate-700">${em}</span>`).join('');
+            const reactionHTML = Object.entries(reactions).map(([uId, em]) => `<span class="bg-[#120409] px-1.5 py-0.5 rounded-full text-[10px] border border-rose-900/50">${em}</span>`).join('');
 
-            // GÖRÜLDÜ SİSTEMİ: Karşı taraf okuduğunda net görüldü ibaresi
             const isSeen = data.seenBy && Object.keys(data.seenBy).length > 1;
-            const seenHTML = isMe ? `<span class="text-[9px] ${isSeen ? 'text-cyan-400 font-bold' : 'text-slate-400'}">${isSeen ? '✓✓ Görüldü' : '✓ İletildi'}</span>` : '';
+            const seenHTML = isMe ? `<span class="text-[9px] ${isSeen ? 'text-amber-300 font-bold' : 'text-rose-200/60'}">${isSeen ? '✓✓ Görüldü' : '✓ İletildi'}</span>` : '';
 
             const timeStr = new Date(data.zaman || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            
-            const senderName = currentRoom === 'itiraf' && !isMe ? 'Anonim Üye' : data.isim;
-            const senderAvatar = currentRoom === 'itiraf' && !isMe ? 'https://ui-avatars.com/api/?name=?&background=334155&color=fff' : (data.avatar || 'https://ui-avatars.com/api/?name=U');
+            const isChamp = topChampionUid === data.uid;
 
             div.innerHTML = `
-                <img src="${senderAvatar}" class="w-6 h-6 rounded-full object-cover shrink-0 mb-1 animated-ring">
+                <img onclick="openUserProfileModal('${data.uid}', '${encodeURIComponent(data.isim)}')" src="${data.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-6 h-6 rounded-full object-cover shrink-0 mb-1 cursor-pointer ${isChamp ? 'champion-ring' : ''}" title="Profili Gör">
                 <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[80%]">
-                    <div class="flex items-center gap-1 px-1 mb-0.5"><span class="text-[10px] font-bold text-slate-300">${roomRoles[data.uid] ? '🛡️' : ''} ${senderName}</span>${data.badge && currentRoom !== 'itiraf' ? `<span class="text-[9px] bg-cyan-500/20 text-cyan-300 px-1.5 rounded-full">${data.badge}</span>` : ''}</div>
-                    <div onclick="document.getElementById('menu-${key}').classList.toggle('hidden')" class="cursor-pointer ${isMe ? 'bg-cyan-600' : 'bg-slate-800'} px-3 py-2 rounded-2xl shadow relative">
-                        ${data.replyTo ? `<div class="mb-1 p-1.5 rounded bg-black/25 border-l-2 border-cyan-300 text-[10px]"><b>${data.replyTo.name}</b><br>${data.replyTo.text}</div>` : ''}
+                    <div onclick="openUserProfileModal('${data.uid}', '${encodeURIComponent(data.isim)}')" class="flex items-center gap-1 px-1 mb-0.5 cursor-pointer hover:underline"><span class="text-[10px] font-bold text-rose-200">${roomRoles[data.uid] ? '🛡️' : ''} ${data.isim}</span>${data.badge ? `<span class="text-[9px] bg-amber-500/20 text-amber-300 px-1.5 rounded-full">${data.badge}</span>` : ''}</div>
+                    <div onclick="document.getElementById('menu-${key}').classList.toggle('hidden')" class="cursor-pointer ${isMe ? 'bg-gradient-to-r from-rose-600 to-rose-700' : 'bg-[#280c16]'} px-3 py-2 rounded-2xl shadow relative">
+                        ${data.replyTo ? `<div class="mb-1 p-1.5 rounded bg-black/30 border-l-2 border-amber-400 text-[10px]"><b>${data.replyTo.name}</b><br>${data.replyTo.text}</div>` : ''}
                         ${content}
                         <div class="flex items-center justify-end gap-1.5 text-[9px] opacity-80 mt-0.5">
                             ${seenHTML}
@@ -931,12 +1035,13 @@
                         </div>
                     </div>
                     ${reactionHTML ? `<div class="flex gap-1 mt-0.5">${reactionHTML}</div>` : ''}
-                    <div id="menu-${key}" class="hidden flex flex-wrap gap-1 items-center mt-1 bg-slate-900 border border-slate-800 px-2 py-1 rounded-xl text-xs z-10 shadow-lg">
-                        <button onclick="setReplyTo('${key}', '${senderName}', '${(data.mesaj || 'Medya').replace(/'/g, '')}')" title="Yanıtla">💬</button>
+                    <div id="menu-${key}" class="hidden flex flex-wrap gap-1 items-center mt-1 bg-[#1c0910] border border-rose-900/60 px-2 py-1 rounded-xl text-xs z-10 shadow-lg">
+                        <button onclick="setReplyTo('${key}', '${data.isim}', '${(data.mesaj || 'Medya').replace(/'/g, '')}')" title="Yanıtla">💬</button>
                         <button onclick="reactToMessage('${room}', '${key}', '❤️')" title="Kalp">❤️</button>
                         <button onclick="reactToMessage('${room}', '${key}', '🔥')" title="Ateş">🔥</button>
                         <button onclick="reactToMessage('${room}', '${key}', '👍')" title="Beğen">👍</button>
-                        ${isMe && data.mesaj && currentRoom !== 'itiraf' ? `<button onclick="startEditMessage('${key}', '${data.mesaj.replace(/'/g, '')}')" title="Düzenle">✏️</button>` : ''}
+                        ${isMe && data.mesaj ? `<button onclick="startEditMessage('${key}', '${data.mesaj.replace(/'/g, '')}')" title="Düzenle">✏️</button>` : ''}
+                        ${(isMe || roomRoles[currentUser?.uid]) ? `<button onclick="db.ref('odalar/${room}/${key}').remove()" class="text-red-400" title="Mesajı Sil">🗑️</button>` : ''}
                     </div>
                 </div>
             `;
@@ -954,42 +1059,26 @@
             db.ref(`room_roles/${room}`).on('value', s => { roomRoles = s.val() || {}; updateRoomRoleButton(); });
             db.ref(`room_mutes/${room}`).on('value', s => { mutedUsers = s.val() || {}; });
 
-            // DUYURU SİSTEMİ (Sadece #sohbet / Muhabbet odasında gösterilir)
+            // DUYURU ÇUBUĞU KONTROLÜ (Genel ve Muhabbet odalarında görünür)
             const annBar = document.getElementById('announcement-bar');
             const annText = document.getElementById('announcement-text');
             const annDelBtn = document.getElementById('delete-announcement-btn');
 
-            if (room === 'sohbet') {
+            if (room === 'genel' || room === 'sohbet') {
                 annBar.classList.remove('hidden');
-                db.ref('current_announcement').on('value', snap => {
+                db.ref('global_announcement').on('value', snap => {
                     const val = snap.val();
                     if(val) {
-                        annBar.classList.remove('hidden');
                         annText.textContent = val.text;
-                        // Moderatör veya kurucu duyuruyu silebilir
-                        if(currentUser && (roomRoles[currentUser.uid] || val.by === currentUser.uid)) {
-                            annDelBtn.classList.remove('hidden');
-                        } else {
-                            annDelBtn.classList.add('hidden');
-                        }
+                        annDelBtn.classList.remove('hidden');
                     } else {
-                        annBar.classList.add('hidden');
+                        annText.textContent = "Şu an aktif bir duyuru yok.";
+                        annDelBtn.classList.add('hidden');
                     }
                 });
             } else {
                 annBar.classList.add('hidden');
             }
-
-            db.ref(`music_sync/${room}`).on('value', s => {
-                const d = s.val(); 
-                if (d && d.videoId) {
-                    document.getElementById('yt-player-frame').src = `https://www.youtube.com/embed/${d.videoId}?autoplay=1`;
-                    document.getElementById('music-sync-info').textContent = `🎬 ${d.by} oynatıyor`;
-                } else {
-                    document.getElementById('yt-player-frame').src = "";
-                    document.getElementById('music-sync-info').textContent = "Sinema salonu boş.";
-                }
-            });
 
             roomRef = db.ref('odalar/' + room).limitToLast(50);
             roomRef.once('value', () => { isInitialLoad = false; });
@@ -1003,12 +1092,6 @@
 
             setupTypingIndicator(room);
             listenXOX(room); listenBattleship(room); listenWordGame(room);
-        }
-
-        window.deleteAnnouncement = function() {
-            if(confirm("Duyuruyu kaldırmak istiyor musun?")) {
-                db.ref('current_announcement').remove();
-            }
         }
 
         function setupTypingIndicator(room) {
@@ -1044,15 +1127,6 @@
             const md = getMyData();
 
             if (typingRef && currentUser) typingRef.child(currentUser.uid).remove();
-
-            // EĞER SOHBET ODASINDAKİ İLK KELİME "/duyuru " İSE DUYURU OLARAK EKLE
-            if (currentRoom === 'sohbet' && text.startsWith('/duyuru ')) {
-                const annContent = text.replace('/duyuru ', '');
-                db.ref('current_announcement').set({ text: annContent, by: currentUser.uid });
-                input.value = '';
-                alert("Duyuru başarıyla yayınlandı!");
-                return;
-            }
 
             if (editingMessageKey) {
                 db.ref(`odalar/${currentRoom}/${editingMessageKey}`).update({ mesaj: text, edited: true });
@@ -1209,7 +1283,7 @@
         window.switchGameTab = g => {
             ['xox', 'battleship', 'word'].forEach(x => {
                 document.getElementById(`game-panel-${x}`).classList.toggle('hidden', x !== g);
-                document.getElementById(`tab-${x}`).className = x === g ? "flex-1 py-1.5 rounded-lg text-xs font-bold bg-cyan-600" : "flex-1 py-1.5 rounded-lg text-xs font-bold text-slate-400";
+                document.getElementById(`tab-${x}`).className = x === g ? "flex-1 py-1.5 rounded-lg text-xs font-bold bg-rose-600 text-white" : "flex-1 py-1.5 rounded-lg text-xs font-bold text-rose-300/60";
             });
         };
 
@@ -1241,7 +1315,7 @@
                 d.rev.forEach((rev, i) => {
                     const ship = d.ships.includes(i); if (rev && ship) hits++;
                     const b = document.createElement('button');
-                    b.className = `w-10 h-10 rounded-lg border text-xs font-bold ${rev ? (ship ? 'bg-red-600' : 'bg-slate-800') : 'bg-slate-950 border-slate-800'}`;
+                    b.className = `w-10 h-10 rounded-lg border text-xs font-bold ${rev ? (ship ? 'bg-red-600' : 'bg-[#2b0d18]') : 'bg-[#120409] border-rose-900/50'}`;
                     b.textContent = rev ? (ship ? '💥' : '🌊') : '?';
                     b.onclick = () => {
                         if (!rev && d.shots > 0) {
