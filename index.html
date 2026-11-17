@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WrtS - Ultimate Clean</title>
+    <title>WrtS - Fixed & Clean</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -156,6 +156,7 @@
                 <button onclick="closeModal('menu-drawer-modal'); openModal('leaderboard-modal'); loadLeaderboard();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🏆</span> Skor Tablosu</button>
                 <button onclick="closeModal('menu-drawer-modal'); openModal('stats-modal'); loadStats();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>📊</span> İstatistikler</button>
                 <button onclick="closeModal('menu-drawer-modal'); openMyProfile();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left col-span-2"><span>👤</span> Profilim & Ayarlar</button>
+                <button onclick="clearAllMessagesInRoom()" class="bg-red-600/20 hover:bg-red-600/40 border border-red-500/40 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-red-400 text-left col-span-2 transition"><span>🗑️</span> Bu Odadaki Tüm Mesajları Sil</button>
             </div>
         </div>
     </div>
@@ -317,7 +318,7 @@
         </div>
     </div>
 
-    <!-- OYUN SALONU (Hile korumalı ve optimize edilmiş) -->
+    <!-- OYUN SALONU -->
     <div id="games-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-md space-y-3 text-center">
             <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">🎮 Oyun Salonu</h3><button onclick="closeModal('games-modal')">✕</button></div>
@@ -326,7 +327,6 @@
                 <button onclick="switchGameTab('battleship')" id="tab-battleship" class="flex-1 py-1.5 rounded-lg text-xs font-bold text-rose-300/60">Amiral Battı</button>
             </div>
             
-            <!-- XOX Oyunu -->
             <div id="game-panel-xox" class="space-y-3 py-2">
                 <p id="xox-status" class="text-xs text-amber-300 font-bold">Sıra: X</p>
                 <div class="grid grid-cols-3 gap-2 w-48 mx-auto">
@@ -343,9 +343,9 @@
                 <button onclick="resetXOXGame()" class="w-full bg-[#2b0d18] hover:bg-rose-900/50 py-2 rounded-xl text-xs font-bold text-rose-200 transition">Oyunu Sıfırla</button>
             </div>
 
-            <!-- Amiral Battı Oyunu -->
+            <!-- AMİRAL BATTI DÜZELTİLDİ -->
             <div id="game-panel-battleship" class="hidden space-y-3 py-2">
-                <p id="bs-status" class="text-xs text-amber-300 font-bold">3 gizli gemiyi bul!</p>
+                <p id="bs-status" class="text-xs text-amber-300 font-bold">3 gizli gemiyi bul! Kalan Hak: <span id="bs-shots">10</span></p>
                 <div id="bs-grid" class="grid grid-cols-5 gap-1.5 w-60 mx-auto"></div>
                 <button onclick="resetBattleship()" class="w-full bg-[#2b0d18] hover:bg-rose-900/50 py-2 rounded-xl text-xs font-bold text-rose-200 transition">Yeni Harita Başlat</button>
             </div>
@@ -478,7 +478,6 @@
             return res;
         }
 
-        // Skor ve İstatistikler Kesin Sıfırlama
         window.loadStats = function() {
             if(!currentUser) return;
             db.ref(`stats/${currentUser.uid}`).once('value', s => {
@@ -490,6 +489,15 @@
         function incrementUserStat(field, amount = 1) {
             if(!currentUser) return;
             db.ref(`stats/${currentUser.uid}/${field}`).transaction(cur => (cur || 0) + amount);
+        }
+
+        window.clearAllMessagesInRoom = function() {
+            if(confirm("Bu odadaki tüm mesajları silmek istediğine emin misin?")) {
+                db.ref(`odalar/${currentRoom}`).remove().then(() => {
+                    alert("Odadaki tüm mesajlar başarıyla silindi!");
+                    closeModal('menu-drawer-modal');
+                });
+            }
         }
 
         window.openDeleteAccountModal = function() {
@@ -678,7 +686,7 @@
                         </div>
                         <span class="text-xs font-black text-amber-400">${info.score || 0} Puan</span>
                     </div>
-                `).join('') : '<p class="text-xs text-rose-300/60 italic">Skor tablosu sıfırlandı.</p>';
+                `).join('') : '<p class="text-xs text-rose-300/60 italic">Skor tablosu boş.</p>';
             });
         }
 
@@ -1024,9 +1032,13 @@
             }
         };
 
-        // MESAJ ELEMENTİ (Sola kaydırarak yanıtlama / Swipe to reply dahil)
         function createMessageElement(snap, room) {
             const data = snap.val(); const key = snap.key; const isMe = currentUser && data.uid === currentUser.uid;
+            
+            if (!isMe && currentUser && (!data.readBy || !data.readBy[currentUser.uid])) {
+                db.ref(`odalar/${room}/${key}/readBy/${currentUser.uid}`).set(true);
+            }
+
             const div = document.createElement('div'); div.id = `msg-${key}`; div.className = `flex gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'} items-end transition-transform duration-150 select-none`;
 
             let content = '';
@@ -1046,6 +1058,12 @@
             const timeStr = new Date(data.zaman || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             const safePreview = (data.mesaj || 'Medya').replace(/'/g, '').replace(/"/g, '');
 
+            let seenHtml = '';
+            if (isMe) {
+                const isSeen = data.readBy && Object.keys(data.readBy).length > 1;
+                seenHtml = `<span class="text-[10px] ${isSeen ? 'text-sky-400 font-bold' : 'text-rose-200/60'} ml-1" title="${isSeen ? 'Görüldü' : 'İletildi'}">${isSeen ? '✓✓' : '✓'}</span>`;
+            }
+
             div.innerHTML = `
                 <img onclick="openUserProfileModal('${data.uid}', '${encodeURIComponent(data.isim)}')" src="${data.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-6 h-6 rounded-full object-cover shrink-0 mb-1 cursor-pointer">
                 <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[80%]">
@@ -1053,10 +1071,10 @@
                     <div id="bubble-${key}" class="cursor-pointer ${isMe ? 'bg-gradient-to-r from-rose-600 to-rose-700' : 'bg-[#280c16]'} px-3 py-2 rounded-2xl shadow relative transition-all">
                         ${data.replyTo ? `<div onclick="event.stopPropagation(); scrollToMessage('${data.replyTo.key}')" class="mb-1 p-1.5 rounded bg-black/35 border-l-2 border-amber-400 text-[10px] cursor-pointer"><b>${data.replyTo.name}</b><br>${data.replyTo.text}</div>` : ''}
                         ${content}
-                        <div class="text-[9px] opacity-75 text-right mt-0.5">${timeStr}</div>
+                        <div class="text-[9px] opacity-75 text-right mt-0.5 flex items-center justify-end gap-1"><span>${timeStr}</span>${seenHtml}</div>
                     </div>
                     <div id="menu-${key}" class="hidden flex gap-2 mt-1 bg-[#1c0910] border border-rose-900/60 p-2 rounded-xl text-xs z-10 shadow-xl">
-                        <button onclick="setReplyTo('${key}', '${data.isim}', '${safePreview}')" class="text-amber-400 font-bold">Yanıtlama</button>
+                        <button onclick="setReplyTo('${key}', '${data.isim}', '${safePreview}')" class="text-amber-400 font-bold">Yanıtla</button>
                         ${isMe && data.type === 'text' ? `<button onclick="startEditMessage('${key}', '${safePreview}')" class="text-sky-400 font-bold">Düzenle</button>` : ''}
                         ${isMe ? `<button onclick="db.ref('odalar/${room}/${key}').remove()" class="text-red-400 font-bold">Sil</button>` : ''}
                     </div>
@@ -1067,7 +1085,6 @@
                 document.getElementById(`menu-${key}`).classList.toggle('hidden');
             };
 
-            // Sola kaydırarak yanıtlama (Swipe to reply)
             let startX = 0;
             div.ontouchstart = e => startX = e.touches[0].clientX;
             div.ontouchend = e => {
@@ -1125,9 +1142,12 @@
         const msgInput = document.getElementById('msg-input');
         msgInput.addEventListener('input', e => {
             if(!currentUser) return;
-            db.ref(`typing/${currentRoom}/${currentUser.uid}`).set(getMyData().name);
+            const typingRef = db.ref(`typing/${currentRoom}/${currentUser.uid}`);
+            typingRef.set(getMyData().name);
+            typingRef.onDisconnect().remove();
+            
             clearTimeout(typingTimer);
-            typingTimer = setTimeout(() => { db.ref(`typing/${currentRoom}/${currentUser.uid}`).remove(); }, 2000);
+            typingTimer = setTimeout(() => { typingRef.remove(); }, 2000);
         });
 
         db.ref(`typing`).on('value', snap => {
@@ -1147,6 +1167,8 @@
             const text = msgInput.value.trim(); if (!text) return;
             const muted = (await db.ref(`room_mutes/${currentRoom}/${currentUser.uid}`).once('value')).val();
             if(muted) return alert("Bu odada susturuldun!");
+
+            db.ref(`typing/${currentRoom}/${currentUser.uid}`).remove();
 
             if(editingMessageKey) {
                 db.ref(`odalar/${currentRoom}/${editingMessageKey}`).update({ mesaj: filterBadWords(text), edited: true });
@@ -1242,8 +1264,9 @@
             e.preventDefault();
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream); audioChunks = [];
-                mediaRecorder.ondataavailable = ev => audioChunks.push(ev.data);
+                mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' }); 
+                audioChunks = [];
+                mediaRecorder.ondataavailable = ev => { if(ev.data.size > 0) audioChunks.push(ev.data); };
                 mediaRecorder.onstop = () => {
                     const blob = new Blob(audioChunks, { type: 'audio/webm' });
                     const r = new FileReader();
@@ -1257,7 +1280,7 @@
                 };
                 mediaRecorder.start();
                 wtBtn.classList.add('bg-rose-600', 'text-white', 'animate-pulse');
-            } catch(e) { alert("Mikrofon izni verilmedi."); }
+            } catch(e) { alert("Mikrofon izni verilmedi veya desteklenmiyor."); }
         };
         wtBtn.onmouseup = wtBtn.ontouchend = (e) => {
             e.preventDefault();
@@ -1347,7 +1370,6 @@
             closeModal('call-modal');
         };
 
-        // OYUN SALONU (XOX ve Amiral Battı Hatasız Mantık)
         window.switchGameTab = g => {
             ['xox', 'battleship'].forEach(x => {
                 document.getElementById(`game-panel-${x}`).classList.toggle('hidden', x !== g);
@@ -1378,6 +1400,7 @@
         };
         window.resetXOXGame = () => db.ref(`games/${currentRoom}/xox`).set({ board: Array(9).fill(''), turn: 'X', winner: '' });
 
+        // AMİRAL BATTI MANTIĞI DÜZELTİLDİ (10 hak sınırı ve skor/istatistik ayrımı)
         function listenBattleship() {
             db.ref(`games/${currentRoom}/bs`).on('value', s => {
                 let g = s.val();
@@ -1385,6 +1408,10 @@
                 const grid = document.getElementById('bs-grid');
                 grid.innerHTML = '';
                 let found = 0;
+                let shotsUsed = g.revealed ? Object.keys(g.revealed).length : 0;
+                let maxShots = 10;
+                let remainingShots = maxShots - shotsUsed;
+
                 for (let i = 0; i < 25; i++) {
                     const hit = g.revealed && g.revealed[i];
                     const isShip = g.ships && g.ships.includes(i);
@@ -1392,23 +1419,39 @@
                     const btn = document.createElement('button');
                     btn.className = `w-10 h-10 rounded-lg font-bold text-xs border border-rose-900/50 ${hit ? (isShip ? 'bg-emerald-600 text-white' : 'bg-rose-950/60 text-rose-500') : 'bg-[#120409] hover:border-amber-500'} transition`;
                     btn.textContent = hit ? (isShip ? '🚢' : '❌') : '?';
+                    
                     btn.onclick = () => {
-                        if (!hit && found < 3) {
-                            db.ref(`games/${currentRoom}/bs/revealed/${i}`).set(true);
-                        }
+                        if (g.gameOver || hit || remainingShots <= 0) return;
+                        db.ref(`games/${currentRoom}/bs/revealed/${i}`).set(true);
                     };
                     grid.appendChild(btn);
                 }
-                document.getElementById('bs-status').textContent = found >= 3 ? '🎉 Tebrikler! Tüm gemiler bulundu' : `Bulunan Gemi: ${found}/3`;
+
+                const statusEl = document.getElementById('bs-status');
+                document.getElementById('bs-shots').textContent = Math.max(0, remainingShots);
+
+                if (found >= 3) {
+                    statusEl.textContent = '🎉 Tebrikler! Tüm gemileri buldun!';
+                    if(!g.scored && currentUser) {
+                        incrementUserStat('score', 50);
+                        db.ref(`leaderboard/${currentUser.uid}`).update({ name: getMyData().name, avatar: getMyData().avatar, score: firebase.database.ServerValue.increment(50) });
+                        db.ref(`games/${currentRoom}/bs/scored`).set(true);
+                    }
+                } else if (remainingShots <= 0) {
+                    statusEl.textContent = '💥 Hak bitti! Kaybettin.';
+                } else {
+                    statusEl.innerHTML = `3 gizli gemiyi bul! Kalan Hak: <span id="bs-shots">${remainingShots}</span>`;
+                }
             });
         }
+
         window.resetBattleship = () => {
             const ships = [];
             while (ships.length < 3) {
                 const r = Math.floor(Math.random() * 25);
                 if (!ships.includes(r)) ships.push(r);
             }
-            db.ref(`games/${currentRoom}/bs`).set({ ships, revealed: {} });
+            db.ref(`games/${currentRoom}/bs`).set({ ships, revealed: {}, gameOver: false, scored: false });
         };
     </script>
 </body>
