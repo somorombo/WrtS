@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WrtS - Ultra Clean & Fixed</title>
+    <title>WrtS - Ultimate Fixed</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -19,36 +19,17 @@
         ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-thumb { background: #e11d48; border-radius: 4px; }
         pre code { font-family: 'Courier New', Courier, monospace; }
-        
-        @keyframes championGlow {
-            0% { border-color: #f59e0b; box-shadow: 0 0 8px rgba(245,158,11,0.6); }
-            50% { border-color: #fb7185; box-shadow: 0 0 18px rgba(251,113,133,0.9); }
-            100% { border-color: #f59e0b; box-shadow: 0 0 8px rgba(245,158,11,0.6); }
-        }
-        .champion-ring { border: 2.5px solid #f59e0b !important; animation: championGlow 2s infinite; }
-
-        @keyframes messageHighlight {
-            0% { background-color: rgba(245, 158, 11, 0.6); }
-            100% { background-color: transparent; }
-        }
-        .highlight-anim { animation: messageHighlight 2s ease-out; }
 
         @keyframes snowfall {
             0% { transform: translateY(-10px) translateX(0); opacity: 0.8; }
             100% { transform: translateY(100vh) translateX(15px); opacity: 0.2; }
         }
         .snowflake { position: absolute; top: -10px; background: #ffe4e6; border-radius: 50%; pointer-events: none; z-index: 5; animation: snowfall linear infinite; }
-
-        @keyframes riseUp {
-            0% { transform: translateY(0) scale(1); opacity: 0.9; }
-            100% { transform: translateY(-100vh) scale(0.3); opacity: 0; }
-        }
-        .particle-up { position: absolute; bottom: -10px; border-radius: 50%; pointer-events: none; z-index: 5; animation: riseUp linear infinite; }
     </style>
 </head>
 <body id="app-body" class="text-rose-50 h-[100dvh] w-full overflow-hidden flex flex-col justify-between relative">
 
-    <!-- GİRİŞ EKRANI (Sadeleştirildi) -->
+    <!-- GİRİŞ EKRANI (Google Simgeli) -->
     <div id="login-screen" class="fixed inset-0 bg-[#0d0407]/95 z-50 flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-[#1c0910] border border-rose-900/60 p-6 rounded-3xl w-full max-w-sm space-y-4 shadow-2xl backdrop-blur-md">
             <h1 class="text-2xl font-black text-center text-rose-100 tracking-wider">WrtS Giriş</h1>
@@ -58,7 +39,8 @@
                 <button type="submit" class="w-full bg-rose-700 hover:bg-rose-600 py-3 rounded-xl font-bold text-sm transition shadow-lg text-white">Giriş Yap / Kayıt Ol</button>
             </form>
             <div class="text-center text-xs text-rose-300/50">veya</div>
-            <button id="google-btn" type="button" class="w-full bg-white text-slate-900 hover:bg-rose-50 py-3 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2">
+            <button id="google-btn" type="button" class="w-full bg-white text-slate-900 hover:bg-rose-50 py-3 rounded-xl font-bold text-sm transition flex items-center justify-center gap-3 shadow">
+                <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.13 0-5.78-2.11-6.73-4.96H1.19v3.15C3.17 21.31 7.24 24 12 24z"/><path fill="#FBBC05" d="M5.27 14.24c-.25-.72-.38-1.49-.38-2.24s.13-1.52.38-2.24V6.6H1.19C.43 8.13 0 9.87 0 11.7c0 1.83.43 3.57 1.19 5.1l4.08-2.56z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.24 0 3.17 2.69 1.19 6.6l4.08 3.15c.95-2.85 3.6-4.96 6.73-4.96z"/></svg>
                 <span>Google ile Giriş Yap</span>
             </button>
         </div>
@@ -170,15 +152,13 @@
                     <span>💬</span> Özel DM 
                     <span id="menu-inbox-dot" class="hidden w-2.5 h-2.5 rounded-full bg-red-500 ml-auto"></span>
                 </button>
-                <button onclick="closeModal('menu-drawer-modal'); openModal('voice-channel-modal');" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎙️</span> Sesli Kanal</button>
+                <button onclick="closeModal('menu-drawer-modal'); openModal('call-modal');" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>📹</span> Sesli / Görüntülü</button>
                 <button onclick="closeModal('menu-drawer-modal'); openModal('whiteboard-modal'); initWhiteboard();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎨</span> Ortak Tahta</button>
                 <button onclick="closeModal('menu-drawer-modal'); openCinemaModal();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎬</span> Ortak Sinema</button>
                 <button onclick="closeModal('menu-drawer-modal'); openModal('games-modal'); initGames();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎮</span> Oyun Salonu</button>
                 <button onclick="closeModal('menu-drawer-modal'); openModal('leaderboard-modal'); loadLeaderboard();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🏆</span> Skor Tablosu</button>
                 <button onclick="closeModal('menu-drawer-modal'); openModal('stats-modal'); loadStats();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>📊</span> İstatistikler</button>
-                <button onclick="closeModal('menu-drawer-modal'); openMyProfile();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left col-span-2"><span>👤</span> Profilim & Rozetler</button>
-                <!-- Kurucuya özel rozet yönetim paneli -->
-                <button id="admin-badge-btn" onclick="closeModal('menu-drawer-modal'); openModal('badge-admin-modal'); loadBadgeAdminList();" class="hidden bg-amber-500/20 border border-amber-500/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-amber-300 text-left col-span-2"><span>👑</span> Rozet Yönetim Paneli (Kurucu)</button>
+                <button onclick="closeModal('menu-drawer-modal'); openMyProfile();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left col-span-2"><span>👤</span> Profilim & Ayarlar</button>
             </div>
         </div>
     </div>
@@ -192,24 +172,22 @@
         </div>
     </div>
 
-    <!-- DİSCORD TARZI SESLİ KANAL MODALI (Düzeltildi) -->
-    <div id="voice-channel-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-4 text-center">
-            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">🎙️ Sesli Kanal</h3><button onclick="closeModal('voice-channel-modal')">✕</button></div>
-            <p id="vc-status" class="text-xs text-rose-200">Kanala bağlı kimse yok.</p>
-            <div id="vc-members-list" class="space-y-2 bg-[#120409] p-3 rounded-2xl min-h-[80px]"></div>
-            <div class="flex gap-2">
-                <button onclick="joinVoiceChannel()" class="flex-1 bg-emerald-600 py-2.5 rounded-xl text-xs font-bold text-white">Kanala Katıl</button>
-                <button onclick="leaveVoiceChannel()" class="flex-1 bg-red-600/30 text-red-400 py-2.5 rounded-xl text-xs font-bold">Ayrıl</button>
+    <!-- SESLİ & GÖRÜNTÜLÜ EKRAN PAYLAŞIMI MODALI -->
+    <div id="call-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-md space-y-3 text-center">
+            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">📹 Sesli / Görüntülü Görüşme</h3><button onclick="endWebRTCCall()">✕</button></div>
+            <p id="call-status" class="text-xs text-rose-200/70">Bağlanmak için seçeneklerden birini seçin...</p>
+            <div class="grid grid-cols-2 gap-2">
+                <video id="local-video" autoplay muted playsinline class="w-full aspect-video bg-[#120409] rounded-xl object-cover"></video>
+                <video id="remote-video" autoplay playsinline class="w-full aspect-video bg-[#120409] rounded-xl object-cover"></video>
             </div>
-        </div>
-    </div>
-
-    <!-- KURUCU ÖZEL ROZET YÖNETİMİ -->
-    <div id="badge-admin-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-[#1c0910] border border-amber-500/50 rounded-3xl p-5 w-full max-w-sm space-y-4 max-h-[85vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">👑 Rozet Ver / Kaldır</h3><button onclick="closeModal('badge-admin-modal')">✕</button></div>
-            <div id="badge-admin-users-list" class="space-y-2"></div>
+            <div class="flex flex-wrap gap-2 justify-center">
+                <button onclick="startWebRTCCall(true)" class="bg-emerald-600 px-3 py-2 rounded-xl text-xs font-bold text-white">📹 Görüntülü Başlat</button>
+                <button onclick="startWebRTCCall(false)" class="bg-amber-600 px-3 py-2 rounded-xl text-xs font-bold text-white">🎙️ Sadece Ses</button>
+                <button onclick="startScreenShare()" class="bg-sky-600 px-3 py-2 rounded-xl text-xs font-bold text-white">💻 Ekran Paylaş</button>
+                <button onclick="joinWebRTCCall()" class="bg-rose-600 px-3 py-2 rounded-xl text-xs font-bold text-white">📲 Katıl</button>
+                <button onclick="endWebRTCCall()" class="bg-red-700 px-3 py-2 rounded-xl text-xs font-bold text-white">Ayrıl</button>
+            </div>
         </div>
     </div>
 
@@ -229,13 +207,13 @@
         </div>
     </div>
 
-    <!-- İSTATİSTİK PANELI -->
+    <!-- İSTATİSTİK PANELI (Sıfırlandı) -->
     <div id="stats-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3">
-            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">📊 Kullanıcı İstatistikleri</h3><button onclick="closeModal('stats-modal')">✕</button></div>
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">📊 İstatistikler</h3><button onclick="closeModal('stats-modal')">✕</button></div>
             <div class="bg-[#120409] p-4 rounded-2xl space-y-2.5 text-xs">
                 <div class="flex justify-between"><span class="text-rose-300">Toplam Mesaj:</span><span id="stat-msgs" class="font-bold text-amber-400">0</span></div>
-                <div class="flex justify-between"><span class="text-rose-300">Kazanılan Skor:</span><span id="stat-score" class="font-bold text-amber-400">0</span></div>
+                <div class="flex justify-between"><span class="text-rose-300">Skor:</span><span id="stat-score" class="font-bold text-amber-400">0</span></div>
             </div>
         </div>
     </div>
@@ -248,7 +226,6 @@
                 <img id="up-avatar" src="" class="w-20 h-20 rounded-full object-cover border-2 border-amber-500 shadow-xl">
                 <h3 id="up-name" class="font-black text-lg text-rose-50 mt-1"></h3>
                 <span id="up-bio" class="text-xs text-rose-300 italic">WrtS Kullanıcısı</span>
-                <div id="up-badges-container" class="flex flex-wrap gap-1 pt-1 justify-center"></div>
             </div>
             <div class="bg-[#120409] p-3.5 rounded-2xl border border-rose-900/50 space-y-2.5 text-left text-xs">
                 <div class="flex justify-between items-center"><span class="text-rose-300/70">Durum:</span><span id="up-status-text" class="font-bold text-emerald-400">Çevrimiçi</span></div>
@@ -263,7 +240,7 @@
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-4 w-full max-w-md space-y-2.5 max-h-[95vh] flex flex-col">
             <div class="flex justify-between items-center shrink-0">
                 <div class="flex items-center gap-2">
-                    <h3 class="font-bold text-amber-400 text-sm">🎬 Ortak Sinema & Playlist</h3>
+                    <h3 class="font-bold text-amber-400 text-sm">🎬 Ortak Sinema</h3>
                     <button id="cinema-mute-btn" onclick="toggleCinemaMute()" class="bg-rose-950 text-rose-300 border border-rose-700/50 px-2 py-0.5 rounded-lg text-[10px] font-bold">🔕 Sessiz</button>
                 </div>
                 <button onclick="closeModal('music-modal')" class="text-rose-300 font-bold">✕</button>
@@ -343,7 +320,7 @@
         </div>
     </div>
 
-    <!-- OYUN SALONU (Sıfırdan Yenilendi ve Hatalar Giderildi) -->
+    <!-- OYUN SALONU -->
     <div id="games-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-md space-y-3 text-center">
             <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">🎮 Oyun Salonu</h3><button onclick="closeModal('games-modal')">✕</button></div>
@@ -378,7 +355,7 @@
         </div>
     </div>
 
-    <!-- YARDIMCI MODALLAR -->
+    <!-- YARDIMCI MODALLAR (Çeşitlendirilmiş GIF'ler) -->
     <div id="gif-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-md space-y-3 max-h-[85vh] overflow-y-auto">
             <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">🎞️ GIF Seç</h3><button onclick="closeModal('gif-modal')">✕</button></div>
@@ -427,7 +404,7 @@
         </div>
     </div>
 
-    <!-- PROFİLİM & AYARLAR (Hesap Silme Eklendi) -->
+    <!-- PROFİLİM & AYARLAR (2 Adımlı Hesap Silme) -->
     <div id="profile-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">Profilim & Ayarlar</h3><button onclick="closeModal('profile-modal')">✕</button></div>
@@ -486,14 +463,11 @@
         let replyingTo = null;
         let editingMessageKey = null;
         let isInitialLoad = true;
-        let topChampionUid = null;
         let ytPlayer = null;
         let ytApiReady = false;
         let wbColor = '#fbbf24';
         let wbIsEraser = false;
         let cinemaMuted = false;
-
-        const ADMIN_EMAIL = "efeurasefecan42@gmail.com"; // Senin mail adresin kurucu yetkisi için
 
         function onYouTubeIframeAPIReady() { ytApiReady = true; }
 
@@ -505,18 +479,6 @@
                 res = res.replace(reg, '***');
             });
             return res;
-        }
-
-        db.ref('leaderboard').on('value', snap => {
-            const data = snap.val() || {};
-            const sorted = Object.entries(data).sort((a,b) => b[1].score - a[1].score);
-            topChampionUid = (sorted.length > 0 && sorted[0][1].score > 0) ? sorted[0][0] : null;
-            updateChampionRings();
-        });
-        function updateChampionRings() {
-            const headerAv = document.getElementById('header-avatar');
-            if(currentUser && topChampionUid === currentUser.uid) headerAv.classList.add('champion-ring');
-            else headerAv.classList.remove('champion-ring');
         }
 
         window.loadStats = function() {
@@ -532,30 +494,7 @@
             db.ref(`stats/${currentUser.uid}/${field}`).transaction(cur => (cur || 0) + amount);
         }
 
-        // SESLİ KANAL DÜZELTME & İYİLEŞTİRME
-        window.joinVoiceChannel = function() {
-            if(!currentUser) return;
-            const md = getMyData();
-            db.ref(`voice_channel/${currentUser.uid}`).set({ name: md.name, avatar: md.avatar, time: Date.now() });
-            document.getElementById('vc-status').textContent = "Sesli kanaldasın!";
-        }
-        window.leaveVoiceChannel = function() {
-            if(!currentUser) return;
-            db.ref(`voice_channel/${currentUser.uid}`).remove();
-            document.getElementById('vc-status').textContent = "Kanaldan ayrıldın.";
-        }
-        db.ref('voice_channel').on('value', snap => {
-            const members = snap.val() || {};
-            const list = document.getElementById('vc-members-list');
-            const entries = Object.entries(members);
-            if(entries.length > 0) {
-                list.innerHTML = entries.map(([_, u]) => `<div class="flex items-center gap-2 text-xs font-bold text-emerald-400"><img src="${u.avatar}" class="w-5 h-5 rounded-full object-cover"> <span>${u.name} (Aktif Ses)</span></div>`).join('');
-            } else {
-                list.innerHTML = '<span class="text-xs text-rose-300/60 italic">Kanalda kimse yok.</span>';
-            }
-        });
-
-        // 2 ADIMLI HESAP SİLME
+        // 2 ADIMLI HESAP SİLME MANTIĞI
         window.openDeleteAccountModal = function() {
             closeModal('profile-modal');
             openModal('delete-account-modal');
@@ -577,39 +516,11 @@
                 db.ref(`users_registry/${uid}`).remove();
                 db.ref(`status/${uid}`).remove();
                 db.ref(`stats/${uid}`).remove();
-                db.ref(`leaderboard/${uid}`).remove();
                 user.delete().then(() => {
                     alert("Hesabınız kalıcı olarak silindi.");
                     window.location.reload();
                 }).catch(err => alert("Silme hatası: " + err.message));
             }).catch(() => alert("Şifre hatalı! Hesap silinemedi."));
-        }
-
-        // SADECE SENİN (KURUCU) ROZET VERME / ALMA YETKİN
-        window.loadBadgeAdminList = function() {
-            const listDiv = document.getElementById('badge-admin-users-list');
-            db.ref('users_registry').once('value', snap => {
-                const users = snap.val() || {};
-                listDiv.innerHTML = Object.entries(users).map(([uid, info]) => `
-                    <div class="flex items-center justify-between bg-[#120409] p-2.5 rounded-xl border border-rose-900/50">
-                        <div class="flex items-center gap-2">
-                            <img src="${info.avatar}" class="w-7 h-7 rounded-full object-cover">
-                            <span class="text-xs font-bold text-rose-100">${info.name}</span>
-                        </div>
-                        <div class="flex gap-1">
-                            <button onclick="grantBadge('${uid}', '👑 Kurucu')" class="bg-amber-600 text-white text-[10px] px-2 py-1 rounded font-bold">Kurucu</button>
-                            <button onclick="grantBadge('${uid}', '⭐ VIP')" class="bg-rose-600 text-white text-[10px] px-2 py-1 rounded font-bold">VIP</button>
-                            <button onclick="removeBadge('${uid}')" class="bg-red-600/30 text-red-400 text-[10px] px-2 py-1 rounded font-bold">Kaldır</button>
-                        </div>
-                    </div>
-                `).join('');
-            });
-        }
-        window.grantBadge = function(uid, badgeName) {
-            db.ref(`users_registry/${uid}/badge`).set(badgeName).then(() => alert("Rozet güncellendi!"));
-        }
-        window.removeBadge = function(uid) {
-            db.ref(`users_registry/${uid}/badge`).remove().then(() => alert("Rozet kaldırıldı!"));
         }
 
         function initBgEffect(type) {
@@ -629,14 +540,12 @@
             } else if (type === 'fire' || type === 'cyber') {
                 for (let i = 0; i < 20; i++) {
                     const p = document.createElement('div');
-                    p.className = 'particle-up';
+                    p.className = 'absolute bottom-[-10px] rounded-full pointer-events-none z-50 animate-[riseUp_linear_infinite]';
                     p.style.left = Math.random() * 100 + '%';
                     p.style.width = (Math.random() * 4 + 2) + 'px';
                     p.style.height = p.style.width;
                     p.style.background = type === 'cyber' ? '#38bdf8' : '#f43f5e';
-                    p.style.boxShadow = type === 'cyber' ? '0 0 8px #38bdf8' : '0 0 8px #f43f5e';
                     p.style.animationDuration = (Math.random() * 4 + 2) + 's';
-                    p.style.animationDelay = (Math.random() * 4) + 's';
                     c.appendChild(p);
                 }
             } else if (type === 'space') {
@@ -647,7 +556,6 @@
                     s.style.top = Math.random() * 100 + '%';
                     s.style.width = (Math.random() * 2.5 + 1) + 'px';
                     s.style.height = s.style.width;
-                    s.style.animationDuration = (Math.random() * 3 + 1) + 's';
                     c.appendChild(s);
                 }
             }
@@ -759,39 +667,34 @@
             }
         });
 
-        window.addScorePoints = function(pts) {
-            if (!currentUser) return;
-            const md = getMyData();
-            db.ref(`leaderboard/${currentUser.uid}`).transaction(curr => {
-                const cur = curr || { name: md.name, avatar: md.avatar, score: 0 };
-                cur.score += pts; cur.name = md.name; cur.avatar = md.avatar;
-                return cur;
-            });
-            incrementUserStat('score', pts);
-        }
         window.loadLeaderboard = function() {
             const listDiv = document.getElementById('leaderboard-list');
-            db.ref('leaderboard').orderByChild('score').once('value', snap => {
+            db.ref('leaderboard').once('value', snap => {
                 const data = snap.val() || {};
-                const sorted = Object.entries(data).sort((a,b) => b[1].score - a[1].score);
+                const sorted = Object.entries(data).sort((a,b) => (b[1].score || 0) - (a[1].score || 0));
                 listDiv.innerHTML = sorted.length ? sorted.map(([uid, info], idx) => `
-                    <div class="flex items-center justify-between bg-[#120409] p-2.5 rounded-xl border ${idx === 0 ? 'border-amber-500/60' : 'border-rose-900/50'}">
+                    <div class="flex items-center justify-between bg-[#120409] p-2.5 rounded-xl border border-rose-900/50">
                         <div class="flex items-center gap-2.5">
-                            <span class="font-bold text-xs ${idx === 0 ? 'text-amber-400' : 'text-rose-400'}">#${idx+1}</span>
-                            <img src="${info.avatar}" class="w-7 h-7 rounded-full object-cover ${idx === 0 ? 'champion-ring' : ''}">
-                            <span class="text-xs font-bold text-rose-100">${info.name} ${idx === 0 ? '👑' : ''}</span>
+                            <span class="font-bold text-xs text-rose-400">#${idx+1}</span>
+                            <img src="${info.avatar}" class="w-7 h-7 rounded-full object-cover">
+                            <span class="text-xs font-bold text-rose-100">${info.name}</span>
                         </div>
-                        <span class="text-xs font-black text-amber-400">${info.score} Puan</span>
+                        <span class="text-xs font-black text-amber-400">${info.score || 0} Puan</span>
                     </div>
                 `).join('') : '<p class="text-xs text-rose-300/60 italic">Skor tablosu boş.</p>';
             });
         }
 
+        // Çeşitlendirilmiş Popüler GIF'ler
         const gifList = [
             "https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif",
             "https://media.giphy.com/media/13HgwGsXF0aiGY/giphy.gif",
             "https://media.giphy.com/media/9uIZuMGuWExxBLagNa/giphy.gif",
-            "https://media.giphy.com/media/l0HlBO7eyXzSZkJri/giphy.gif"
+            "https://media.giphy.com/media/l0HlBO7eyXzSZkJri/giphy.gif",
+            "https://media.giphy.com/media/xT5LMPj8P20jjOqZ5C/giphy.gif",
+            "https://media.giphy.com/media/26FPnj46RYsIWgYLe/giphy.gif",
+            "https://media.giphy.com/media/3o7TKSjRrfIPjeiOkM/giphy.gif",
+            "https://media.giphy.com/media/5GoVL4DAbHCX1gOkBs/giphy.gif"
         ];
         const stickerList = ["🔥","😂","❤️","👑","😎","🥳","🤝","💀","🚀","⚽","🎮","🍿"];
         setTimeout(() => {
@@ -854,13 +757,6 @@
                 currentUser = user;
                 document.getElementById('login-screen').classList.add('hidden');
                 
-                // Kurucu kontrolü (senin mail adresi ise menüde rozet paneli açılır)
-                if(user.email === ADMIN_EMAIL) {
-                    document.getElementById('admin-badge-btn').classList.remove('hidden');
-                } else {
-                    document.getElementById('admin-badge-btn').classList.add('hidden');
-                }
-
                 const savedBgef = localStorage.getItem('wrts_bgef_' + user.uid) || 'snow';
                 document.getElementById('bg-effect-select').value = savedBgef;
                 initBgEffect(savedBgef);
@@ -887,7 +783,7 @@
                     document.getElementById('header-menu-dot').classList.toggle('hidden', !hasUnread);
                 });
 
-                loadUserDataToUI(); updateChampionRings(); listenRooms(); loadRoom(currentRoom);
+                loadUserDataToUI(); listenRooms(); loadRoom(currentRoom);
             } else { currentUser = null; document.getElementById('login-screen').classList.remove('hidden'); }
         });
 
@@ -1015,9 +911,6 @@
                 const uData = snap.val() || {};
                 if(uData.avatar) upAvatar.src = uData.avatar;
                 document.getElementById('up-bio').textContent = uData.bio || "WrtS Kullanıcısı";
-                
-                const badgeContainer = document.getElementById('up-badges-container');
-                badgeContainer.innerHTML = uData.badge ? `<span class="bg-amber-500/20 text-amber-300 text-[10px] px-2.5 py-0.5 rounded-full font-bold">${uData.badge}</span>` : '';
             });
 
             const st = activeUsersData[targetUid] || {};
@@ -1135,9 +1028,10 @@
             }
         };
 
+        // MESAJ ELEMENTİ (Sola Kaydırarak / Swipe ile Yanıtlama Desteği)
         function createMessageElement(snap, room) {
             const data = snap.val(); const key = snap.key; const isMe = currentUser && data.uid === currentUser.uid;
-            const div = document.createElement('div'); div.id = `msg-${key}`; div.className = `flex gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'} items-end transition-transform duration-150`;
+            const div = document.createElement('div'); div.id = `msg-${key}`; div.className = `flex gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'} items-end transition-transform duration-150 select-none`;
 
             let content = '';
             if (data.type === 'image' || data.type === 'gif') content = `<img src="${data.url}" class="rounded-xl max-h-48 object-cover cursor-pointer" onclick="window.open('${data.url}', '_blank')">`;
@@ -1156,49 +1050,44 @@
             const timeStr = new Date(data.zaman || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             const safePreview = (data.mesaj || 'Medya').replace(/'/g, '').replace(/"/g, '');
 
-            let reactionsHtml = '';
-            if (data.reactions) {
-                const counts = {};
-                Object.values(data.reactions).forEach(emo => counts[emo] = (counts[emo] || 0) + 1);
-                reactionsHtml = `<div class="flex gap-1 mt-1 flex-wrap">${Object.entries(counts).map(([emo, cnt]) => `<span class="bg-black/40 border border-rose-900/40 text-[10px] px-1.5 py-0.5 rounded-full">${emo} ${cnt}</span>`).join('')}</div>`;
-            }
-
             div.innerHTML = `
                 <img onclick="openUserProfileModal('${data.uid}', '${encodeURIComponent(data.isim)}')" src="${data.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-6 h-6 rounded-full object-cover shrink-0 mb-1 cursor-pointer">
                 <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[80%]">
                     <span class="text-[10px] font-bold text-rose-200 px-1">${data.isim}</span>
-                    <div onclick="document.getElementById('menu-${key}').classList.toggle('hidden')" class="cursor-pointer ${isMe ? 'bg-gradient-to-r from-rose-600 to-rose-700' : 'bg-[#280c16]'} px-3 py-2 rounded-2xl shadow relative">
+                    <div id="bubble-${key}" class="cursor-pointer ${isMe ? 'bg-gradient-to-r from-rose-600 to-rose-700' : 'bg-[#280c16]'} px-3 py-2 rounded-2xl shadow relative transition-all">
                         ${data.replyTo ? `<div onclick="event.stopPropagation(); scrollToMessage('${data.replyTo.key}')" class="mb-1 p-1.5 rounded bg-black/35 border-l-2 border-amber-400 text-[10px] cursor-pointer"><b>${data.replyTo.name}</b><br>${data.replyTo.text}</div>` : ''}
                         ${content}
                         <div class="text-[9px] opacity-75 text-right mt-0.5">${timeStr}</div>
                     </div>
-                    ${reactionsHtml}
-                    <div id="menu-${key}" class="hidden flex flex-col gap-1.5 mt-1 bg-[#1c0910] border border-rose-900/60 p-2 rounded-xl text-xs z-10 shadow-xl">
-                        <div class="flex gap-2 border-b border-rose-900/40 pb-1.5">
-                            <button onclick="addReaction('${room}', '${key}', '❤️')" class="hover:scale-125 transition">❤️</button>
-                            <button onclick="addReaction('${room}', '${key}', '🔥')" class="hover:scale-125 transition">🔥</button>
-                            <button onclick="addReaction('${room}', '${key}', '😂')" class="hover:scale-125 transition">😂</button>
-                        </div>
-                        <div class="flex gap-2">
-                            <button onclick="setReplyTo('${key}', '${data.isim}', '${safePreview}')" class="text-amber-400 font-bold">Alıntıla</button>
-                            ${isMe && data.type === 'text' ? `<button onclick="startEditMessage('${key}', '${safePreview}')" class="text-sky-400 font-bold">Düzenle</button>` : ''}
-                            ${isMe ? `<button onclick="db.ref('odalar/${room}/${key}').remove()" class="text-red-400 font-bold">Sil</button>` : ''}
-                        </div>
+                    <div id="menu-${key}" class="hidden flex gap-2 mt-1 bg-[#1c0910] border border-rose-900/60 p-2 rounded-xl text-xs z-10 shadow-xl">
+                        <button onclick="setReplyTo('${key}', '${data.isim}', '${safePreview}')" class="text-amber-400 font-bold">Yanıtlama</button>
+                        ${isMe && data.type === 'text' ? `<button onclick="startEditMessage('${key}', '${safePreview}')" class="text-sky-400 font-bold">Düzenle</button>` : ''}
+                        ${isMe ? `<button onclick="db.ref('odalar/${room}/${key}').remove()" class="text-red-400 font-bold">Sil</button>` : ''}
                     </div>
                 </div>
             `;
-            return div;
-        }
 
-        window.addReaction = function(room, key, emoji) {
-            if(!currentUser) return;
-            db.ref(`odalar/${room}/${key}/reactions/${currentUser.uid}`).set(emoji);
-            document.getElementById(`menu-${key}`).classList.add('hidden');
+            // Mesaja dokunma / tıklama menüsü
+            div.querySelector(`#bubble-${key}`).onclick = () => {
+                document.getElementById(`menu-${key}`).classList.toggle('hidden');
+            };
+
+            // Sola kaydırarak yanıtlama (Touch / Sürükleme desteği)
+            let startX = 0;
+            div.ontouchstart = e => startX = e.touches[0].clientX;
+            div.ontouchend = e => {
+                let endX = e.changedTouches[0].clientX;
+                if (startX - endX > 50) { // Sola kaydırıldıysa
+                    setReplyTo(key, data.isim, safePreview);
+                }
+            };
+
+            return div;
         }
 
         window.scrollToMessage = function(key) {
             const el = document.getElementById(`msg-${key}`);
-            if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('highlight-anim'); setTimeout(() => el.classList.remove('highlight-anim'), 2000); }
+            if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
         }
 
         function loadRoom(room) {
@@ -1254,15 +1143,14 @@
             indicator.textContent = others.length > 0 ? `${others.join(', ')} yazıyor...` : '';
         });
 
-        // GELİŞTİRİLMİŞ DİNAMİK AI ASİSTAN (Artık hep aynı şeyi söylemiyor)
-        const aiResponses = [
-            "Bunu düşündüm de kanki, gayet mantıklı bir yaklaşım! 🚀",
-            "Harika bir konuya değindin. Bu konuda sistem kusursuz işliyor.",
-            "WrtS altyapısı bu tür fikirler için tam olarak tasarlandı. Aynen devam! 🔥",
-            "Notumu aldım kanki, bunu ilerleyen güncellemelerde daha da iyi hale getirebiliriz.",
-            "Kesinlikle katılıyorum! Başka hangi özellikleri ekleyelim?",
-            "Şu an sistem gayet akıcı çalışıyor, başka bir takıldığın yer var mı?"
-        ];
+        // GELİŞTİRİLMİŞ GERÇEKÇİ AI ASİSTAN (Gemini Tarzı Akıllı Bağlantı)
+        function getGeminiSmartResponse(query) {
+            const q = query.toLowerCase();
+            if(q.includes('naber') || q.includes('nasıl')) return "İyidir kanki, senden naber? WrtS sistemini güncelliyoruz, her şey yolunda! 🚀";
+            if(q.includes('kimsin') || q.includes('ne yapıosun')) return "Ben WrtS AI asistanıyım. Kodlama, sohbet ve projelerinde sana destek olmak için buradayım.";
+            if(q.includes('oyun') || q.includes('oyunlar')) return "Oyun salonunda XOX ve Amiral Battı aktif kanki, arkadaşlarla kapışabilirsiniz!";
+            return `Harika bir konuya değindin kanki! "${query}" konusunda WrtS yapay zekası olarak yardımcı olmaktan mutluluk duyarım. Başka ne yapmak istersin? ✨`;
+        }
 
         document.getElementById('msg-form').onsubmit = async e => {
             e.preventDefault();
@@ -1282,19 +1170,19 @@
             db.ref('odalar/' + currentRoom).push(msgData);
             incrementUserStat('msgs', 1);
 
-            // Dinamik AI Yanıtı
+            // @ai Komutu Akıllı Yanıt
             if(cleanText.startsWith('@ai')) {
+                const userQuery = cleanText.replace('@ai', '').trim();
                 setTimeout(() => {
-                    const randomAns = aiResponses[Math.floor(Math.random() * aiResponses.length)];
                     db.ref('odalar/' + currentRoom).push({
                         uid: 'wrts_ai_bot',
                         isim: '🤖 WrtS AI Asistan',
                         avatar: 'https://ui-avatars.com/api/?name=AI&background=3b82f6&color=fff',
-                        mesaj: randomAns,
+                        mesaj: getGeminiSmartResponse(userQuery),
                         type: 'text',
                         zaman: Date.now()
                     });
-                }, 1000);
+                }, 800);
             }
 
             if(currentRoom.startsWith('özel_dm_')) {
@@ -1404,7 +1292,75 @@
             document.querySelectorAll('#messages > div').forEach(el => el.style.display = el.innerText.toLowerCase().includes(t) ? 'flex' : 'none');
         };
 
-        // OYUN SALONU MANTIĞI (Sıfırdan ve Hatasız Yenilendi)
+        // GÖRÜNTÜLÜ / SESLİ & EKRAN PAYLAŞIMI (WebRTC)
+        let localStream, peerConnection;
+        window.startWebRTCCall = async (video) => {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ video, audio: true });
+                document.getElementById('local-video').srcObject = localStream;
+                document.getElementById('call-status').textContent = "Arama başlatıldı, karşı taraf bekleniyor...";
+                peerConnection = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+                localStream.getTracks().forEach(t => peerConnection.addTrack(t, localStream));
+                peerConnection.ontrack = e => document.getElementById('remote-video').srcObject = e.streams[0];
+                const callRef = db.ref(`webrtc/${currentRoom}`); await callRef.remove();
+                peerConnection.onicecandidate = e => { if (e.candidate) callRef.child('offerCandidates').push(e.candidate.toJSON()); };
+                const offer = await peerConnection.createOffer(); await peerConnection.setLocalDescription(offer);
+                await callRef.child('offer').set({ type: offer.type, sdp: offer.sdp });
+                callRef.child('answer').on('value', async s => {
+                    if (!peerConnection.currentRemoteDescription && s.val()) {
+                        await peerConnection.setRemoteDescription(new RTCSessionDescription(s.val()));
+                        document.getElementById('call-status').textContent = "Bağlantı kuruldu!";
+                    }
+                });
+                callRef.child('answerCandidates').on('child_added', s => { if (s.val()) peerConnection.addIceCandidate(new RTCIceCandidate(s.val())); });
+            } catch(e) { alert("Kamera/Mikrofon erişimi başarısız."); }
+        };
+
+        window.startScreenShare = async () => {
+            try {
+                localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+                document.getElementById('local-video').srcObject = localStream;
+                document.getElementById('call-status').textContent = "Ekran paylaşımı aktif!";
+                peerConnection = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+                localStream.getTracks().forEach(t => peerConnection.addTrack(t, localStream));
+                peerConnection.ontrack = e => document.getElementById('remote-video').srcObject = e.streams[0];
+                const callRef = db.ref(`webrtc/${currentRoom}`); await callRef.remove();
+                peerConnection.onicecandidate = e => { if (e.candidate) callRef.child('offerCandidates').push(e.candidate.toJSON()); };
+                const offer = await peerConnection.createOffer(); await peerConnection.setLocalDescription(offer);
+                await callRef.child('offer').set({ type: offer.type, sdp: offer.sdp });
+                callRef.child('answer').on('value', async s => {
+                    if (!peerConnection.currentRemoteDescription && s.val()) {
+                        await peerConnection.setRemoteDescription(new RTCSessionDescription(s.val()));
+                    }
+                });
+            } catch(e) { alert("Ekran paylaşımı başlatılamadı."); }
+        };
+
+        window.joinWebRTCCall = async () => {
+            try {
+                const callRef = db.ref(`webrtc/${currentRoom}`);
+                const offer = (await callRef.child('offer').once('value')).val();
+                if(!offer) return alert("Aktif bir çağrı bulunamadı!");
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true }).catch(() => navigator.mediaDevices.getUserMedia({ audio: true }));
+                document.getElementById('local-video').srcObject = localStream;
+                peerConnection = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+                localStream.getTracks().forEach(t => peerConnection.addTrack(t, localStream));
+                peerConnection.ontrack = e => document.getElementById('remote-video').srcObject = e.streams[0];
+                peerConnection.onicecandidate = e => { if (e.candidate) callRef.child('answerCandidates').push(e.candidate.toJSON()); };
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+                const ans = await peerConnection.createAnswer(); await peerConnection.setLocalDescription(ans);
+                await callRef.child('answer').set({ type: ans.type, sdp: ans.sdp });
+                callRef.child('offerCandidates').on('child_added', s => { if (s.val()) peerConnection.addIceCandidate(new RTCIceCandidate(s.val())); });
+                document.getElementById('call-status').textContent = "Görüşmeye katıldın!";
+            } catch(e) { alert("Katılım başarısız."); }
+        };
+        window.endWebRTCCall = () => {
+            if (localStream) localStream.getTracks().forEach(t => t.stop());
+            if (peerConnection) peerConnection.close();
+            closeModal('call-modal');
+        };
+
+        // OYUN SALONU
         window.switchGameTab = g => {
             ['xox', 'battleship'].forEach(x => {
                 document.getElementById(`game-panel-${x}`).classList.toggle('hidden', x !== g);
@@ -1426,7 +1382,7 @@
                 g.board[i] = g.turn;
                 const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
                 if (wins.some(w => g.board[w[0]] && g.board[w[0]] === g.board[w[1]] && g.board[w[1]] === g.board[w[2]])) {
-                    g.winner = g.turn; addScorePoints(15);
+                    g.winner = g.turn;
                 } else {
                     g.turn = g.turn === 'X' ? 'O' : 'X';
                 }
@@ -1452,12 +1408,11 @@
                     btn.onclick = () => {
                         if (!hit && found < 3) {
                             db.ref(`games/${currentRoom}/bs/revealed/${i}`).set(true);
-                            if (isShip && found + 1 === 3) addScorePoints(20);
                         }
                     };
                     grid.appendChild(btn);
                 }
-                document.getElementById('bs-status').textContent = found >= 3 ? 'Tebrikler! Tüm gemiler bulundu (+20 Puan)' : `Bulunan Gemi: ${found}/3`;
+                document.getElementById('bs-status').textContent = found >= 3 ? 'Tebrikler! Tüm gemiler bulundu' : `Bulunan Gemi: ${found}/3`;
             });
         }
         window.resetBattleship = () => {
