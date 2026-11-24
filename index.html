@@ -1810,11 +1810,42 @@
         let peerConnections = {};
         let pendingCandidatesByPeer = {};
         let remoteDescSetByPeer = {};
+        let remoteAudioStreamsByPeer = {};
+        let remoteVideoStreamsByPeer = {};
         let callRoomWatcherRef = null;
         let myCallSessionRef = null;
         let inCallSession = false;
         let isMicMuted = false;
         let isCamOff = false;
+
+        function attachStreamToVideo(videoEl, stream) {
+            if (!videoEl || !stream) return;
+            if (videoEl.srcObject !== stream) {
+                videoEl.srcObject = stream;
+            }
+            const tryPlay = () => {
+                const p = videoEl.play();
+                if (p && typeof p.catch === 'function') p.catch(() => {});
+            };
+            videoEl.onloadedmetadata = tryPlay;
+            tryPlay();
+        }
+
+        function attachTrackToAudio(audioEl, track) {
+            if (!audioEl || !track) return;
+            const ms = new MediaStream([track]);
+            if (audioEl.srcObject !== ms) {
+                audioEl.srcObject = ms;
+            }
+            audioEl.muted = false;
+            audioEl.volume = 1.0;
+            const tryPlay = () => {
+                const p = audioEl.play();
+                if (p && typeof p.catch === 'function') p.catch(() => {});
+            };
+            audioEl.onloadedmetadata = tryPlay;
+            tryPlay();
+        }
 
         function updateScreenShareUI() {
             const btn = document.getElementById('screen-share-btn');
@@ -1888,17 +1919,38 @@
             if (!tile) {
                 tile = document.createElement('div');
                 tile.id = `remote-tile-${peerUid}`;
-                tile.className = 'relative bg-[#120409] rounded-xl overflow-hidden border border-emerald-500/40 aspect-video';
+                tile.className = 'relative bg-[#120409] rounded-xl overflow-hidden border border-emerald-500/40 aspect-video flex items-center justify-center';
                 tile.innerHTML = `
                     <video id="remote-video-${peerUid}" autoplay playsinline class="w-full h-full object-contain bg-black"></video>
-                    <span id="remote-label-${peerUid}" class="absolute bottom-1.5 left-2 text-[10px] bg-black/70 text-emerald-300 px-2 py-0.5 rounded-md font-bold">${peerName}</span>
+                    <audio id="remote-audio-${peerUid}" autoplay playsinline class="hidden"></audio>
+                    <div id="remote-placeholder-${peerUid}" class="absolute inset-0 flex flex-col items-center justify-center bg-[#120409]/90 text-rose-200/80 text-xs pointer-events-none">
+                        <span class="text-xl mb-1">🎙️</span>
+                        <span id="remote-sublabel-${peerUid}" class="font-semibold">${peerName}</span>
+                    </div>
+                    <span id="remote-label-${peerUid}" class="absolute bottom-1.5 left-2 text-[10px] bg-black/75 text-emerald-300 px-2 py-0.5 rounded-md font-bold z-10">${peerName}</span>
                 `;
                 container.appendChild(tile);
             } else {
                 const lbl = document.getElementById(`remote-label-${peerUid}`);
                 if (lbl && peerName) lbl.textContent = peerName;
             }
-            return document.getElementById(`remote-video-${peerUid}`);
+            return {
+                videoEl: document.getElementById(`remote-video-${peerUid}`),
+                audioEl: document.getElementById(`remote-audio-${peerUid}`),
+                placeholderEl: document.getElementById(`remote-placeholder-${peerUid}`),
+                sublabelEl: document.getElementById(`remote-sublabel-${peerUid}`)
+            };
+        }
+
+        function updateRemotePeerStatusUI(peerUid, info = {}) {
+            const elements = ensureRemotePeerTile(peerUid, info.name || 'Katılımcı');
+            if (!elements) return;
+            const modeText = info.mode ? `${info.name || 'Katılımcı'} (${info.mode})` : (info.name || 'Katılımcı');
+            const lbl = document.getElementById(`remote-label-${peerUid}`);
+            if (lbl) lbl.textContent = modeText;
+            if (elements.sublabelEl) {
+                elements.sublabelEl.textContent = info.mode || 'Sesli Bağlantı';
+            }
         }
 
         function removeRemotePeerTile(peerUid) {
@@ -1910,6 +1962,8 @@
             }
             delete pendingCandidatesByPeer[peerUid];
             delete remoteDescSetByPeer[peerUid];
+            delete remoteAudioStreamsByPeer[peerUid];
+            delete remoteVideoStreamsByPeer[peerUid];
         }
 
         window.toggleCallMic = function() {
@@ -1935,16 +1989,43 @@
             showToast(isCamOff ? "Kamera kapatıldı." : "Kamera açıldı.");
         };
 
+        async function renegotiatePeer(remoteUid, pc) {
+            if (!pc || !currentUser) return;
+            const signalRef = db.ref(`webrtc_mesh/${currentRoom}/${currentUser.uid}_${remoteUid}`);
+            try {
+                const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
+                await pc.setLocalDescription(offer);
+                await signalRef.child('offer').set({
+                    fromUid: currentUser.uid,
+                    fromName: getMyData().name,
+                    toUid: remoteUid,
+                    type: offer.type,
+                    sdp: offer.sdp,
+                    updatedAt: Date.now()
+                });
+            } catch (_) {}
+        }
+
         async function replaceOutgoingVideoTrack(newTrack) {
-            Object.values(peerConnections).forEach(pc => {
-                if (!pc || typeof pc.getSenders !== 'function') return;
-                const videoSender = pc.getSenders().find(s => s.track && s.track.kind === 'video');
+            for (const [remoteUid, pc] of Object.entries(peerConnections)) {
+                if (!pc || typeof pc.getSenders !== 'function') continue;
+                const videoSender = pc.getSenders().find(s => s.track && s.track.kind === 'video')
+                    || pc.getSenders().find(s => !s.track && s.dtmf === undefined);
                 if (videoSender && typeof videoSender.replaceTrack === 'function') {
-                    videoSender.replaceTrack(newTrack).catch(() => {});
+                    try {
+                        await videoSender.replaceTrack(newTrack);
+                    } catch (_) {
+                        if (newTrack && localStream) {
+                            try { pc.addTrack(newTrack, localStream); } catch (__) {}
+                        }
+                    }
                 } else if (newTrack && localStream) {
                     try { pc.addTrack(newTrack, localStream); } catch (_) {}
                 }
-            });
+                if (currentUser.uid < remoteUid) {
+                    await renegotiatePeer(remoteUid, pc);
+                }
+            }
         }
 
         window.stopScreenShare = async function(silent = false) {
@@ -1977,14 +2058,14 @@
             await replaceOutgoingVideoTrack(fallbackVideoTrack);
             const localVid = document.getElementById('local-video');
             if (localVid && localStream) {
-                localVid.srcObject = localStream;
-                localVid.play().catch(() => {});
+                attachStreamToVideo(localVid, localStream);
             }
             updateCallUIButtons();
             if (inCallSession) {
-                setCallBadge(fallbackVideoTrack ? "Görüntülü Görüşme" : "Sesli Görüşme");
+                const nextMode = fallbackVideoTrack ? "Görüntülü Görüşme" : "Sesli Görüşme";
+                setCallBadge(nextMode);
                 if (myCallSessionRef) {
-                    myCallSessionRef.update({ mode: fallbackVideoTrack ? "Görüntülü Görüşme" : "Sesli Görüşme" }).catch(() => {});
+                    myCallSessionRef.update({ mode: nextMode, sharingScreen: false }).catch(() => {});
                 }
             }
             if (!silent) {
@@ -2043,13 +2124,12 @@
 
                 const localVid = document.getElementById('local-video');
                 if (localVid) {
-                    localVid.srcObject = localStream;
-                    localVid.play().catch(() => {});
+                    attachStreamToVideo(localVid, localStream);
                 }
                 updateCallUIButtons();
                 setCallBadge("Ekran Paylaşımı");
                 if (myCallSessionRef) {
-                    myCallSessionRef.update({ mode: "Ekran Paylaşımı" }).catch(() => {});
+                    myCallSessionRef.update({ mode: "Ekran Paylaşımı", sharingScreen: true }).catch(() => {});
                 }
                 document.getElementById('call-status').textContent = "Ekran paylaşımı yayında!";
                 showToast("Ekran paylaşımı başlatıldı.");
@@ -2084,19 +2164,49 @@
             pendingCandidatesByPeer[remoteUid] = [];
             remoteDescSetByPeer[remoteUid] = false;
 
-            const remoteVideoEl = ensureRemotePeerTile(remoteUid, remoteName);
+            const peerUI = ensureRemotePeerTile(remoteUid, remoteName);
 
             if (localStream) {
-                localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+                localStream.getTracks().forEach(track => {
+                    try { pc.addTrack(track, localStream); } catch (_) {}
+                });
             }
 
             pc.ontrack = event => {
-                const vid = ensureRemotePeerTile(remoteUid, remoteName);
-                if (vid && event.streams && event.streams[0]) {
-                    vid.srcObject = event.streams[0];
-                    vid.play().catch(() => {});
-                } else if (remoteVideoEl && event.streams && event.streams[0]) {
-                    remoteVideoEl.srcObject = event.streams[0];
+                const ui = ensureRemotePeerTile(remoteUid, remoteName);
+                const track = event.track;
+                if (!track || !ui) return;
+
+                if (track.kind === 'audio') {
+                    const audioStream = remoteAudioStreamsByPeer[remoteUid] || new MediaStream();
+                    audioStream.getAudioTracks().forEach(t => audioStream.removeTrack(t));
+                    audioStream.addTrack(track);
+                    remoteAudioStreamsByPeer[remoteUid] = audioStream;
+                    if (ui.audioEl) {
+                        ui.audioEl.srcObject = audioStream;
+                        ui.audioEl.muted = false;
+                        ui.audioEl.volume = 1.0;
+                        ui.audioEl.play().catch(() => {});
+                    }
+                } else if (track.kind === 'video') {
+                    const vidStream = remoteVideoStreamsByPeer[remoteUid] || new MediaStream();
+                    vidStream.getVideoTracks().forEach(t => vidStream.removeTrack(t));
+                    vidStream.addTrack(track);
+                    remoteVideoStreamsByPeer[remoteUid] = vidStream;
+
+                    if (ui.videoEl) {
+                        attachStreamToVideo(ui.videoEl, vidStream);
+                    }
+                    if (ui.placeholderEl) {
+                        ui.placeholderEl.classList.add('hidden');
+                    }
+                    track.onmute = () => {
+                        if (ui.placeholderEl) ui.placeholderEl.classList.remove('hidden');
+                    };
+                    track.onunmute = () => {
+                        if (ui.placeholderEl) ui.placeholderEl.classList.add('hidden');
+                        if (ui.videoEl) ui.videoEl.play().catch(() => {});
+                    };
                 }
             };
 
@@ -2114,7 +2224,7 @@
 
             pc.onconnectionstatechange = () => {
                 if (pc.connectionState === 'connected') {
-                    document.getElementById('call-status').textContent = `${remoteName} ile bağlantı kuruldu!`;
+                    document.getElementById('call-status').textContent = `${remoteName} ile ses ve görüntü bağlantısı kuruldu!`;
                 } else if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed' || pc.connectionState === 'closed') {
                     removeRemotePeerTile(remoteUid);
                 }
@@ -2134,39 +2244,35 @@
             if (isInitiator) {
                 signalRef.child('answer').on('value', async snap => {
                     const ans = snap.val();
-                    if (ans && !pc.currentRemoteDescription) {
-                        await pc.setRemoteDescription(new RTCSessionDescription(ans));
-                        remoteDescSetByPeer[remoteUid] = true;
-                        await flushCandidatesForPeer(remoteUid);
+                    if (ans && ans.sdp && (!pc.currentRemoteDescription || pc.currentRemoteDescription.sdp !== ans.sdp)) {
+                        try {
+                            await pc.setRemoteDescription(new RTCSessionDescription({ type: ans.type, sdp: ans.sdp }));
+                            remoteDescSetByPeer[remoteUid] = true;
+                            await flushCandidatesForPeer(remoteUid);
+                        } catch (_) {}
                     }
                 });
 
-                pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true })
-                    .then(offer => pc.setLocalDescription(offer).then(() => offer))
-                    .then(offer => signalRef.child('offer').set({
-                        fromUid: currentUser.uid,
-                        fromName: getMyData().name,
-                        toUid: remoteUid,
-                        type: offer.type,
-                        sdp: offer.sdp
-                    }))
-                    .catch(() => {});
+                renegotiatePeer(remoteUid, pc);
             } else {
                 signalRef.child('offer').on('value', async snap => {
                     const offerData = snap.val();
-                    if (offerData && offerData.sdp && !pc.currentRemoteDescription) {
-                        await pc.setRemoteDescription(new RTCSessionDescription({ type: offerData.type, sdp: offerData.sdp }));
-                        remoteDescSetByPeer[remoteUid] = true;
-                        await flushCandidatesForPeer(remoteUid);
-                        const answer = await pc.createAnswer();
-                        await pc.setLocalDescription(answer);
-                        await signalRef.child('answer').set({
-                            fromUid: currentUser.uid,
-                            fromName: getMyData().name,
-                            toUid: remoteUid,
-                            type: answer.type,
-                            sdp: answer.sdp
-                        });
+                    if (offerData && offerData.sdp && (!pc.currentRemoteDescription || pc.currentRemoteDescription.sdp !== offerData.sdp)) {
+                        try {
+                            await pc.setRemoteDescription(new RTCSessionDescription({ type: offerData.type, sdp: offerData.sdp }));
+                            remoteDescSetByPeer[remoteUid] = true;
+                            await flushCandidatesForPeer(remoteUid);
+                            const answer = await pc.createAnswer();
+                            await pc.setLocalDescription(answer);
+                            await signalRef.child('answer').set({
+                                fromUid: currentUser.uid,
+                                fromName: getMyData().name,
+                                toUid: remoteUid,
+                                type: answer.type,
+                                sdp: answer.sdp,
+                                updatedAt: Date.now()
+                            });
+                        } catch (_) {}
                     }
                 });
             }
@@ -2190,13 +2296,14 @@
                 if (!inCallSession) return;
                 const shouldInitiate = currentUser.uid < peerUid;
                 createPeerConnectionFor(peerUid, peerInfo.name || 'Katılımcı', shouldInitiate);
+                updateRemotePeerStatusUI(peerUid, peerInfo);
             });
 
             peersRef.on('child_changed', snap => {
                 const peerUid = snap.key;
                 const peerInfo = snap.val() || {};
                 if (!peerUid || peerUid === currentUser.uid) return;
-                ensureRemotePeerTile(peerUid, peerInfo.name || 'Katılımcı');
+                updateRemotePeerStatusUI(peerUid, peerInfo);
             });
 
             peersRef.on('child_removed', snap => {
@@ -2268,8 +2375,7 @@
                 localStream = await acquireMediaStream(mediaOpts);
                 const localVid = document.getElementById('local-video');
                 if (localVid) {
-                    localVid.srcObject = localStream;
-                    localVid.play().catch(() => {});
+                    attachStreamToVideo(localVid, localStream);
                 }
                 updateCallUIButtons();
 
@@ -2282,6 +2388,7 @@
                     uid: currentUser.uid,
                     name: md.name,
                     mode: modeLabel,
+                    sharingScreen: !!mediaOpts.screen,
                     joinedAt: Date.now()
                 });
                 myCallSessionRef.onDisconnect().remove();
@@ -2294,6 +2401,7 @@
                     if (peerUid !== currentUser.uid) {
                         const shouldInitiate = currentUser.uid < peerUid;
                         createPeerConnectionFor(peerUid, (info && info.name) || 'Katılımcı', shouldInitiate);
+                        updateRemotePeerStatusUI(peerUid, info || {});
                     }
                 });
 
