@@ -56,10 +56,32 @@
             0% { transform: translateY(0) scale(1); opacity: 0.85; }
             100% { transform: translateY(-100vh) scale(0.4); opacity: 0; }
         }
+        @keyframes confettiFall {
+            0% { transform: translateY(-20px) rotate(0deg) scale(1); opacity: 1; }
+            100% { transform: translateY(105vh) rotate(720deg) scale(0.8); opacity: 0; }
+        }
+        @keyframes bubbleGlowPulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(251, 191, 36, 0.45), 0 0 20px rgba(244, 63, 94, 0.25); }
+            50% { box-shadow: 0 0 18px rgba(251, 191, 36, 0.85), 0 0 30px rgba(244, 63, 94, 0.5); }
+        }
+        .glow-bubble {
+            border: 1.5px solid rgba(251, 191, 36, 0.85) !important;
+            animation: bubbleGlowPulse 2.2s ease-in-out infinite;
+        }
+        .confetti-piece {
+            position: fixed;
+            top: -15px;
+            z-index: 80;
+            pointer-events: none;
+            animation: confettiFall linear forwards;
+        }
         .snowflake { position: absolute; top: -10px; background: #ffe4e6; border-radius: 50%; pointer-events: none; z-index: 5; animation: snowfall linear infinite; }
     </style>
 </head>
 <body id="app-body" data-theme="ruby" class="text-rose-50 h-[100dvh] w-full overflow-hidden flex flex-col justify-between relative">
+
+    <!-- KONFETİ KATMANI -->
+    <div id="confetti-container" class="fixed inset-0 pointer-events-none z-[80] overflow-hidden"></div>
 
     <!-- TOAST BİLDİRİM ALANI -->
     <div id="toast-container" class="fixed top-16 right-3 z-[70] flex flex-col gap-2 pointer-events-none max-w-[260px]"></div>
@@ -107,7 +129,7 @@
                 <span id="online-count">1</span>
                 <span id="req-badge" class="hidden absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">!</span>
             </button>
-            <button type="button" onclick="openMyProfile()" class="flex items-center gap-1 bg-[#2b0d18] p-1 rounded-full border border-rose-800/60 shrink-0">
+            <button type="button" onclick="openMyProfile()" class="flex items-center gap-1 bg-[#2b0d18] p-1 rounded-full border border-rose-800/60 shrink-0" title="Profilim & Canlı Durum">
                 <img id="header-avatar" src="" class="w-6 h-6 rounded-full object-cover">
             </button>
         </div>
@@ -182,6 +204,19 @@
         <button type="button" onclick="cancelReplyOrEdit()" class="text-rose-300 font-bold text-xs px-2">✕</button>
     </div>
 
+    <!-- HIZLI @ ETİKETLEME MENÜSÜ -->
+    <div id="mention-bar" class="hidden w-full max-w-4xl mx-auto px-3 py-1.5 bg-[#1c0910] border-t border-amber-500/40 flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0 z-20"></div>
+
+    <!-- ÖZEL MESAJ BALONU EFEKTİ SEÇİCİ BARI -->
+    <div id="effect-drawer" class="hidden w-full max-w-4xl mx-auto px-3 py-1.5 bg-[#1c0910] border-t border-amber-500/40 flex items-center justify-between gap-1.5 shrink-0 z-20 text-[11px]">
+        <span class="text-amber-300 font-bold shrink-0">Mesaj Efekti:</span>
+        <div class="flex items-center gap-1.5">
+            <button type="button" onclick="setNextMessageEffect('none')" id="eff-btn-none" class="px-2 py-1 rounded-lg bg-rose-600 text-white font-bold">Normal</button>
+            <button type="button" onclick="setNextMessageEffect('confetti')" id="eff-btn-confetti" class="px-2 py-1 rounded-lg bg-[#120409] border border-amber-500/40 text-amber-200 font-bold">🎉 Konfeti</button>
+            <button type="button" onclick="setNextMessageEffect('glow')" id="eff-btn-glow" class="px-2 py-1 rounded-lg bg-[#120409] border border-amber-500/40 text-amber-200 font-bold">✨ Parlayan Balon</button>
+        </div>
+    </div>
+
     <!-- EKSTRA ARAÇLAR -->
     <div id="tools-drawer" class="hidden bg-[#1a070e] border-t border-rose-900/60 p-2 w-full max-w-4xl mx-auto grid grid-cols-4 sm:grid-cols-7 gap-1.5 shrink-0 z-20">
         <button type="button" onclick="document.getElementById('img-file').click(); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-[#120409] p-2 rounded-xl border border-rose-900/50 text-xs"><span>🖼️</span><span class="text-[10px]">Fotoğraf</span></button>
@@ -197,9 +232,10 @@
     <footer id="main-footer" class="bg-[#1a070e] border-t border-rose-900/60 p-2 sm:p-3 w-full max-w-4xl mx-auto shrink-0 z-20">
         <form id="msg-form" class="flex items-center gap-1.5 w-full">
             <button type="button" onclick="toggleToolsDrawer()" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#2b0d18] text-amber-400 font-black text-base sm:text-lg flex items-center justify-center shrink-0">+</button>
+            <button type="button" id="effect-toggle-btn" onclick="toggleEffectDrawer()" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#2b0d18] text-amber-300 flex items-center justify-center shrink-0 text-xs sm:text-sm" title="Mesaj Balonu Efekti / Konfeti">✨</button>
             <button type="button" id="walkie-talkie-btn" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#2b0d18] text-rose-400 flex items-center justify-center shrink-0 text-xs sm:text-sm" title="Basılı Tutarak Sesli Not Gönder">🎙️</button>
             <input type="file" id="img-file" accept="image/*" class="hidden">
-            <input type="text" id="msg-input" placeholder="Mesaj yaz..." autocomplete="off" class="flex-1 min-w-0 bg-[#120409] border border-rose-900/50 rounded-xl px-2.5 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-amber-500">
+            <input type="text" id="msg-input" placeholder="Mesaj yaz (@ ile etiketle)..." autocomplete="off" class="flex-1 min-w-0 bg-[#120409] border border-rose-900/50 rounded-xl px-2.5 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-amber-500">
             <button type="submit" class="bg-gradient-to-r from-rose-600 to-amber-600 px-3 sm:px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm text-white shadow shrink-0">Gönder</button>
         </form>
     </footer>
@@ -221,7 +257,7 @@
                 <button type="button" onclick="closeModal('menu-drawer-modal'); openModal('games-modal'); initGames();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎮</span> Oyun Salonu</button>
                 <button type="button" onclick="closeModal('menu-drawer-modal'); openModal('leaderboard-modal'); loadLeaderboard();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🏆</span> Skor Tablosu</button>
                 <button type="button" onclick="closeModal('menu-drawer-modal'); openModal('stats-modal'); loadStats();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>📊</span> İstatistikler</button>
-                <button type="button" onclick="closeModal('menu-drawer-modal'); openMyProfile();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left col-span-2"><span>👤</span> Profilim & Ayarlar</button>
+                <button type="button" onclick="closeModal('menu-drawer-modal'); openMyProfile();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left col-span-2"><span>👤</span> Profilim & Canlı Durum</button>
                 <button type="button" onclick="clearAllMessagesInRoom()" class="bg-red-600/20 hover:bg-red-600/40 border border-red-500/40 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-red-400 text-left col-span-2 transition"><span>🗑️</span> Bu Odadaki Tüm Mesajları Sil</button>
             </div>
         </div>
@@ -312,6 +348,7 @@
             <div class="flex flex-col items-center gap-2">
                 <img id="up-avatar" src="" class="w-20 h-20 rounded-full object-cover border-2 border-amber-500 shadow-xl">
                 <h3 id="up-name" class="font-black text-lg text-rose-50 mt-1"></h3>
+                <span id="up-live-status" class="hidden bg-amber-500/20 border border-amber-400/40 text-amber-200 px-2.5 py-0.5 rounded-full text-[11px] font-bold"></span>
                 <span id="up-bio" class="text-xs text-rose-300 italic">WrtS Kullanıcısı</span>
             </div>
             <div class="bg-[#120409] p-3.5 rounded-2xl border border-rose-900/50 space-y-2.5 text-left text-xs">
@@ -595,7 +632,7 @@
     <!-- PROFİLİM & AYARLAR -->
     <div id="profile-modal" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">Profilim & Ayarlar</h3><button type="button" onclick="closeModal('profile-modal')">✕</button></div>
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">Profilim & Canlı Durum</h3><button type="button" onclick="closeModal('profile-modal')">✕</button></div>
             <div class="flex flex-col items-center gap-2">
                 <img id="preview-avatar" src="" class="w-16 h-16 rounded-full object-cover border-2 border-amber-500">
                 <input type="file" id="upload-avatar-file" accept="image/*" class="hidden">
@@ -604,6 +641,17 @@
             <div>
                 <label class="block text-[11px] text-rose-300/70">Görünen Ad</label>
                 <input type="text" id="edit-name" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
+            </div>
+            <div>
+                <label class="block text-[11px] text-rose-300/70 mb-1">Canlı Durum / Şu An Ne Yapıyor?</label>
+                <div class="flex flex-wrap gap-1 mb-1.5">
+                    <button type="button" onclick="selectPresetActivity('🎮 Oyunda')" class="bg-[#120409] hover:bg-rose-900/50 border border-rose-900/50 px-2 py-1 rounded-lg text-[10px] font-bold">🎮 Oyunda</button>
+                    <button type="button" onclick="selectPresetActivity('🎧 Müzik Dinliyor')" class="bg-[#120409] hover:bg-rose-900/50 border border-rose-900/50 px-2 py-1 rounded-lg text-[10px] font-bold">🎧 Müzik Dinliyor</button>
+                    <button type="button" onclick="selectPresetActivity('💤 AFK')" class="bg-[#120409] hover:bg-rose-900/50 border border-rose-900/50 px-2 py-1 rounded-lg text-[10px] font-bold">💤 AFK</button>
+                    <button type="button" onclick="selectPresetActivity('💻 Kod Yazıyor')" class="bg-[#120409] hover:bg-rose-900/50 border border-rose-900/50 px-2 py-1 rounded-lg text-[10px] font-bold">💻 Kod Yazıyor</button>
+                    <button type="button" onclick="selectPresetActivity('')" class="bg-red-950/60 border border-red-700/40 text-red-300 px-2 py-1 rounded-lg text-[10px] font-bold">Temizle</button>
+                </div>
+                <input type="text" id="edit-activity" maxlength="32" placeholder="Özel mini durum yaz (örn: 🏆 Maçta)..." class="w-full bg-[#120409] border border-amber-500/40 rounded-xl px-3 py-2 text-xs text-amber-200">
             </div>
             <div>
                 <label class="block text-[11px] text-rose-300/70">Kişisel Biyografi</label>
@@ -658,6 +706,7 @@
         let currentPinnedKey = null;
         let customRoomsData = {};
         let activeUsersData = {};
+        let registryUsersData = {};
         let myFriends = {};
         let tempBase64Avatar = null;
         let replyingTo = null;
@@ -672,6 +721,15 @@
         let guessSecret = Math.floor(Math.random() * 50) + 1;
         let unreadBelowCount = 0;
         let unreadDividerShown = false;
+        let nextMessageEffect = 'none';
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
 
         function setLoginError(msg) {
             const box = document.getElementById('login-error-box');
@@ -709,6 +767,64 @@
             box.appendChild(el);
             setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 250); }, 2800);
         }
+
+        // ==================== KONFETİ & BALON EFEKTİ ====================
+        window.launchConfetti = function() {
+            const container = document.getElementById('confetti-container');
+            if (!container) return;
+            const colors = ['#fbbf24', '#f43f5e', '#34d399', '#38bdf8', '#c084fc', '#fb7185'];
+            for (let i = 0; i < 42; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'confetti-piece';
+                piece.style.left = (Math.random() * 100) + 'vw';
+                piece.style.width = (Math.random() * 7 + 5) + 'px';
+                piece.style.height = (Math.random() * 10 + 6) + 'px';
+                piece.style.backgroundColor = colors[i % colors.length];
+                piece.style.borderRadius = Math.random() > 0.5 ? '9999px' : '2px';
+                piece.style.animationDuration = (Math.random() * 1.4 + 1.4) + 's';
+                piece.style.animationDelay = (Math.random() * 0.25) + 's';
+                container.appendChild(piece);
+                setTimeout(() => piece.remove(), 3100);
+            }
+        };
+
+        window.toggleEffectDrawer = function() {
+            const drawer = document.getElementById('effect-drawer');
+            if (!drawer) return;
+            drawer.classList.toggle('hidden');
+        };
+
+        window.setNextMessageEffect = function(eff) {
+            nextMessageEffect = eff || 'none';
+            ['none', 'confetti', 'glow'].forEach(mode => {
+                const btn = document.getElementById(`eff-btn-${mode}`);
+                if (!btn) return;
+                btn.className = mode === nextMessageEffect
+                    ? 'px-2 py-1 rounded-lg bg-rose-600 text-white font-bold'
+                    : 'px-2 py-1 rounded-lg bg-[#120409] border border-amber-500/40 text-amber-200 font-bold';
+            });
+            const toggleBtn = document.getElementById('effect-toggle-btn');
+            if (toggleBtn) {
+                if (nextMessageEffect === 'confetti') {
+                    toggleBtn.textContent = '🎉';
+                    toggleBtn.classList.add('ring-2', 'ring-amber-400');
+                } else if (nextMessageEffect === 'glow') {
+                    toggleBtn.textContent = '💫';
+                    toggleBtn.classList.add('ring-2', 'ring-amber-400');
+                } else {
+                    toggleBtn.textContent = '✨';
+                    toggleBtn.classList.remove('ring-2', 'ring-amber-400');
+                }
+            }
+            document.getElementById('effect-drawer')?.classList.add('hidden');
+            if (nextMessageEffect === 'confetti') showToast("Sıradaki mesaj konfeti patlatacak!");
+            else if (nextMessageEffect === 'glow') showToast("Sıradaki mesaj parlayan balon olacak!");
+        };
+
+        window.selectPresetActivity = function(txt) {
+            const inp = document.getElementById('edit-activity');
+            if (inp) inp.value = txt;
+        };
 
         window.requestNotificationPermission = async function() {
             if (!('Notification' in window)) return showToast("Tarayıcı bildirim desteklemiyor.", 'error');
@@ -1142,12 +1258,12 @@
 
         window.sendGIF = url => {
             const md = getMyData();
-            db.ref('odalar/' + currentRoom).push({ uid: currentUser.uid, isim: md.name, avatar: md.avatar, url, type: 'gif', zaman: Date.now() });
+            db.ref('odalar/' + currentRoom).push({ uid: currentUser.uid, isim: md.name, avatar: md.avatar, activity: md.activity, url, type: 'gif', zaman: Date.now() });
             closeModal('gif-modal'); playWhatsAppSound('send');
         };
         window.sendSticker = st => {
             const md = getMyData();
-            db.ref('odalar/' + currentRoom).push({ uid: currentUser.uid, isim: md.name, avatar: md.avatar, mesaj: st, type: 'sticker', zaman: Date.now() });
+            db.ref('odalar/' + currentRoom).push({ uid: currentUser.uid, isim: md.name, avatar: md.avatar, activity: md.activity, mesaj: st, type: 'sticker', zaman: Date.now() });
             closeModal('sticker-modal'); playWhatsAppSound('send');
         };
         window.sendGameInvite = () => {
@@ -1157,6 +1273,7 @@
                 uid: currentUser.uid,
                 isim: md.name,
                 avatar: md.avatar,
+                activity: md.activity,
                 type: 'game_invite',
                 mesaj: 'Oyun salonuna davet gönderdi!',
                 zaman: Date.now()
@@ -1170,6 +1287,7 @@
                 uid: currentUser.uid,
                 isim: md.name,
                 avatar: md.avatar,
+                activity: md.activity,
                 type: 'chess_invite',
                 mesaj: 'Seni karşılıklı Satranç [BETA] maçına davet etti!',
                 zaman: Date.now()
@@ -1297,13 +1415,14 @@
                 db.ref('.info/connected').on('value', snap => {
                     if (snap.val() === true) {
                         const md = getMyData();
-                        statusRef.onDisconnect().set({ state: 'offline', name: md.name, avatar: md.avatar, lastSeen: firebase.database.ServerValue.TIMESTAMP });
-                        statusRef.set({ state: 'online', name: md.name, avatar: md.avatar, lastSeen: firebase.database.ServerValue.TIMESTAMP });
-                        db.ref('users_registry/' + user.uid).update({ name: md.name, avatar: md.avatar, bio: md.bio });
+                        statusRef.onDisconnect().set({ state: 'offline', name: md.name, avatar: md.avatar, activity: md.activity, lastSeen: firebase.database.ServerValue.TIMESTAMP });
+                        statusRef.set({ state: 'online', name: md.name, avatar: md.avatar, activity: md.activity, lastSeen: firebase.database.ServerValue.TIMESTAMP });
+                        db.ref('users_registry/' + user.uid).update({ name: md.name, avatar: md.avatar, bio: md.bio, activity: md.activity });
                     }
                 });
 
                 db.ref('status').on('value', snap => { activeUsersData = snap.val() || {}; updateUsersUI(); });
+                db.ref('users_registry').on('value', snap => { registryUsersData = snap.val() || {}; });
                 db.ref(`friends/${user.uid}`).on('value', snap => { myFriends = snap.val() || {}; updateUsersUI(); });
                 db.ref(`friend_requests/${user.uid}`).on('value', snap => {
                     const reqs = snap.val() || {};
@@ -1337,8 +1456,9 @@
         function getMyData() {
             const name = localStorage.getItem('wrts_name_' + currentUser.uid) || currentUser.displayName || (currentUser.email ? currentUser.email.split('@')[0] : 'Kullanıcı');
             const bio = localStorage.getItem('wrts_bio_' + currentUser.uid) || "WrtS Kullanıcısı";
+            const activity = localStorage.getItem('wrts_activity_' + currentUser.uid) || "";
             const avatar = localStorage.getItem('wrts_avatar_' + currentUser.uid) || currentUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=e11d48&color=fff`;
-            return { name, avatar, bio };
+            return { name, avatar, bio, activity };
         }
 
         function loadUserDataToUI() {
@@ -1347,23 +1467,28 @@
             document.getElementById('preview-avatar').src = d.avatar;
             document.getElementById('edit-name').value = d.name;
             document.getElementById('edit-bio').value = d.bio;
+            const actInp = document.getElementById('edit-activity');
+            if (actInp) actInp.value = d.activity || '';
         }
 
         document.getElementById('save-profile').onclick = async () => {
             const n = document.getElementById('edit-name').value.trim();
             const b = document.getElementById('edit-bio').value.trim();
+            const actRaw = (document.getElementById('edit-activity')?.value || '').trim();
+            const act = actRaw ? filterBadWords(actRaw).slice(0, 32) : '';
             if (!n) return;
             localStorage.setItem('wrts_name_' + currentUser.uid, n);
             localStorage.setItem('wrts_bio_' + currentUser.uid, b);
+            localStorage.setItem('wrts_activity_' + currentUser.uid, act);
             if (tempBase64Avatar) {
                 const compressedAvatar = await compressImageDataUrl(tempBase64Avatar, 160, 0.72);
                 localStorage.setItem('wrts_avatar_' + currentUser.uid, compressedAvatar);
             }
             loadUserDataToUI(); closeModal('profile-modal');
             const md = getMyData();
-            db.ref('status/' + currentUser.uid).update({ name: md.name, avatar: md.avatar });
-            db.ref('users_registry/' + currentUser.uid).update({ name: md.name, avatar: md.avatar, bio: md.bio });
-            showToast("Profil kaydedildi.");
+            db.ref('status/' + currentUser.uid).update({ name: md.name, avatar: md.avatar, activity: md.activity });
+            db.ref('users_registry/' + currentUser.uid).update({ name: md.name, avatar: md.avatar, bio: md.bio, activity: md.activity });
+            showToast(md.activity ? `Durum güncellendi: ${md.activity}` : "Profil kaydedildi.");
         };
 
         document.getElementById('upload-avatar-file').onchange = e => {
@@ -1415,12 +1540,17 @@
             const fList = document.getElementById('my-friends-list');
             const fEntries = Object.entries(myFriends);
             fList.innerHTML = fEntries.length ? fEntries.map(([uid, info]) => {
-                const online = (activeUsersData[uid] || {}).state === 'online';
+                const st = activeUsersData[uid] || {};
+                const online = st.state === 'online';
+                const act = st.activity || (registryUsersData[uid] && registryUsersData[uid].activity) || '';
                 const safeName = encodeURIComponent(info.name || 'İsimsiz');
                 return `
-                    <div onclick="openUserProfileModal('${uid}', '${safeName}')" class="flex items-center justify-between bg-[#120409] p-2 rounded-xl border border-rose-500/30 cursor-pointer hover:border-amber-500">
-                        <span class="text-xs font-bold">${info.name || 'İsimsiz'} <span class="${online ? 'text-emerald-400' : 'text-rose-500'}">●</span></span>
-                        <span class="text-[10px] text-amber-400 font-bold">Profili Aç</span>
+                    <div onclick="openUserProfileModal('${uid}', '${safeName}')" class="flex items-center justify-between bg-[#120409] p-2 rounded-xl border border-rose-500/30 cursor-pointer hover:border-amber-500 gap-2">
+                        <div class="min-w-0">
+                            <div class="text-xs font-bold truncate">${info.name || 'İsimsiz'} <span class="${online ? 'text-emerald-400' : 'text-rose-500'}">●</span></div>
+                            ${act ? `<div class="text-[10px] text-amber-300 truncate">${escapeHtml(act)}</div>` : ''}
+                        </div>
+                        <span class="text-[10px] text-amber-400 font-bold shrink-0">Profili Aç</span>
                     </div>
                 `;
             }).join('') : '<p class="text-xs text-rose-300/60 italic">Henüz arkadaşın yok.</p>';
@@ -1430,18 +1560,19 @@
                 document.getElementById('all-users-list').innerHTML = Object.entries(all).filter(([uid]) => uid !== currentUser.uid).map(([uid, info]) => {
                     const st = activeUsersData[uid] || {};
                     const online = st.state === 'online';
+                    const act = st.activity || info.activity || '';
                     const displayName = info.name || 'İsimsiz';
                     const safeName = encodeURIComponent(displayName);
                     return `
-                        <div onclick="openUserProfileModal('${uid}', '${safeName}')" class="flex items-center justify-between bg-[#120409] p-2.5 rounded-xl border border-rose-900/50 hover:border-amber-500 cursor-pointer transition">
-                            <div class="flex items-center gap-2">
-                                <img src="${info.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-8 h-8 rounded-full object-cover">
-                                <div class="text-left">
-                                    <p class="text-xs font-bold text-rose-100">${displayName} <span class="${online ? 'text-emerald-400' : 'text-rose-500'}">●</span></p>
-                                    <p class="text-[9px] text-rose-300/60">${online ? 'Çevrimiçi' : 'Çevrimdışı'}</p>
+                        <div onclick="openUserProfileModal('${uid}', '${safeName}')" class="flex items-center justify-between bg-[#120409] p-2.5 rounded-xl border border-rose-900/50 hover:border-amber-500 cursor-pointer transition gap-2">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <img src="${info.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-8 h-8 rounded-full object-cover shrink-0">
+                                <div class="text-left min-w-0">
+                                    <p class="text-xs font-bold text-rose-100 truncate">${displayName} <span class="${online ? 'text-emerald-400' : 'text-rose-500'}">●</span></p>
+                                    <p class="text-[9px] text-amber-300/90 truncate">${act ? escapeHtml(act) : (online ? 'Çevrimiçi' : 'Çevrimdışı')}</p>
                                 </div>
                             </div>
-                            <span class="text-[10px] text-amber-400 font-bold bg-amber-950/60 px-2 py-1 rounded-lg">Profili Aç</span>
+                            <span class="text-[10px] text-amber-400 font-bold bg-amber-950/60 px-2 py-1 rounded-lg shrink-0">Profili Aç</span>
                         </div>
                     `;
                 }).join('');
@@ -1457,13 +1588,33 @@
             const upAvatar = document.getElementById('up-avatar');
             upAvatar.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(targetName) + '&background=e11d48&color=fff';
 
+            const st = activeUsersData[targetUid] || {};
+            const liveStatusEl = document.getElementById('up-live-status');
+            if (liveStatusEl) {
+                const initAct = st.activity || (registryUsersData[targetUid] && registryUsersData[targetUid].activity) || '';
+                if (initAct) {
+                    liveStatusEl.textContent = initAct;
+                    liveStatusEl.classList.remove('hidden');
+                } else {
+                    liveStatusEl.classList.add('hidden');
+                }
+            }
+
             db.ref(`users_registry/${targetUid}`).once('value', snap => {
                 const uData = snap.val() || {};
                 if (uData.avatar) upAvatar.src = uData.avatar;
                 document.getElementById('up-bio').textContent = uData.bio || "WrtS Kullanıcısı";
+                const finalAct = st.activity || uData.activity || '';
+                if (liveStatusEl) {
+                    if (finalAct) {
+                        liveStatusEl.textContent = finalAct;
+                        liveStatusEl.classList.remove('hidden');
+                    } else {
+                        liveStatusEl.classList.add('hidden');
+                    }
+                }
             });
 
-            const st = activeUsersData[targetUid] || {};
             const online = st.state === 'online';
             const statusText = document.getElementById('up-status-text');
             const lastSeenText = document.getElementById('up-last-seen');
@@ -1607,6 +1758,7 @@
             const key = snap.key;
             const senderUid = data.uid || '';
             const senderName = data.isim || 'İsimsiz';
+            const liveActivity = (activeUsersData[senderUid] && activeUsersData[senderUid].activity) || data.activity || '';
             const isMe = !!(currentUser && senderUid === currentUser.uid);
 
             if (!isMe && currentUser && (!data.readBy || !data.readBy[currentUser.uid])) {
@@ -1640,6 +1792,10 @@
             const timeStr = new Date(data.zaman || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             const safePreview = (data.mesaj || (data.type === 'audio' ? 'Sesli Mesaj' : 'Medya')).replace(/'/g, '').replace(/"/g, '');
             const safeSenderEnc = encodeURIComponent(senderName);
+            const effectClass = (data.effect === 'glow' || data.effect === 'confetti') ? 'glow-bubble' : '';
+            const activityBadgeHtml = liveActivity
+                ? `<span class="bg-[#120409]/90 border border-amber-500/35 text-amber-200 px-1.5 py-0.2 rounded-full text-[9px] font-semibold">${escapeHtml(liveActivity)}</span>`
+                : '';
 
             let seenHtml = '';
             if (isMe) {
@@ -1664,11 +1820,14 @@
             div.innerHTML = `
                 <img onclick="openUserProfileModal('${senderUid}', '${safeSenderEnc}')" src="${data.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-6 h-6 rounded-full object-cover shrink-0 mb-1 cursor-pointer">
                 <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[82%] sm:max-w-[80%]">
-                    <span class="text-[10px] font-bold text-rose-200 px-1">${senderName}</span>
-                    <div id="bubble-${key}" class="cursor-pointer ${isMe ? 'bg-gradient-to-r from-rose-600 to-rose-700' : 'bg-[#280c16]'} px-3 py-2 rounded-2xl shadow relative transition-all">
+                    <div class="flex items-center gap-1 flex-wrap px-1 mb-0.5">
+                        <span class="text-[10px] font-bold text-rose-200">${escapeHtml(senderName)}</span>
+                        ${activityBadgeHtml}
+                    </div>
+                    <div id="bubble-${key}" class="cursor-pointer ${isMe ? 'bg-gradient-to-r from-rose-600 to-rose-700' : 'bg-[#280c16]'} ${effectClass} px-3 py-2 rounded-2xl shadow relative transition-all">
                         ${data.replyTo ? `<div onclick="event.stopPropagation(); scrollToMessage('${data.replyTo.key}')" class="mb-1 p-1.5 rounded bg-black/35 border-l-2 border-amber-400 text-[10px] cursor-pointer"><b>${data.replyTo.name}</b><br>${data.replyTo.text}</div>` : ''}
                         ${content}
-                        <div class="text-[9px] opacity-75 text-right mt-0.5 flex items-center justify-end gap-1"><span>${timeStr}</span>${seenHtml}</div>
+                        <div class="text-[9px] opacity-75 text-right mt-0.5 flex items-center justify-end gap-1">${data.effect === 'confetti' ? '<span>🎉</span>' : ''}<span>${timeStr}</span>${seenHtml}</div>
                     </div>
                     ${reactionsHtml}
                     <div id="menu-${key}" class="hidden flex-col gap-1.5 mt-1 bg-[#1c0910] border border-rose-900/60 p-2.5 rounded-xl text-xs z-10 shadow-xl">
@@ -1835,6 +1994,10 @@
                 }
                 updateScrollBottomButton();
 
+                if (!isInitialLoad && d.effect === 'confetti') {
+                    launchConfetti();
+                }
+
                 if (!isInitialLoad && isOther) {
                     playWhatsAppSound('receive');
                     triggerNotification(d.isim || 'Yeni Mesaj', d.mesaj || (d.type === 'audio' ? 'Sesli mesaj gönderdi' : 'Yeni medya paylaştı'));
@@ -1847,9 +2010,80 @@
             roomRef.on('child_removed', snap => document.getElementById(`msg-${snap.key}`)?.remove());
         }
 
+        // ==================== HIZLI @ ETİKETLEME MENÜSÜ ====================
+        function updateMentionAutocomplete() {
+            const bar = document.getElementById('mention-bar');
+            const inp = document.getElementById('msg-input');
+            if (!bar || !inp || !currentUser) return;
+
+            const cursorPos = inp.selectionStart || inp.value.length;
+            const beforeCursor = inp.value.slice(0, cursorPos);
+            const match = beforeCursor.match(/(?:^|\s)@([^\s@]*)$/);
+
+            if (!match) {
+                bar.classList.add('hidden');
+                bar.innerHTML = '';
+                return;
+            }
+
+            const query = (match[1] || '').toLowerCase();
+            const candidatesMap = new Map();
+
+            Object.entries(activeUsersData).forEach(([uid, u]) => {
+                if (uid !== currentUser.uid && u && u.name) {
+                    candidatesMap.set(uid, { uid, name: u.name, online: u.state === 'online' });
+                }
+            });
+            Object.entries(registryUsersData).forEach(([uid, u]) => {
+                if (uid !== currentUser.uid && u && u.name && !candidatesMap.has(uid)) {
+                    candidatesMap.set(uid, { uid, name: u.name, online: false });
+                }
+            });
+
+            const filtered = Array.from(candidatesMap.values()).filter(u =>
+                !query || u.name.toLowerCase().includes(query)
+            );
+
+            if (!filtered.length) {
+                bar.classList.add('hidden');
+                bar.innerHTML = '';
+                return;
+            }
+
+            bar.innerHTML = `<span class="text-[10px] text-amber-400 font-bold shrink-0">Etiketle:</span>` + filtered.slice(0, 12).map(u => {
+                const safeName = encodeURIComponent(u.name);
+                return `<button type="button" onclick="insertMentionTag('${safeName}')" class="bg-[#120409] hover:bg-rose-900/60 border border-amber-500/35 text-rose-100 px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 shrink-0">
+                    <span class="w-1.5 h-1.5 rounded-full ${u.online ? 'bg-emerald-400' : 'bg-rose-500'}"></span>
+                    <span>@${escapeHtml(u.name)}</span>
+                </button>`;
+            }).join('');
+            bar.classList.remove('hidden');
+        }
+
+        window.insertMentionTag = function(encName) {
+            const name = decodeURIComponent(encName || '').replace(/\s+/g, '_');
+            const inp = document.getElementById('msg-input');
+            const bar = document.getElementById('mention-bar');
+            if (!inp || !name) return;
+
+            const cursorPos = inp.selectionStart || inp.value.length;
+            const before = inp.value.slice(0, cursorPos);
+            const after = inp.value.slice(cursorPos);
+            const replacedBefore = before.replace(/(^|\s)@([^\s@]*)$/, `$1@${name} `);
+
+            inp.value = replacedBefore + after;
+            inp.focus();
+            inp.setSelectionRange(replacedBefore.length, replacedBefore.length);
+            if (bar) {
+                bar.classList.add('hidden');
+                bar.innerHTML = '';
+            }
+        };
+
         let typingTimer = null;
         const msgInput = document.getElementById('msg-input');
         msgInput.addEventListener('input', () => {
+            updateMentionAutocomplete();
             if (!currentUser) return;
             const typingRef = db.ref(`typing/${currentRoom}/${currentUser.uid}`);
             if (!msgInput.value.trim()) {
@@ -1863,6 +2097,7 @@
             clearTimeout(typingTimer);
             typingTimer = setTimeout(() => { typingRef.remove(); }, 2000);
         });
+        msgInput.addEventListener('click', updateMentionAutocomplete);
 
         function setRecordingState(active) {
             if (!currentUser) return;
@@ -1883,6 +2118,7 @@
 
             clearTimeout(typingTimer);
             db.ref(`typing/${currentRoom}/${currentUser.uid}`).remove();
+            document.getElementById('mention-bar')?.classList.add('hidden');
 
             if (editingMessageKey) {
                 db.ref(`odalar/${currentRoom}/${editingMessageKey}`).update({ mesaj: filterBadWords(text), edited: true });
@@ -1891,10 +2127,25 @@
 
             const md = getMyData();
             const cleanText = filterBadWords(text);
-            const msgData = { uid: currentUser.uid, isim: md.name, avatar: md.avatar, mesaj: cleanText, type: 'text', zaman: Date.now(), readBy: { [currentUser.uid]: true } };
+            const appliedEffect = nextMessageEffect;
+            const msgData = {
+                uid: currentUser.uid,
+                isim: md.name,
+                avatar: md.avatar,
+                activity: md.activity,
+                effect: appliedEffect,
+                mesaj: cleanText,
+                type: 'text',
+                zaman: Date.now(),
+                readBy: { [currentUser.uid]: true }
+            };
             if (replyingTo) { msgData.replyTo = replyingTo; cancelReplyOrEdit(); }
             db.ref('odalar/' + currentRoom).push(msgData);
             incrementUserStat('msgs', 1);
+
+            if (appliedEffect !== 'none') {
+                setNextMessageEffect('none');
+            }
 
             if (currentRoom.startsWith('özel_dm_')) {
                 const parts = currentRoom.replace('özel_dm_', '').split('_');
@@ -1934,7 +2185,7 @@
             const code = document.getElementById('code-content-input').value;
             if (!code.trim()) return;
             const md = getMyData();
-            db.ref('odalar/' + currentRoom).push({ uid: currentUser.uid, isim: md.name, avatar: md.avatar, type: 'code', code, zaman: Date.now() });
+            db.ref('odalar/' + currentRoom).push({ uid: currentUser.uid, isim: md.name, avatar: md.avatar, activity: md.activity, type: 'code', code, zaman: Date.now() });
             document.getElementById('code-content-input').value = ''; closeModal('code-modal'); playWhatsAppSound('send');
         };
         window.createPoll = function() {
@@ -1943,7 +2194,7 @@
             const o2 = document.getElementById('poll-opt2').value.trim();
             if (!q || !o1 || !o2) return;
             const md = getMyData();
-            db.ref('odalar/' + currentRoom).push({ uid: currentUser.uid, isim: md.name, avatar: md.avatar, type: 'poll', question: filterBadWords(q), opt1: filterBadWords(o1), opt2: filterBadWords(o2), votes: {}, zaman: Date.now() });
+            db.ref('odalar/' + currentRoom).push({ uid: currentUser.uid, isim: md.name, avatar: md.avatar, activity: md.activity, type: 'poll', question: filterBadWords(q), opt1: filterBadWords(o1), opt2: filterBadWords(o2), votes: {}, zaman: Date.now() });
             closeModal('poll-modal'); playWhatsAppSound('send');
         };
         window.votePoll = (room, key, choice) => { if (currentUser) db.ref(`odalar/${room}/${key}/votes/${currentUser.uid}`).set(choice); };
@@ -1954,7 +2205,7 @@
             r.onload = async ev => {
                 const compressedUrl = await compressImageDataUrl(ev.target.result, 720, 0.72);
                 const md = getMyData();
-                db.ref('odalar/' + currentRoom).push({ uid: currentUser.uid, isim: md.name, avatar: md.avatar, url: compressedUrl, type: 'image', zaman: Date.now() });
+                db.ref('odalar/' + currentRoom).push({ uid: currentUser.uid, isim: md.name, avatar: md.avatar, activity: md.activity, url: compressedUrl, type: 'image', zaman: Date.now() });
                 playWhatsAppSound('send');
             };
             r.readAsDataURL(f);
@@ -2006,6 +2257,7 @@
                             uid: currentUser.uid,
                             isim: md.name,
                             avatar: md.avatar,
+                            activity: md.activity,
                             url: reader.result,
                             type: 'audio',
                             zaman: Date.now()
