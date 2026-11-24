@@ -221,9 +221,9 @@
             </p>
 
             <!-- Kendi Akışım -->
-            <div class="relative bg-[#120409] rounded-xl overflow-hidden border border-rose-900/50 aspect-video max-h-40 mx-auto w-full">
+            <div id="local-video-box" class="relative bg-[#120409] rounded-xl overflow-hidden border border-rose-900/50 aspect-video max-h-44 mx-auto w-full">
                 <video id="local-video" autoplay muted playsinline class="w-full h-full object-cover"></video>
-                <span class="absolute bottom-1.5 left-2 text-[10px] bg-black/70 text-amber-300 px-2 py-0.5 rounded-md font-bold">Sen</span>
+                <span id="local-video-label" class="absolute bottom-1.5 left-2 text-[10px] bg-black/70 text-amber-300 px-2 py-0.5 rounded-md font-bold">Sen</span>
             </div>
 
             <!-- Bağlı Katılımcıların Görüntü & Ses Alanı -->
@@ -233,7 +233,7 @@
             <div class="flex flex-wrap gap-1.5 justify-center pt-1">
                 <button type="button" onclick="startWebRTCCall(true)" class="bg-emerald-600 hover:bg-emerald-500 px-3 py-2 rounded-xl text-xs font-bold text-white transition">📹 Görüntülü Başlat</button>
                 <button type="button" onclick="startWebRTCCall(false)" class="bg-amber-600 hover:bg-amber-500 px-3 py-2 rounded-xl text-xs font-bold text-white transition">🎙️ Sesli Başlat</button>
-                <button type="button" onclick="startScreenShare()" class="bg-sky-600 hover:bg-sky-500 px-3 py-2 rounded-xl text-xs font-bold text-white transition">💻 Ekran Paylaş</button>
+                <button type="button" id="screen-share-btn" onclick="toggleScreenShare()" class="bg-sky-600 hover:bg-sky-500 px-3 py-2 rounded-xl text-xs font-bold text-white transition">💻 Ekran Paylaş</button>
                 <button type="button" onclick="joinWebRTCCall()" class="bg-rose-600 hover:bg-rose-500 px-3 py-2 rounded-xl text-xs font-bold text-white transition">📲 Görüşmeye Katıl</button>
             </div>
 
@@ -1805,6 +1805,8 @@
 
         // ==================== ÇOKLU / KARŞILIKLI WEBRTC GÖRÜŞME & EKRAN PAYLAŞIMI ====================
         let localStream = null;
+        let screenStream = null;
+        let isSharingScreen = false;
         let peerConnections = {}; // { peerUid: RTCPeerConnection }
         let pendingCandidatesByPeer = {}; // { peerUid: [candidate] }
         let remoteDescSetByPeer = {}; // { peerUid: boolean }
@@ -1814,6 +1816,24 @@
         let isMicMuted = false;
         let isCamOff = false;
         let currentCallModeLabel = "Hazır";
+
+        function updateScreenShareUI() {
+            const btn = document.getElementById('screen-share-btn');
+            const localVid = document.getElementById('local-video');
+            const localLbl = document.getElementById('local-video-label');
+            if (btn) {
+                btn.textContent = isSharingScreen ? '🛑 Ekranı Durdur' : '💻 Ekran Paylaş';
+                btn.className = isSharingScreen
+                    ? 'bg-amber-600 hover:bg-amber-500 px-3 py-2 rounded-xl text-xs font-bold text-white transition'
+                    : 'bg-sky-600 hover:bg-sky-500 px-3 py-2 rounded-xl text-xs font-bold text-white transition';
+            }
+            if (localVid) {
+                localVid.className = isSharingScreen ? 'w-full h-full object-contain bg-black' : 'w-full h-full object-cover';
+            }
+            if (localLbl) {
+                localLbl.textContent = isSharingScreen ? 'Sen (Ekran Paylaşımı)' : 'Sen';
+            }
+        }
 
         function updateCallUIButtons() {
             const micBtn = document.getElementById('toggle-mic-btn');
@@ -1830,6 +1850,7 @@
                     ? 'bg-red-950 text-red-300 border border-red-600/60 px-3 py-1.5 rounded-xl text-xs font-bold transition'
                     : 'bg-[#2b0d18] hover:bg-rose-900/60 text-rose-100 border border-rose-800/50 px-3 py-1.5 rounded-xl text-xs font-bold transition';
             }
+            updateScreenShareUI();
         }
 
         function setCallBadge(label) {
@@ -1871,7 +1892,7 @@
                 tile.id = `remote-tile-${peerUid}`;
                 tile.className = 'relative bg-[#120409] rounded-xl overflow-hidden border border-emerald-500/40 aspect-video';
                 tile.innerHTML = `
-                    <video id="remote-video-${peerUid}" autoplay playsinline class="w-full h-full object-cover"></video>
+                    <video id="remote-video-${peerUid}" autoplay playsinline class="w-full h-full object-contain bg-black"></video>
                     <span id="remote-label-${peerUid}" class="absolute bottom-1.5 left-2 text-[10px] bg-black/70 text-emerald-300 px-2 py-0.5 rounded-md font-bold">${peerName}</span>
                 `;
                 container.appendChild(tile);
@@ -1904,13 +1925,141 @@
         };
 
         window.toggleCallCam = function() {
+            if (isSharingScreen) {
+                return showToast("Şu an ekran paylaşımı aktif; önce ekran paylaşımını durdurabilirsin.", 'error');
+            }
             if (!localStream) return showToast("Aktif bir görüntü akışı yok.", 'error');
             const videoTracks = localStream.getVideoTracks();
-            if (!videoTracks.length) return showToast("Kamera veya ekran kanalı yok.", 'error');
+            if (!videoTracks.length) return showToast("Kamera kanalı yok.", 'error');
             isCamOff = !isCamOff;
             videoTracks.forEach(t => { t.enabled = !isCamOff; });
             updateCallUIButtons();
-            showToast(isCamOff ? "Görüntü gizlendi." : "Görüntü açıldı.");
+            showToast(isCamOff ? "Kamera kapatıldı." : "Kamera açıldı.");
+        };
+
+        async function replaceOutgoingVideoTrack(newTrack) {
+            Object.values(peerConnections).forEach(pc => {
+                if (!pc || typeof pc.getSenders !== 'function') return;
+                const videoSender = pc.getSenders().find(s => s.track && s.track.kind === 'video');
+                if (videoSender && typeof videoSender.replaceTrack === 'function') {
+                    videoSender.replaceTrack(newTrack).catch(() => {});
+                } else if (newTrack && localStream) {
+                    try { pc.addTrack(newTrack, localStream); } catch (_) {}
+                }
+            });
+        }
+
+        window.stopScreenShare = async function(silent = false) {
+            if (!isSharingScreen) return;
+            isSharingScreen = false;
+            if (screenStream) {
+                screenStream.getTracks().forEach(t => {
+                    t.onended = null;
+                    t.stop();
+                });
+                screenStream = null;
+            }
+
+            let fallbackVideoTrack = null;
+            if (localStream) {
+                localStream.getVideoTracks().forEach(t => {
+                    t.stop();
+                    localStream.removeTrack(t);
+                });
+                try {
+                    const camOnly = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+                    fallbackVideoTrack = camOnly.getVideoTracks()[0] || null;
+                    if (fallbackVideoTrack) {
+                        fallbackVideoTrack.enabled = !isCamOff;
+                        localStream.addTrack(fallbackVideoTrack);
+                    }
+                } catch (_) {}
+            }
+
+            await replaceOutgoingVideoTrack(fallbackVideoTrack);
+            const localVid = document.getElementById('local-video');
+            if (localVid && localStream) {
+                localVid.srcObject = localStream;
+                localVid.play().catch(() => {});
+            }
+            updateCallUIButtons();
+            if (inCallSession) {
+                setCallBadge(fallbackVideoTrack ? "Görüntülü Görüşme" : "Sesli Görüşme");
+                if (myCallSessionRef) {
+                    myCallSessionRef.update({ mode: fallbackVideoTrack ? "Görüntülü Görüşme" : "Sesli Görüşme" }).catch(() => {});
+                }
+            }
+            if (!silent) {
+                document.getElementById('call-status').textContent = "Ekran paylaşımı durduruldu.";
+                showToast("Ekran paylaşımı durduruldu.");
+            }
+        };
+
+        window.toggleScreenShare = async function() {
+            if (isSharingScreen) {
+                await stopScreenShare(false);
+                return;
+            }
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+                return showToast("Bu cihaz veya tarayıcı ekran paylaşımını desteklemiyor.", 'error');
+            }
+            try {
+                if (!inCallSession) {
+                    await enterCallWithMedia("Ekran Paylaşımı", { audio: true, screen: true });
+                    return;
+                }
+
+                const display = await navigator.mediaDevices.getDisplayMedia({
+                    video: { cursor: "always" },
+                    audio: true
+                });
+                screenStream = display;
+                const displayVideoTrack = display.getVideoTracks()[0];
+                if (!displayVideoTrack) {
+                    throw new Error("Ekran görüntüsü alınamadı.");
+                }
+
+                displayVideoTrack.onended = () => {
+                    stopScreenShare(false);
+                };
+
+                if (!localStream) {
+                    localStream = new MediaStream();
+                }
+                localStream.getVideoTracks().forEach(t => {
+                    t.stop();
+                    localStream.removeTrack(t);
+                });
+                localStream.addTrack(displayVideoTrack);
+
+                if (localStream.getAudioTracks().length === 0) {
+                    try {
+                        const mic = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true }, video: false });
+                        mic.getAudioTracks().forEach(at => localStream.addTrack(at));
+                    } catch (_) {}
+                }
+
+                isSharingScreen = true;
+                isCamOff = false;
+                await replaceOutgoingVideoTrack(displayVideoTrack);
+
+                const localVid = document.getElementById('local-video');
+                if (localVid) {
+                    localVid.srcObject = localStream;
+                    localVid.play().catch(() => {});
+                }
+                updateCallUIButtons();
+                setCallBadge("Ekran Paylaşımı");
+                if (myCallSessionRef) {
+                    myCallSessionRef.update({ mode: "Ekran Paylaşımı" }).catch(() => {});
+                }
+                document.getElementById('call-status').textContent = "Ekran paylaşımı yayında!";
+                showToast("Ekran paylaşımı başlatıldı.");
+            } catch (err) {
+                isSharingScreen = false;
+                updateCallUIButtons();
+                showToast(err.message || "Ekran paylaşımı başlatılamadı.", 'error');
+            }
         };
 
         async function flushCandidatesForPeer(peerUid) {
@@ -1994,7 +2143,7 @@
                     }
                 });
 
-                pc.createOffer()
+                pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true })
                     .then(offer => pc.setLocalDescription(offer).then(() => offer))
                     .then(offer => signalRef.child('offer').set({
                         fromUid: currentUser.uid,
@@ -2064,8 +2213,13 @@
                 localStream.getTracks().forEach(t => t.stop());
                 localStream = null;
             }
+            if (screenStream) {
+                screenStream.getTracks().forEach(t => t.stop());
+                screenStream = null;
+            }
             isMicMuted = false;
             isCamOff = false;
+            isSharingScreen = false;
 
             if (screen) {
                 if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
@@ -2075,19 +2229,24 @@
                     video: { cursor: "always" },
                     audio: true
                 });
+                screenStream = displayStream;
+                isSharingScreen = true;
+
+                const combined = new MediaStream();
+                displayStream.getVideoTracks().forEach(vt => {
+                    vt.onended = () => {
+                        stopScreenShare(false);
+                    };
+                    combined.addTrack(vt);
+                });
+                displayStream.getAudioTracks().forEach(at => combined.addTrack(at));
+
                 try {
-                    const micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-                    micStream.getAudioTracks().forEach(track => displayStream.addTrack(track));
+                    const micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true }, video: false });
+                    micStream.getAudioTracks().forEach(track => combined.addTrack(track));
                 } catch (_) {}
 
-                const primaryVideoTrack = displayStream.getVideoTracks()[0];
-                if (primaryVideoTrack) {
-                    primaryVideoTrack.onended = () => {
-                        showToast("Ekran paylaşımı durduruldu.");
-                        endWebRTCCall();
-                    };
-                }
-                return displayStream;
+                return combined;
             }
 
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -2109,7 +2268,11 @@
                 setCallBadge("Hazırlanıyor");
 
                 localStream = await acquireMediaStream(mediaOpts);
-                document.getElementById('local-video').srcObject = localStream;
+                const localVid = document.getElementById('local-video');
+                if (localVid) {
+                    localVid.srcObject = localStream;
+                    localVid.play().catch(() => {});
+                }
                 updateCallUIButtons();
 
                 inCallSession = true;
@@ -2139,7 +2302,9 @@
                 document.getElementById('call-status').textContent = `${modeLabel} aktif! Karşı tarafın katılması bekleniyor veya bağlanılıyor...`;
             } catch (err) {
                 inCallSession = false;
+                isSharingScreen = false;
                 setCallBadge("Hazır");
+                updateCallUIButtons();
                 document.getElementById('call-status').textContent = err.message || "Görüşme başlatılamadı.";
                 showToast(err.message || "Kamera/Mikrofon/Ekran erişimi başarısız.", 'error');
             }
@@ -2150,7 +2315,7 @@
         };
 
         window.startScreenShare = async () => {
-            await enterCallWithMedia("Ekran Paylaşımı", { video: true, screen: true });
+            await toggleScreenShare();
         };
 
         window.joinWebRTCCall = async () => {
@@ -2163,6 +2328,7 @@
 
         window.endWebRTCCall = () => {
             inCallSession = false;
+            isSharingScreen = false;
             if (callRoomWatcherRef) {
                 callRoomWatcherRef.off();
                 callRoomWatcherRef = null;
@@ -2173,6 +2339,13 @@
                 myCallSessionRef = null;
             }
             Object.keys(peerConnections).forEach(uid => removeRemotePeerTile(uid));
+            if (screenStream) {
+                screenStream.getTracks().forEach(t => {
+                    t.enabled = false;
+                    t.stop();
+                });
+                screenStream = null;
+            }
             if (localStream) {
                 localStream.getTracks().forEach(t => {
                     t.enabled = false;
