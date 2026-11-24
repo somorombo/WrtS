@@ -10,8 +10,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
     <style>
-        body { 
-            overscroll-behavior-y: none; 
+        body {
+            overscroll-behavior-y: none;
             background: radial-gradient(circle at top right, #2e0916, #14050a 45%, #090306 100%);
         }
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -24,10 +24,17 @@
             0% { transform: translateY(-10px) translateX(0); opacity: 0.8; }
             100% { transform: translateY(100vh) translateX(15px); opacity: 0.2; }
         }
+        @keyframes riseUp {
+            0% { transform: translateY(0) scale(1); opacity: 0.85; }
+            100% { transform: translateY(-100vh) scale(0.4); opacity: 0; }
+        }
         .snowflake { position: absolute; top: -10px; background: #ffe4e6; border-radius: 50%; pointer-events: none; z-index: 5; animation: snowfall linear infinite; }
     </style>
 </head>
 <body id="app-body" class="text-rose-50 h-[100dvh] w-full overflow-hidden flex flex-col justify-between relative">
+
+    <!-- TOAST BİLDİRİM ALANI -->
+    <div id="toast-container" class="fixed top-16 right-3 z-[70] flex flex-col gap-2 pointer-events-none max-w-xs"></div>
 
     <!-- GİRİŞ EKRANI -->
     <div id="login-screen" class="fixed inset-0 bg-[#0d0407]/95 z-50 flex items-center justify-center p-4 overflow-y-auto">
@@ -94,6 +101,15 @@
         </div>
     </div>
 
+    <!-- SABİTLENMİŞ MESAJ BANTI -->
+    <div id="pinned-bar" class="hidden bg-[#240913]/95 border-b border-amber-400/30 px-3 py-1.5 flex items-center justify-between text-xs shrink-0 z-15">
+        <div onclick="scrollToPinned()" class="flex items-center gap-2 overflow-hidden flex-1 cursor-pointer">
+            <span class="text-amber-300 font-bold shrink-0">📌 Sabit:</span>
+            <span id="pinned-text" class="text-rose-100 truncate"></span>
+        </div>
+        <button id="unpin-btn" onclick="unpinMessage()" class="hidden text-[10px] text-rose-300 bg-rose-950 px-2 py-0.5 rounded ml-2">Kaldır</button>
+    </div>
+
     <!-- DM BİLGİ ÇUBUĞU -->
     <div id="dm-banner" class="hidden bg-rose-950/90 border-b border-rose-500/40 px-3 py-1.5 flex items-center justify-between text-xs shrink-0 z-15">
         <span id="dm-banner-text" class="text-rose-200 font-bold">💬 Özel Sohbet</span>
@@ -106,7 +122,7 @@
         <main id="messages" class="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 w-full max-w-4xl mx-auto z-10 relative"></main>
     </div>
 
-    <!-- YAZIYOR BİLGİSİ -->
+    <!-- YAZIYOR / SES KAYDEDİYOR BİLGİSİ -->
     <div id="typing-indicator" class="px-4 py-1 text-[11px] text-amber-300/80 italic w-full max-w-4xl mx-auto h-6 shrink-0 z-20"></div>
 
     <!-- YANITLANAN VEYA DÜZENLENEN ÖNİZLEME -->
@@ -119,12 +135,13 @@
     </div>
 
     <!-- EKSTRA ARAÇLAR -->
-    <div id="tools-drawer" class="hidden bg-[#1a070e] border-t border-rose-900/60 p-2.5 w-full max-w-4xl mx-auto grid grid-cols-5 gap-2 shrink-0 z-20">
+    <div id="tools-drawer" class="hidden bg-[#1a070e] border-t border-rose-900/60 p-2.5 w-full max-w-4xl mx-auto grid grid-cols-6 gap-1.5 shrink-0 z-20">
         <button type="button" onclick="document.getElementById('img-file').click(); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-[#120409] p-2 rounded-xl border border-rose-900/50 text-xs"><span>🖼️</span><span class="text-[10px]">Fotoğraf</span></button>
         <button type="button" onclick="openModal('gif-modal'); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-[#120409] p-2 rounded-xl border border-rose-900/50 text-xs"><span>🎞️</span><span class="text-[10px]">GIF</span></button>
         <button type="button" onclick="openModal('sticker-modal'); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-[#120409] p-2 rounded-xl border border-rose-900/50 text-xs"><span>✨</span><span class="text-[10px]">Sticker</span></button>
         <button type="button" onclick="openModal('code-modal'); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-[#120409] p-2 rounded-xl border border-rose-900/50 text-xs"><span>💻</span><span class="text-[10px]">Kod</span></button>
         <button type="button" onclick="openModal('poll-modal'); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-[#120409] p-2 rounded-xl border border-rose-900/50 text-xs"><span>📊</span><span class="text-[10px]">Anket</span></button>
+        <button type="button" onclick="sendGameInvite(); toggleToolsDrawer();" class="flex flex-col items-center gap-1 bg-[#120409] p-2 rounded-xl border border-rose-900/50 text-xs"><span>🎲</span><span class="text-[10px]">Davet</span></button>
     </div>
 
     <!-- ALT ÇUBUK -->
@@ -146,7 +163,7 @@
             <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">🧭 WrtS Menü</h3><button onclick="closeModal('menu-drawer-modal')">✕</button></div>
             <div class="grid grid-cols-2 gap-2 pt-1">
                 <button onclick="closeModal('menu-drawer-modal'); openDMListModal();" class="relative bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left">
-                    <span>💬</span> Özel DM 
+                    <span>💬</span> Özel DM
                     <span id="menu-inbox-dot" class="hidden w-2.5 h-2.5 rounded-full bg-red-500 ml-auto"></span>
                 </button>
                 <button onclick="closeModal('menu-drawer-modal'); openModal('call-modal');" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>📹</span> Sesli / Görüntülü</button>
@@ -212,6 +229,10 @@
             <div class="bg-[#120409] p-4 rounded-2xl space-y-2.5 text-xs">
                 <div class="flex justify-between"><span class="text-rose-300">Toplam Mesaj:</span><span id="stat-msgs" class="font-bold text-amber-400">0</span></div>
                 <div class="flex justify-between"><span class="text-rose-300">Skor:</span><span id="stat-score" class="font-bold text-amber-400">0</span></div>
+                <div class="pt-1 border-t border-rose-900/40">
+                    <span class="text-rose-300 block mb-1.5">Rozetler:</span>
+                    <div id="stat-badges" class="flex flex-wrap gap-1.5"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -245,17 +266,21 @@
             </div>
             <div class="flex gap-1.5 shrink-0">
                 <input type="text" id="yt-url-input" placeholder="YouTube linki yapıştır..." class="flex-1 bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-1.5 text-xs">
-                <button onclick="syncYoutubeVideo()" class="bg-gradient-to-r from-rose-600 to-amber-600 px-3 py-1.5 rounded-xl text-xs font-bold text-white">Ekle</button>
+                <button onclick="syncYoutubeVideo(false)" class="bg-gradient-to-r from-rose-600 to-amber-600 px-2.5 py-1.5 rounded-xl text-xs font-bold text-white">Oynat</button>
+                <button onclick="addToCinemaQueue()" class="bg-[#2b0d18] border border-amber-500/40 text-amber-300 px-2.5 py-1.5 rounded-xl text-xs font-bold">+ Kuyruk</button>
             </div>
             <div class="aspect-video bg-black rounded-2xl overflow-hidden border border-rose-900/50 relative shrink-0 shadow-xl">
                 <div id="yt-player-frame" class="w-full h-full"></div>
             </div>
-            <div class="flex items-center justify-between gap-1 shrink-0">
+            <div class="flex items-center justify-between gap-1 shrink-0 flex-wrap">
                 <p id="music-sync-info" class="text-[11px] text-rose-200/70 truncate flex-1">Sinema salonu boş.</p>
-                <button onclick="forceSyncAllToMyTime()" class="bg-amber-600/30 text-amber-300 border border-amber-500/40 px-2 py-1 rounded-lg text-[10px] font-bold shrink-0">🔄 Senkron</button>
-                <button onclick="stopAndDeleteMusic()" class="bg-rose-950 text-rose-300 border border-rose-700/50 px-2 py-1 rounded-lg text-[10px] font-bold shrink-0">Kapat</button>
+                <button onclick="toggleCinemaPlayPause()" id="cinema-playpause-btn" class="bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 px-2 py-1 rounded-lg text-[10px] font-bold">⏯️ Oynat/Duraklat</button>
+                <button onclick="playNextInQueue()" class="bg-sky-600/30 text-sky-300 border border-sky-500/40 px-2 py-1 rounded-lg text-[10px] font-bold">⏭️ Sıradaki</button>
+                <button onclick="forceSyncAllToMyTime()" class="bg-amber-600/30 text-amber-300 border border-amber-500/40 px-2 py-1 rounded-lg text-[10px] font-bold">🔄 Senkron</button>
+                <button onclick="stopAndDeleteMusic()" class="bg-rose-950 text-rose-300 border border-rose-700/50 px-2 py-1 rounded-lg text-[10px] font-bold">Kapat</button>
             </div>
-            <div class="flex-1 bg-[#120409] border border-rose-900/50 rounded-2xl p-2.5 flex flex-col min-h-[100px] max-h-[130px]">
+            <div id="cinema-queue-list" class="flex gap-1.5 overflow-x-auto no-scrollbar shrink-0 text-[10px]"></div>
+            <div class="flex-1 bg-[#120409] border border-rose-900/50 rounded-2xl p-2.5 flex flex-col min-h-[90px] max-h-[120px]">
                 <div id="cinema-messages" class="flex-1 overflow-y-auto space-y-1.5 pr-1 text-xs"></div>
                 <form onsubmit="sendCinemaMessage(event)" class="flex gap-1 mt-1.5 shrink-0">
                     <input type="text" id="cinema-msg-input" placeholder="Film hakkında yaz..." autocomplete="off" class="flex-1 bg-[#1c0910] border border-rose-900/50 rounded-lg px-2.5 py-1 text-xs focus:outline-none">
@@ -325,8 +350,9 @@
             <div class="flex gap-1 bg-[#120409] p-1 rounded-xl">
                 <button onclick="switchGameTab('xox')" id="tab-xox" class="flex-1 py-1.5 rounded-lg text-xs font-bold bg-rose-600 text-white">XOX</button>
                 <button onclick="switchGameTab('battleship')" id="tab-battleship" class="flex-1 py-1.5 rounded-lg text-xs font-bold text-rose-300/60">Amiral Battı</button>
+                <button onclick="switchGameTab('guess')" id="tab-guess" class="flex-1 py-1.5 rounded-lg text-xs font-bold text-rose-300/60">Sayı Tahmini</button>
             </div>
-            
+
             <div id="game-panel-xox" class="space-y-3 py-2">
                 <p id="xox-status" class="text-xs text-amber-300 font-bold">Sıra: X</p>
                 <div class="grid grid-cols-3 gap-2 w-48 mx-auto">
@@ -347,6 +373,16 @@
                 <p id="bs-status" class="text-xs text-amber-300 font-bold">3 gizli gemiyi bul! Kalan Hak: <span id="bs-shots">10</span></p>
                 <div id="bs-grid" class="grid grid-cols-5 gap-1.5 w-60 mx-auto"></div>
                 <button onclick="resetBattleship()" class="w-full bg-[#2b0d18] hover:bg-rose-900/50 py-2 rounded-xl text-xs font-bold text-rose-200 transition">Yeni Harita Başlat</button>
+            </div>
+
+            <div id="game-panel-guess" class="hidden space-y-3 py-2">
+                <p id="guess-status" class="text-xs text-amber-300 font-bold">1 ile 50 arasında gizli sayıyı bul! (+25 Puan)</p>
+                <div class="flex gap-2 justify-center">
+                    <input type="number" id="guess-input" min="1" max="50" placeholder="1-50" class="w-24 bg-[#120409] border border-rose-900/60 rounded-xl px-3 py-2 text-xs text-center">
+                    <button onclick="submitGuess()" class="bg-gradient-to-r from-rose-600 to-amber-600 px-4 py-2 rounded-xl text-xs font-bold text-white">Tahmin Et</button>
+                </div>
+                <p id="guess-hint" class="text-xs text-rose-200/80 min-h-[1rem]"></p>
+                <button onclick="resetGuessGame()" class="w-full bg-[#2b0d18] hover:bg-rose-900/50 py-2 rounded-xl text-xs font-bold text-rose-200 transition">Yeni Sayı Üret</button>
             </div>
         </div>
     </div>
@@ -426,6 +462,10 @@
                     <option value="space">🌌 Yıldızlı Uzay</option>
                 </select>
             </div>
+            <div>
+                <label class="block text-[11px] text-rose-300/70">@ai Webhook / API Endpoint (Opsiyonel)</label>
+                <input type="text" id="edit-ai-endpoint" placeholder="https://..." class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
+            </div>
             <div class="flex gap-2 pt-1">
                 <button id="save-profile" class="flex-1 bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-xs font-bold text-white">Kaydet</button>
                 <button id="modal-logout" class="bg-amber-600/20 text-amber-400 px-3 py-2.5 rounded-xl text-xs font-bold">Çıkış</button>
@@ -452,6 +492,8 @@
         let currentUser = null;
         let currentRoom = 'genel';
         let roomRef = null;
+        let pinnedRef = null;
+        let currentPinnedKey = null;
         let customRoomsData = {};
         let activeUsersData = {};
         let myFriends = {};
@@ -461,11 +503,44 @@
         let isInitialLoad = true;
         let ytPlayer = null;
         let ytApiReady = false;
+        let currentCinemaVideoId = null;
         let wbColor = '#fbbf24';
         let wbIsEraser = false;
         let cinemaMuted = false;
+        let guessSecret = Math.floor(Math.random() * 50) + 1;
 
         function onYouTubeIframeAPIReady() { ytApiReady = true; }
+
+        function showToast(msg, type = 'info') {
+            const box = document.getElementById('toast-container');
+            const el = document.createElement('div');
+            const colors = type === 'error'
+                ? 'bg-red-950/95 border-red-500/60 text-red-200'
+                : 'bg-[#1c0910]/95 border-amber-500/50 text-amber-100';
+            el.className = `border ${colors} px-3.5 py-2 rounded-2xl text-xs font-semibold shadow-xl backdrop-blur transition-all`;
+            el.textContent = msg;
+            box.appendChild(el);
+            setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 250); }, 2800);
+        }
+
+        function compressImageDataUrl(dataUrl, maxSize = 640, quality = 0.72) {
+            return new Promise(resolve => {
+                const img = new Image();
+                img.onload = () => {
+                    let { width, height } = img;
+                    if (width > maxSize || height > maxSize) {
+                        if (width > height) { height = Math.round((height * maxSize) / width); width = maxSize; }
+                        else { width = Math.round((width * maxSize) / height); height = maxSize; }
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL('image/jpeg', quality));
+                };
+                img.src = dataUrl;
+            });
+        }
 
         const badWords = ["küfür1", "küfür2", "amk", "aq", "orospu", "piç"];
         function filterBadWords(txt) {
@@ -478,26 +553,37 @@
         }
 
         window.loadStats = function() {
-            if(!currentUser) return;
+            if (!currentUser) return;
             db.ref(`stats/${currentUser.uid}`).once('value', s => {
                 const st = s.val() || { msgs: 0, score: 0 };
-                document.getElementById('stat-msgs').textContent = st.msgs || 0;
-                document.getElementById('stat-score').textContent = st.score || 0;
+                const msgs = st.msgs || 0;
+                const score = st.score || 0;
+                document.getElementById('stat-msgs').textContent = msgs;
+                document.getElementById('stat-score').textContent = score;
+                const badges = [];
+                if (msgs >= 10) badges.push('💬 Aktif Konuşmacı');
+                if (msgs >= 50) badges.push('🔥 Sohbet Ustası');
+                if (score >= 50) badges.push('🏅 Oyuncu');
+                if (score >= 150) badges.push('👑 Şampiyon');
+                document.getElementById('stat-badges').innerHTML = badges.length
+                    ? badges.map(b => `<span class="bg-amber-500/15 border border-amber-500/40 text-amber-300 px-2 py-0.5 rounded-full text-[10px] font-bold">${b}</span>`).join('')
+                    : '<span class="text-rose-300/50 text-[10px]">Henüz rozet kazanılmadı.</span>';
             });
-        }
+        };
+
         function incrementUserStat(field, amount = 1) {
-            if(!currentUser) return;
+            if (!currentUser) return;
             db.ref(`stats/${currentUser.uid}/${field}`).transaction(cur => (cur || 0) + amount);
         }
 
         window.clearAllMessagesInRoom = function() {
-            if(confirm("Bu odadaki tüm mesajları silmek istediğine emin misin?")) {
+            if (confirm("Bu odadaki tüm mesajları silmek istediğine emin misin?")) {
                 db.ref(`odalar/${currentRoom}`).remove().then(() => {
-                    alert("Odadaki tüm mesajlar başarıyla silindi!");
+                    showToast("Odadaki tüm mesajlar silindi.");
                     closeModal('menu-drawer-modal');
                 });
             }
-        }
+        };
 
         window.openDeleteAccountModal = function() {
             closeModal('profile-modal');
@@ -505,14 +591,14 @@
             document.getElementById('del-step-1').classList.remove('hidden');
             document.getElementById('del-step-2').classList.add('hidden');
             document.getElementById('del-confirm-pass').value = '';
-        }
+        };
         window.proceedToDeleteStep2 = function() {
             document.getElementById('del-step-1').classList.add('hidden');
             document.getElementById('del-step-2').classList.remove('hidden');
-        }
+        };
         window.executeAccountDeletion = function() {
             const pass = document.getElementById('del-confirm-pass').value;
-            if(!pass) return alert("Lütfen şifrenizi girin.");
+            if (!pass) return showToast("Lütfen şifrenizi girin.", 'error');
             const user = auth.currentUser;
             const cred = firebase.auth.EmailAuthProvider.credential(user.email, pass);
             user.reauthenticateWithCredential(cred).then(() => {
@@ -521,11 +607,11 @@
                 db.ref(`status/${uid}`).remove();
                 db.ref(`stats/${uid}`).remove();
                 user.delete().then(() => {
-                    alert("Hesabınız kalıcı olarak silindi.");
+                    showToast("Hesabınız kalıcı olarak silindi.");
                     window.location.reload();
-                }).catch(err => alert("Silme hatası: " + err.message));
-            }).catch(() => alert("Şifre hatalı! Hesap silinemedi."));
-        }
+                }).catch(err => showToast("Silme hatası: " + err.message, 'error'));
+            }).catch(() => showToast("Şifre hatalı! Hesap silinemedi.", 'error'));
+        };
 
         function initBgEffect(type) {
             const c = document.getElementById('dynamic-bg-container');
@@ -544,12 +630,12 @@
             } else if (type === 'fire' || type === 'cyber') {
                 for (let i = 0; i < 20; i++) {
                     const p = document.createElement('div');
-                    p.className = 'absolute bottom-[-10px] rounded-full pointer-events-none z-50 animate-[riseUp_linear_infinite]';
+                    p.className = 'absolute bottom-[-10px] rounded-full pointer-events-none z-50';
                     p.style.left = Math.random() * 100 + '%';
                     p.style.width = (Math.random() * 4 + 2) + 'px';
                     p.style.height = p.style.width;
                     p.style.background = type === 'cyber' ? '#38bdf8' : '#f43f5e';
-                    p.style.animationDuration = (Math.random() * 4 + 2) + 's';
+                    p.style.animation = `riseUp ${(Math.random() * 4 + 2)}s linear infinite`;
                     c.appendChild(p);
                 }
             } else if (type === 'space') {
@@ -565,17 +651,17 @@
             }
         }
         window.changeBgEffect = function(val) {
-            if(currentUser) localStorage.setItem('wrts_bgef_' + currentUser.uid, val);
+            if (currentUser) localStorage.setItem('wrts_bgef_' + currentUser.uid, val);
             initBgEffect(val);
-        }
+        };
 
         window.openModal = id => document.getElementById(id).classList.remove('hidden');
         window.closeModal = id => document.getElementById(id).classList.add('hidden');
         window.toggleToolsDrawer = () => document.getElementById('tools-drawer').classList.toggle('hidden');
-        window.openMyProfile = function() { loadUserDataToUI(); openModal('profile-modal'); }
+        window.openMyProfile = function() { loadUserDataToUI(); openModal('profile-modal'); };
 
         function playWhatsAppSound(type) {
-            if(cinemaMuted && type === 'receive') return;
+            if (cinemaMuted && type === 'receive') return;
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
                 const osc = ctx.createOscillator();
@@ -591,70 +677,151 @@
                     gain.gain.setValueAtTime(0.12, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
                     osc.start(now); osc.stop(now + 0.14);
                 }
-            } catch(e) {}
+            } catch (e) {}
         }
 
         window.publishAnnouncement = function() {
             const text = document.getElementById('announcement-input').value.trim();
-            if(!text) return;
+            if (!text) return;
             db.ref(`announcements/${currentRoom}`).set({ text: filterBadWords(text), by: getMyData().name, time: Date.now() }).then(() => {
                 document.getElementById('announcement-input').value = '';
                 closeModal('announcement-modal');
+                showToast("Duyuru yayınlandı.");
             });
-        }
+        };
         window.deleteAnnouncement = () => db.ref(`announcements/${currentRoom}`).remove();
 
+        window.pinMessage = function(room, key, text, senderName) {
+            db.ref(`pinned/${room}`).set({ key, text: filterBadWords(text), by: senderName, pinnedAt: Date.now() });
+            showToast("Mesaj sabitlendi.");
+        };
+        window.unpinMessage = function() {
+            db.ref(`pinned/${currentRoom}`).remove();
+            showToast("Sabit mesaj kaldırıldı.");
+        };
+        window.scrollToPinned = function() {
+            if (currentPinnedKey) scrollToMessage(currentPinnedKey);
+        };
+
+        // ORTAK SİNEMA & KUYRUK & OYNAT/DURAKLAT
         window.openCinemaModal = () => openModal('music-modal');
         window.toggleCinemaMute = function() {
             cinemaMuted = !cinemaMuted;
             const btn = document.getElementById('cinema-mute-btn');
             btn.textContent = cinemaMuted ? "🔔 Ses Aç" : "🔕 Sessiz";
-        }
+        };
         window.sendCinemaMessage = function(e) {
             e.preventDefault();
             const inp = document.getElementById('cinema-msg-input');
             const val = inp.value.trim();
-            if(!val || !currentUser) return;
+            if (!val || !currentUser) return;
             db.ref('cinema_chat').push({ isim: getMyData().name, mesaj: filterBadWords(val), zaman: Date.now() });
             inp.value = '';
-        }
-        window.syncYoutubeVideo = function() {
-            const url = document.getElementById('yt-url-input').value.trim();
+        };
+        function extractYoutubeId(url) {
             const match = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-            if (!match) return alert("Geçerli YouTube linki gir!");
-            db.ref('global_cinema').set({ videoId: match[1], by: getMyData().name, startTime: Date.now(), seekSec: 0 });
+            return match ? match[1] : null;
+        }
+        window.syncYoutubeVideo = function(fromQueueId = null) {
+            const inputVal = document.getElementById('yt-url-input').value.trim();
+            const vid = fromQueueId || extractYoutubeId(inputVal);
+            if (!vid) return showToast("Geçerli YouTube linki gir!", 'error');
+            db.ref('global_cinema').set({
+                videoId: vid,
+                by: getMyData().name,
+                startTime: Date.now(),
+                seekSec: 0,
+                playing: true
+            });
+            if (!fromQueueId) document.getElementById('yt-url-input').value = '';
+        };
+        window.addToCinemaQueue = function() {
+            const vid = extractYoutubeId(document.getElementById('yt-url-input').value.trim());
+            if (!vid) return showToast("Kuyruğa eklemek için geçerli link gir!", 'error');
+            db.ref('cinema_queue').push({ videoId: vid, by: getMyData().name });
             document.getElementById('yt-url-input').value = '';
-        }
+            showToast("Video kuyruğa eklendi.");
+        };
+        window.playNextInQueue = function() {
+            db.ref('cinema_queue').once('value', snap => {
+                const entries = Object.entries(snap.val() || {});
+                if (!entries.length) return showToast("Kuyruk boş.");
+                const [firstKey, firstItem] = entries[0];
+                db.ref(`cinema_queue/${firstKey}`).remove();
+                syncYoutubeVideo(firstItem.videoId);
+            });
+        };
+        window.toggleCinemaPlayPause = function() {
+            db.ref('global_cinema').once('value', snap => {
+                const d = snap.val();
+                if (!d || !d.videoId) return;
+                const currentSec = (ytPlayer && typeof ytPlayer.getCurrentTime === 'function')
+                    ? Math.floor(ytPlayer.getCurrentTime())
+                    : (d.seekSec || 0);
+                const nextPlaying = d.playing === false ? true : false;
+                db.ref('global_cinema').update({
+                    playing: nextPlaying,
+                    seekSec: currentSec,
+                    startTime: Date.now()
+                });
+            });
+        };
         window.forceSyncAllToMyTime = function() {
-            if(ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
+            if (ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
                 const sec = Math.floor(ytPlayer.getCurrentTime());
-                db.ref('global_cinema').update({ seekSec: sec, startTime: Date.now() });
+                db.ref('global_cinema').update({ seekSec: sec, startTime: Date.now(), playing: true });
+                showToast("Zaman senkronize edildi.");
             }
-        }
+        };
         window.stopAndDeleteMusic = () => db.ref('global_cinema').remove();
+
+        db.ref('cinema_queue').on('value', snap => {
+            const listEl = document.getElementById('cinema-queue-list');
+            if (!listEl) return;
+            const entries = Object.entries(snap.val() || {});
+            listEl.innerHTML = entries.map(([k, v], idx) => `
+                <button onclick="db.ref('cinema_queue/${k}').remove(); syncYoutubeVideo('${v.videoId}');" class="bg-[#120409] border border-amber-500/30 text-amber-200 px-2 py-1 rounded-lg shrink-0">
+                    #${idx + 1} ${v.videoId}
+                </button>
+            `).join('');
+        });
 
         db.ref('global_cinema').on('value', s => {
             const d = s.val();
             const container = document.getElementById('yt-player-frame');
             if (d && d.videoId) {
-                document.getElementById('music-sync-info').textContent = `🎬 ${d.by} oynatıyor`;
+                const stateLabel = d.playing === false ? '⏸️ Duraklatıldı' : '▶️ Oynatılıyor';
+                document.getElementById('music-sync-info').textContent = `🎬 ${d.by} (${stateLabel})`;
                 openCinemaModal();
-                const elapsed = Math.floor((Date.now() - (d.startTime || Date.now())) / 1000) + (d.seekSec || 0);
+                const elapsed = d.playing === false
+                    ? (d.seekSec || 0)
+                    : Math.floor((Date.now() - (d.startTime || Date.now())) / 1000) + (d.seekSec || 0);
+
                 if (ytApiReady && YT && YT.Player) {
-                    if (!ytPlayer || !ytPlayer.loadVideoById) {
+                    if (!ytPlayer || !ytPlayer.loadVideoById || currentCinemaVideoId !== d.videoId) {
+                        currentCinemaVideoId = d.videoId;
                         container.innerHTML = '<div id="yt-api-target"></div>';
                         ytPlayer = new YT.Player('yt-api-target', {
                             height: '100%', width: '100%', videoId: d.videoId,
-                            playerVars: { autoplay: 1, start: elapsed, playsinline: 1 }
+                            playerVars: { autoplay: d.playing === false ? 0 : 1, start: elapsed, playsinline: 1 },
+                            events: {
+                                onReady: ev => { if (d.playing === false) ev.target.pauseVideo(); }
+                            }
                         });
                     } else {
-                        ytPlayer.loadVideoById({ videoId: d.videoId, startSeconds: elapsed });
+                        if (d.playing === false && typeof ytPlayer.pauseVideo === 'function') {
+                            ytPlayer.pauseVideo();
+                        } else if (typeof ytPlayer.playVideo === 'function') {
+                            ytPlayer.seekTo(elapsed, true);
+                            ytPlayer.playVideo();
+                        }
                     }
                 } else {
-                    container.innerHTML = `<iframe class="w-full h-full" src="https://www.youtube.com/embed/${d.videoId}?autoplay=1&start=${elapsed}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+                    container.innerHTML = `<iframe class="w-full h-full" src="https://www.youtube.com/embed/${d.videoId}?autoplay=${d.playing === false ? 0 : 1}&start=${elapsed}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
                 }
             } else {
-                if(ytPlayer && ytPlayer.destroy) { ytPlayer.destroy(); ytPlayer = null; }
+                currentCinemaVideoId = null;
+                if (ytPlayer && ytPlayer.destroy) { ytPlayer.destroy(); ytPlayer = null; }
                 container.innerHTML = "";
                 document.getElementById('music-sync-info').textContent = "Sinema salonu boş.";
             }
@@ -663,7 +830,7 @@
         db.ref('cinema_chat').limitToLast(25).on('child_added', snap => {
             const m = snap.val();
             const cBox = document.getElementById('cinema-messages');
-            if(cBox) {
+            if (cBox) {
                 const p = document.createElement('div');
                 p.className = "bg-[#1c0910] px-2 py-1 rounded-lg border border-rose-900/30";
                 p.innerHTML = `<span class="font-bold text-amber-400">${m.isim}:</span> <span class="text-rose-100">${m.mesaj}</span>`;
@@ -675,11 +842,11 @@
             const listDiv = document.getElementById('leaderboard-list');
             db.ref('leaderboard').once('value', snap => {
                 const data = snap.val() || {};
-                const sorted = Object.entries(data).sort((a,b) => (b[1].score || 0) - (a[1].score || 0));
+                const sorted = Object.entries(data).sort((a, b) => (b[1].score || 0) - (a[1].score || 0));
                 listDiv.innerHTML = sorted.length ? sorted.map(([uid, info], idx) => `
                     <div class="flex items-center justify-between bg-[#120409] p-2.5 rounded-xl border border-rose-900/50">
                         <div class="flex items-center gap-2.5">
-                            <span class="font-bold text-xs text-rose-400">#${idx+1}</span>
+                            <span class="font-bold text-xs text-rose-400">#${idx + 1}</span>
                             <img src="${info.avatar}" class="w-7 h-7 rounded-full object-cover">
                             <span class="text-xs font-bold text-rose-100">${info.name}</span>
                         </div>
@@ -687,7 +854,7 @@
                     </div>
                 `).join('') : '<p class="text-xs text-rose-300/60 italic">Skor tablosu boş.</p>';
             });
-        }
+        };
 
         const gifList = [
             "https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif",
@@ -699,7 +866,7 @@
             "https://media.giphy.com/media/3o7TKSjRrfIPjeiOkM/giphy.gif",
             "https://media.giphy.com/media/5GoVL4DAbHCX1gOkBs/giphy.gif"
         ];
-        const stickerList = ["🔥","😂","❤️","👑","😎","🥳","🤝","💀","🚀","⚽","🎮","🍿"];
+        const stickerList = ["🔥", "😂", "❤️", "👑", "😎", "🥳", "🤝", "💀", "🚀", "⚽", "🎮", "🍿"];
         setTimeout(() => {
             document.getElementById('gif-grid').innerHTML = gifList.map(url => `<img src="${url}" class="w-full h-24 object-cover rounded-xl cursor-pointer" onclick="sendGIF('${url}')">`).join('');
             document.getElementById('sticker-grid').innerHTML = stickerList.map(st => `<button onclick="sendSticker('${st}')" class="bg-[#120409] p-2 rounded-xl hover:bg-rose-900/40">${st}</button>`).join('');
@@ -714,6 +881,19 @@
             const md = getMyData();
             db.ref('odalar/' + currentRoom).push({ uid: currentUser.uid, isim: md.name, avatar: md.avatar, mesaj: st, type: 'sticker', zaman: Date.now() });
             closeModal('sticker-modal'); playWhatsAppSound('send');
+        };
+        window.sendGameInvite = () => {
+            if (!currentUser) return;
+            const md = getMyData();
+            db.ref('odalar/' + currentRoom).push({
+                uid: currentUser.uid,
+                isim: md.name,
+                avatar: md.avatar,
+                type: 'game_invite',
+                mesaj: 'Oyun salonuna davet gönderdi!',
+                zaman: Date.now()
+            });
+            playWhatsAppSound('send');
         };
 
         let wbInitialized = false;
@@ -731,7 +911,7 @@
                 };
                 const startDraw = e => { drawing = true; lastPt = getPos(e); };
                 const moveDraw = e => {
-                    if(!drawing) return;
+                    if (!drawing) return;
                     e.preventDefault();
                     const p = getPos(e);
                     const color = wbIsEraser ? '#120409' : wbColor;
@@ -749,17 +929,17 @@
                     ctx.strokeStyle = s.color || '#fbbf24'; ctx.lineWidth = s.width || 3; ctx.lineCap = 'round'; ctx.stroke();
                 });
                 db.ref(`wb_strokes/${currentRoom}`).on('value', snap => {
-                    if(!snap.exists()) ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    if (!snap.exists()) ctx.clearRect(0, 0, canvas.width, canvas.height);
                 });
             }
-        }
+        };
         window.clearWhiteboard = () => db.ref(`wb_strokes/${currentRoom}`).remove();
 
         auth.onAuthStateChanged(user => {
             if (user) {
                 currentUser = user;
                 document.getElementById('login-screen').classList.add('hidden');
-                
+
                 const savedBgef = localStorage.getItem('wrts_bgef_' + user.uid) || 'snow';
                 document.getElementById('bg-effect-select').value = savedBgef;
                 initBgEffect(savedBgef);
@@ -778,7 +958,7 @@
                 db.ref(`friends/${user.uid}`).on('value', snap => { myFriends = snap.val() || {}; updateUsersUI(); });
                 db.ref(`friend_requests/${user.uid}`).on('value', snap => {
                     const reqs = snap.val() || {}; const badge = document.getElementById('req-badge');
-                    if(Object.keys(reqs).length > 0) badge.classList.remove('hidden'); else badge.classList.add('hidden');
+                    if (Object.keys(reqs).length > 0) badge.classList.remove('hidden'); else badge.classList.add('hidden');
                 });
                 db.ref(`gizli_dm_listesi/${user.uid}`).on('value', snap => {
                     const hasUnread = Object.values(snap.val() || {}).some(d => d.unread);
@@ -794,7 +974,8 @@
             const name = localStorage.getItem('wrts_name_' + currentUser.uid) || currentUser.displayName || currentUser.email.split('@')[0];
             const bio = localStorage.getItem('wrts_bio_' + currentUser.uid) || "WrtS Kullanıcısı";
             const avatar = localStorage.getItem('wrts_avatar_' + currentUser.uid) || currentUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=e11d48&color=fff`;
-            return { name, avatar, bio };
+            const aiEndpoint = localStorage.getItem('wrts_ai_url_' + currentUser.uid) || '';
+            return { name, avatar, bio, aiEndpoint };
         }
 
         function loadUserDataToUI() {
@@ -803,33 +984,34 @@
             document.getElementById('preview-avatar').src = d.avatar;
             document.getElementById('edit-name').value = d.name;
             document.getElementById('edit-bio').value = d.bio;
+            document.getElementById('edit-ai-endpoint').value = d.aiEndpoint;
         }
 
-        document.getElementById('save-profile').onclick = () => {
+        document.getElementById('save-profile').onclick = async () => {
             const n = document.getElementById('edit-name').value.trim();
             const b = document.getElementById('edit-bio').value.trim();
-            if(!n) return;
+            const aiUrl = document.getElementById('edit-ai-endpoint').value.trim();
+            if (!n) return;
             localStorage.setItem('wrts_name_' + currentUser.uid, n);
             localStorage.setItem('wrts_bio_' + currentUser.uid, b);
-            if(tempBase64Avatar) localStorage.setItem('wrts_avatar_' + currentUser.uid, tempBase64Avatar);
+            localStorage.setItem('wrts_ai_url_' + currentUser.uid, aiUrl);
+            if (tempBase64Avatar) {
+                const compressedAvatar = await compressImageDataUrl(tempBase64Avatar, 160, 0.72);
+                localStorage.setItem('wrts_avatar_' + currentUser.uid, compressedAvatar);
+            }
             loadUserDataToUI(); closeModal('profile-modal');
             const md = getMyData();
             db.ref('status/' + currentUser.uid).update({ name: md.name, avatar: md.avatar });
             db.ref('users_registry/' + currentUser.uid).update({ name: md.name, avatar: md.avatar, bio: md.bio });
+            showToast("Profil kaydedildi.");
         };
 
         document.getElementById('upload-avatar-file').onchange = e => {
-            const f = e.target.files[0]; if(!f) return;
+            const f = e.target.files[0]; if (!f) return;
             const r = new FileReader();
-            r.onload = ev => {
-                const img = new Image();
-                img.onload = () => {
-                    const c = document.createElement('canvas'); c.width = 120; c.height = 120;
-                    c.getContext('2d').drawImage(img, 0, 0, 120, 120);
-                    tempBase64Avatar = c.toDataURL('image/jpeg', 0.7);
-                    document.getElementById('preview-avatar').src = tempBase64Avatar;
-                };
-                img.src = ev.target.result;
+            r.onload = async ev => {
+                tempBase64Avatar = await compressImageDataUrl(ev.target.result, 160, 0.72);
+                document.getElementById('preview-avatar').src = tempBase64Avatar;
             };
             r.readAsDataURL(f);
         };
@@ -841,7 +1023,7 @@
                 const list = document.getElementById('friend-requests-list');
                 const sec = document.getElementById('friend-requests-section');
                 const entries = Object.entries(reqs);
-                if(entries.length > 0) {
+                if (entries.length > 0) {
                     sec.classList.remove('hidden');
                     list.innerHTML = entries.map(([uid, info]) => `
                         <div class="flex items-center justify-between bg-[#120409] p-2 rounded-xl border border-amber-500/40">
@@ -854,7 +1036,7 @@
                     `).join('');
                 } else { sec.classList.add('hidden'); }
             });
-        }
+        };
 
         window.acceptFriend = function(uid, encName) {
             const name = decodeURIComponent(encName);
@@ -862,12 +1044,12 @@
             db.ref(`friends/${uid}/${currentUser.uid}`).set({ name: getMyData().name });
             db.ref(`friend_requests/${currentUser.uid}/${uid}`).remove();
             loadOnlineUsersList();
-        }
+        };
 
         function updateUsersUI() {
-            let count = 0; Object.values(activeUsersData).forEach(u => { if(u.state === 'online') count++; });
+            let count = 0; Object.values(activeUsersData).forEach(u => { if (u.state === 'online') count++; });
             document.getElementById('online-count').textContent = Math.max(1, count);
-            
+
             const fList = document.getElementById('my-friends-list');
             const fEntries = Object.entries(myFriends);
             fList.innerHTML = fEntries.length ? fEntries.map(([uid, info]) => {
@@ -903,7 +1085,7 @@
 
         window.openUserProfileModal = function(targetUid, encName) {
             closeModal('users-modal'); closeModal('menu-drawer-modal');
-            if(targetUid === currentUser.uid) { openMyProfile(); return; }
+            if (targetUid === currentUser.uid) { openMyProfile(); return; }
             const targetName = decodeURIComponent(encName);
             openModal('user-profile-modal');
             document.getElementById('up-name').textContent = targetName;
@@ -912,7 +1094,7 @@
 
             db.ref(`users_registry/${targetUid}`).once('value', snap => {
                 const uData = snap.val() || {};
-                if(uData.avatar) upAvatar.src = uData.avatar;
+                if (uData.avatar) upAvatar.src = uData.avatar;
                 document.getElementById('up-bio').textContent = uData.bio || "WrtS Kullanıcısı";
             });
 
@@ -921,43 +1103,43 @@
             const statusText = document.getElementById('up-status-text');
             const lastSeenText = document.getElementById('up-last-seen');
 
-            if(online) {
+            if (online) {
                 statusText.textContent = "Çevrimiçi";
                 statusText.className = "font-bold text-emerald-400";
                 lastSeenText.textContent = "Şu an aktif";
             } else {
                 statusText.textContent = "Çevrimdışı";
                 statusText.className = "font-bold text-rose-400";
-                lastSeenText.textContent = st.lastSeen ? new Date(st.lastSeen).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "Az önce";
+                lastSeenText.textContent = st.lastSeen ? new Date(st.lastSeen).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Az önce";
             }
 
             const isFriend = !!myFriends[targetUid];
             document.getElementById('up-actions').innerHTML = `
                 <button onclick="startDM('${targetUid}', '${encodeURIComponent(targetName)}'); closeModal('user-profile-modal');" class="flex-1 bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-xs font-bold text-white">💬 Özel Mesaj</button>
-                ${!isFriend ? `<button onclick="db.ref('friend_requests/${targetUid}/${currentUser.uid}').set({name: getMyData().name}); alert('İstek gönderildi!');" class="bg-rose-600/30 text-rose-200 px-3 py-2.5 rounded-xl text-xs font-bold">💖 Ekle</button>` : `<span class="bg-emerald-600/20 text-emerald-400 px-3 py-2.5 rounded-xl text-xs font-bold">✔ Arkadaş</span>`}
+                ${!isFriend ? `<button onclick="db.ref('friend_requests/${targetUid}/${currentUser.uid}').set({name: getMyData().name}); showToast('Arkadaşlık isteği gönderildi!');" class="bg-rose-600/30 text-rose-200 px-3 py-2.5 rounded-xl text-xs font-bold">💖 Ekle</button>` : `<span class="bg-emerald-600/20 text-emerald-400 px-3 py-2.5 rounded-xl text-xs font-bold">✔ Arkadaş</span>`}
             `;
-        }
+        };
 
         window.startDM = function(targetUid, encName) {
             const targetName = decodeURIComponent(encName);
             const ids = [currentUser.uid, targetUid].sort();
             const dmId = `özel_dm_${ids[0]}_${ids[1]}`;
-            
+
             db.ref(`gizli_dm_listesi/${currentUser.uid}/${dmId}`).set({ targetUid, targetName, unread: false });
             db.ref(`gizli_dm_listesi/${targetUid}/${dmId}`).update({ targetUid: currentUser.uid, targetName: getMyData().name });
-            
+
             currentRoom = dmId;
             document.getElementById('dm-banner').classList.remove('hidden');
             document.getElementById('dm-banner-text').textContent = `💬 ${targetName} ile Özel Sohbet`;
             loadRoom(dmId);
-        }
+        };
 
         window.exitDM = function() {
             document.getElementById('dm-banner').classList.add('hidden');
             currentRoom = 'genel';
             document.getElementById('room-select').value = 'genel';
             loadRoom('genel');
-        }
+        };
 
         window.openDMListModal = function() {
             openModal('dm-list-modal');
@@ -972,7 +1154,7 @@
                     </div>
                 `).join('') : '<p class="text-xs text-rose-300/60 italic">Özel mesajın yok.</p>';
             });
-        }
+        };
         window.openDMFromList = function(dmId, encName) {
             const targetName = decodeURIComponent(encName);
             db.ref(`gizli_dm_listesi/${currentUser.uid}/${dmId}/unread`).set(false);
@@ -981,7 +1163,7 @@
             document.getElementById('dm-banner').classList.remove('hidden');
             document.getElementById('dm-banner-text').textContent = `💬 ${targetName} ile Özel Sohbet`;
             loadRoom(dmId);
-        }
+        };
 
         function listenRooms() {
             db.ref('oda_listesi').on('value', snap => {
@@ -998,7 +1180,7 @@
             });
         }
         document.getElementById('create-room-btn').onclick = () => {
-            const name = document.getElementById('new-room-name').value.trim(); if(!name) return;
+            const name = document.getElementById('new-room-name').value.trim(); if (!name) return;
             const id = 'oda_' + Date.now();
             db.ref('oda_listesi/' + id).set({ name: filterBadWords(name), creator: currentUser.uid }).then(() => {
                 document.getElementById('new-room-name').value = ''; closeModal('room-modal');
@@ -1018,23 +1200,42 @@
                 list.innerHTML = Object.entries(users).filter(([uid]) => uid !== currentUser.uid).map(([uid, info]) => `
                     <div class="flex items-center justify-between bg-[#120409] p-2 rounded-xl border border-rose-900/50">
                         <span class="text-xs font-bold">${info.name}</span>
-                        <button onclick="db.ref('room_mutes/${currentRoom}/${uid}').set(true); alert('Susturuldu!');" class="text-[10px] bg-red-600/30 text-red-400 px-2 py-1 rounded font-bold">Sustur</button>
+                        <button onclick="db.ref('room_mutes/${currentRoom}/${uid}').set(true); showToast('Kullanıcı susturuldu.');" class="text-[10px] bg-red-600/30 text-red-400 px-2 py-1 rounded font-bold">Sustur</button>
                     </div>
                 `).join('');
             });
-        }
+        };
         window.deleteCurrentRoom = () => {
-            if(confirm("Odayı silmek istediğine emin misin?")) {
+            if (confirm("Odayı silmek istediğine emin misin?")) {
                 db.ref('oda_listesi/' + currentRoom).remove();
                 closeModal('roles-modal');
                 currentRoom = 'genel'; loadRoom('genel');
             }
         };
 
-        // MESAJ ELEMENTİ (Emoji bırakma ve geri çekme tamir edildi)
+        function formatMessageWithLinksAndMentions(rawText) {
+            const clean = filterBadWords(rawText || '');
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            const urls = clean.match(urlRegex) || [];
+            let html = clean
+                .replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer" class="underline text-amber-300 break-all">$1</a>')
+                .replace(/(@[^\s<]+)/g, '<span class="bg-amber-500/30 text-amber-300 px-1 rounded font-bold">$1</span>');
+
+            if (urls.length > 0) {
+                const firstUrl = urls[0];
+                let hostName = firstUrl;
+                try { hostName = new URL(firstUrl).hostname; } catch (_) {}
+                html += `<a href="${firstUrl}" target="_blank" rel="noopener noreferrer" class="mt-1.5 block bg-[#120409]/90 border border-amber-500/30 rounded-xl p-2 text-[11px] hover:border-amber-400 transition">
+                    <div class="font-bold text-amber-300 truncate">🔗 ${hostName}</div>
+                    <div class="text-rose-200/70 truncate text-[10px]">${firstUrl}</div>
+                </a>`;
+            }
+            return html;
+        }
+
         function createMessageElement(snap, room) {
             const data = snap.val(); const key = snap.key; const isMe = currentUser && data.uid === currentUser.uid;
-            
+
             if (!isMe && currentUser && (!data.readBy || !data.readBy[currentUser.uid])) {
                 db.ref(`odalar/${room}/${key}/readBy/${currentUser.uid}`).set(true);
             }
@@ -1049,10 +1250,10 @@
             else if (data.type === 'poll') {
                 const votes = data.votes || {}; const v1 = Object.values(votes).filter(v => v === 1).length; const v2 = Object.values(votes).filter(v => v === 2).length;
                 content = `<div class="bg-[#120409]/90 border border-rose-900/50 rounded-xl p-2.5 space-y-1.5 min-w-[200px]"><p class="text-xs font-bold text-amber-300">📊 ${data.question}</p><button onclick="votePoll('${room}', '${key}', 1)" class="w-full flex justify-between bg-[#1c0910] px-2.5 py-1 rounded-lg text-xs"><span>${data.opt1}</span><span class="font-bold text-amber-400">${v1}</span></button><button onclick="votePoll('${room}', '${key}', 2)" class="w-full flex justify-between bg-[#1c0910] px-2.5 py-1 rounded-lg text-xs"><span>${data.opt2}</span><span class="font-bold text-amber-400">${v2}</span></button></div>`;
+            } else if (data.type === 'game_invite') {
+                content = `<div class="bg-[#120409]/90 border border-amber-500/40 rounded-xl p-2.5 space-y-2 min-w-[190px]"><p class="text-xs font-bold text-amber-300">🎲 ${data.mesaj || 'Oyun daveti!'}</p><button onclick="openModal('games-modal'); initGames();" class="w-full bg-gradient-to-r from-rose-600 to-amber-600 py-1.5 rounded-lg text-xs font-bold text-white">Salona Katıl</button></div>`;
             } else {
-                let msgText = filterBadWords(data.mesaj || '');
-                msgText = msgText.replace(/(@[^\s]+)/g, '<span class="bg-amber-500/30 text-amber-300 px-1 rounded font-bold">$1</span>');
-                content = `<p class="text-sm break-words">${msgText} ${data.edited ? '<span class="text-[9px] opacity-60">(düzenlendi)</span>' : ''}</p>`;
+                content = `<div class="text-sm break-words">${formatMessageWithLinksAndMentions(data.mesaj || '')} ${data.edited ? '<span class="text-[9px] opacity-60">(düzenlendi)</span>' : ''}</div>`;
             }
 
             const timeStr = new Date(data.zaman || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -1064,14 +1265,13 @@
                 seenHtml = `<span class="text-[10px] ${isSeen ? 'text-sky-400 font-bold' : 'text-rose-200/60'} ml-1" title="${isSeen ? 'Görüldü' : 'İletildi'}">${isSeen ? '✓✓' : '✓'}</span>`;
             }
 
-            // Emojiler HTML oluşturma
             const reactions = data.reactions || {};
             let reactionsHtml = '';
             const reactionCounts = {};
             Object.entries(reactions).forEach(([uId, emo]) => {
                 reactionCounts[emo] = (reactionCounts[emo] || 0) + 1;
             });
-            if(Object.keys(reactionCounts).length > 0) {
+            if (Object.keys(reactionCounts).length > 0) {
                 reactionsHtml = `<div class="flex flex-wrap gap-1 mt-1">` + Object.entries(reactionCounts).map(([emo, count]) => {
                     const reactedByMe = reactions[currentUser?.uid] === emo;
                     return `<span onclick="toggleReaction('${room}', '${key}', '${emo}')" class="text-[11px] bg-[#120409]/80 border ${reactedByMe ? 'border-amber-400 text-amber-300' : 'border-rose-900/40 text-rose-200'} px-1.5 py-0.5 rounded-full cursor-pointer">${emo} ${count}</span>`;
@@ -1096,8 +1296,9 @@
                             <button onclick="toggleReaction('${room}', '${key}', '👍')" class="hover:scale-125 transition">👍</button>
                             <button onclick="toggleReaction('${room}', '${key}', '🎉')" class="hover:scale-125 transition">🎉</button>
                         </div>
-                        <div class="flex gap-2 pt-0.5">
+                        <div class="flex gap-2 pt-0.5 flex-wrap">
                             <button onclick="setReplyTo('${key}', '${data.isim}', '${safePreview}')" class="text-amber-400 font-bold">Yanıtla</button>
+                            <button onclick="pinMessage('${room}', '${key}', '${safePreview}', '${data.isim}')" class="text-emerald-400 font-bold">Sabitle</button>
                             ${isMe && data.type === 'text' ? `<button onclick="startEditMessage('${key}', '${safePreview}')" class="text-sky-400 font-bold">Düzenle</button>` : ''}
                             ${isMe ? `<button onclick="db.ref('odalar/${room}/${key}').remove()" class="text-red-400 font-bold">Sil</button>` : ''}
                         </div>
@@ -1121,27 +1322,24 @@
             return div;
         }
 
-        // EMOJI EKLEME VE GERİ ÇEKME FONKSİYONU
         window.toggleReaction = function(room, key, emo) {
-            if(!currentUser) return;
+            if (!currentUser) return;
             const ref = db.ref(`odalar/${room}/${key}/reactions/${currentUser.uid}`);
             ref.once('value', snap => {
-                if(snap.val() === emo) {
-                    ref.remove(); // Aynı emojiyse geri çek/kaldır
-                } else {
-                    ref.set(emo); // Yeni emoji ekle veya değiştir
-                }
+                if (snap.val() === emo) ref.remove();
+                else ref.set(emo);
             });
             document.getElementById(`menu-${key}`)?.classList.add('hidden');
-        }
+        };
 
         window.scrollToMessage = function(key) {
             const el = document.getElementById(`msg-${key}`);
             if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-        }
+        };
 
         function loadRoom(room) {
             if (roomRef) roomRef.off();
+            if (pinnedRef) pinnedRef.off();
             const messagesDiv = document.getElementById('messages');
             messagesDiv.innerHTML = ''; isInitialLoad = true;
 
@@ -1149,15 +1347,32 @@
             const annText = document.getElementById('announcement-text');
             const annDelBtn = document.getElementById('delete-announcement-btn');
             const modBtn = document.getElementById('room-settings-btn');
+            const pinnedBar = document.getElementById('pinned-bar');
+            const pinnedText = document.getElementById('pinned-text');
+            const unpinBtn = document.getElementById('unpin-btn');
 
-            if (customRoomsData[room] && customRoomsData[room].creator === currentUser.uid) modBtn.classList.remove('hidden');
-            else modBtn.classList.add('hidden');
+            const isCreator = !!(customRoomsData[room] && customRoomsData[room].creator === currentUser.uid);
+            modBtn.classList.toggle('hidden', !isCreator);
+            unpinBtn.classList.toggle('hidden', !isCreator);
+
+            pinnedRef = db.ref(`pinned/${room}`);
+            pinnedRef.on('value', snap => {
+                const p = snap.val();
+                if (p && p.text) {
+                    currentPinnedKey = p.key || null;
+                    pinnedText.textContent = `${p.by ? p.by + ': ' : ''}${p.text}`;
+                    pinnedBar.classList.remove('hidden');
+                } else {
+                    currentPinnedKey = null;
+                    pinnedBar.classList.add('hidden');
+                }
+            });
 
             if (!room.startsWith('özel_dm_')) {
                 annBar.classList.remove('hidden');
                 db.ref(`announcements/${room}`).on('value', snap => {
                     const val = snap.val();
-                    if(val) { annText.textContent = `${val.text} (${val.by})`; annDelBtn.classList.remove('hidden'); }
+                    if (val) { annText.textContent = `${val.text} (${val.by})`; annDelBtn.classList.remove('hidden'); }
                     else { annText.textContent = "Bu odada duyuru yok."; annDelBtn.classList.add('hidden'); }
                 });
             } else { annBar.classList.add('hidden'); }
@@ -1171,44 +1386,76 @@
             });
             roomRef.on('child_changed', snap => {
                 const oldEl = document.getElementById(`msg-${snap.key}`);
-                if(oldEl) { oldEl.replaceWith(createMessageElement(snap, room)); }
+                if (oldEl) { oldEl.replaceWith(createMessageElement(snap, room)); }
             });
             roomRef.on('child_removed', snap => document.getElementById(`msg-${snap.key}`)?.remove());
         }
 
         let typingTimer = null;
         const msgInput = document.getElementById('msg-input');
-        msgInput.addEventListener('input', e => {
-            if(!currentUser) return;
+        msgInput.addEventListener('input', () => {
+            if (!currentUser) return;
             const typingRef = db.ref(`typing/${currentRoom}/${currentUser.uid}`);
-            typingRef.set(getMyData().name);
+            typingRef.set({ name: getMyData().name, mode: 'typing' });
             typingRef.onDisconnect().remove();
-            
+
             clearTimeout(typingTimer);
             typingTimer = setTimeout(() => { typingRef.remove(); }, 2000);
         });
 
-        db.ref(`typing`).on('value', snap => {
+        function setRecordingState(active) {
+            if (!currentUser) return;
+            const typingRef = db.ref(`typing/${currentRoom}/${currentUser.uid}`);
+            if (active) {
+                typingRef.set({ name: getMyData().name, mode: 'recording' });
+                typingRef.onDisconnect().remove();
+            } else {
+                typingRef.remove();
+            }
+        }
+
+        db.ref('typing').on('value', snap => {
             const data = snap.val() || {};
             const roomTyping = data[currentRoom] || {};
-            const others = Object.entries(roomTyping).filter(([uid]) => currentUser && uid !== currentUser.uid).map(([_, name]) => name);
+            const entries = Object.entries(roomTyping).filter(([uid]) => currentUser && uid !== currentUser.uid);
             const indicator = document.getElementById('typing-indicator');
-            indicator.textContent = others.length > 0 ? `${others.join(', ')} yazıyor...` : '';
+            if (!entries.length) { indicator.textContent = ''; return; }
+            const recorders = entries.filter(([_, v]) => typeof v === 'object' && v.mode === 'recording').map(([_, v]) => v.name);
+            const typers = entries.filter(([_, v]) => !(typeof v === 'object' && v.mode === 'recording')).map(([_, v]) => typeof v === 'object' ? v.name : v);
+            const parts = [];
+            if (typers.length) parts.push(`${typers.join(', ')} yazıyor...`);
+            if (recorders.length) parts.push(`🎙️ ${recorders.join(', ')} ses kaydediyor...`);
+            indicator.textContent = parts.join(' • ');
         });
 
-        function getAISystemNotice() {
-            return "🤖 **WrtS AI Bilgilendirme:** Yapay zeka asistanı modülü şu an geliştirilme aşamasındadır ve tam olarak aktif değildir. Yakında güncellenmiş özellikleriyle sizlerle olacak!";
+        async function resolveAIResponse(promptText, endpoint) {
+            if (endpoint) {
+                try {
+                    const res = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt: promptText, room: currentRoom })
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data && (data.reply || data.text || data.message)) {
+                            return String(data.reply || data.text || data.message);
+                        }
+                    }
+                } catch (_) {}
+            }
+            return "🤖 **WrtS AI:** `@ai` komutu algılandı. İstersen Profil & Ayarlar menüsünden kendi webhook/API adresini ekleyebilirsin!";
         }
 
         document.getElementById('msg-form').onsubmit = async e => {
             e.preventDefault();
             const text = msgInput.value.trim(); if (!text) return;
             const muted = (await db.ref(`room_mutes/${currentRoom}/${currentUser.uid}`).once('value')).val();
-            if(muted) return alert("Bu odada susturuldun!");
+            if (muted) return showToast("Bu odada susturuldun!", 'error');
 
             db.ref(`typing/${currentRoom}/${currentUser.uid}`).remove();
 
-            if(editingMessageKey) {
+            if (editingMessageKey) {
                 db.ref(`odalar/${currentRoom}/${editingMessageKey}`).update({ mesaj: filterBadWords(text), edited: true });
                 cancelReplyOrEdit(); msgInput.value = ''; return;
             }
@@ -1220,23 +1467,25 @@
             db.ref('odalar/' + currentRoom).push(msgData);
             incrementUserStat('msgs', 1);
 
-            if(cleanText.includes('@ai')) {
+            if (cleanText.includes('@ai')) {
+                const aiQuestion = cleanText.replace(/@ai/gi, '').trim() || cleanText;
+                const replyText = await resolveAIResponse(aiQuestion, md.aiEndpoint);
                 setTimeout(() => {
                     db.ref('odalar/' + currentRoom).push({
                         uid: 'wrts_ai_bot',
                         isim: '🤖 WrtS AI Asistan',
                         avatar: 'https://ui-avatars.com/api/?name=AI&background=3b82f6&color=fff',
-                        mesaj: getAISystemNotice(),
+                        mesaj: replyText,
                         type: 'text',
                         zaman: Date.now()
                     });
-                }, 700);
+                }, 400);
             }
 
-            if(currentRoom.startsWith('özel_dm_')) {
+            if (currentRoom.startsWith('özel_dm_')) {
                 const parts = currentRoom.replace('özel_dm_', '').split('_');
                 const targetUid = parts.find(id => id !== currentUser.uid);
-                if(targetUid) db.ref(`gizli_dm_listesi/${targetUid}/${currentRoom}`).update({ targetUid: currentUser.uid, targetName: md.name, unread: true });
+                if (targetUid) db.ref(`gizli_dm_listesi/${targetUid}/${currentRoom}`).update({ targetUid: currentUser.uid, targetName: md.name, unread: true });
             }
 
             msgInput.value = '';
@@ -1269,44 +1518,45 @@
 
         window.sendCodeSnippet = function() {
             const code = document.getElementById('code-content-input').value;
-            if(!code.trim()) return;
+            if (!code.trim()) return;
             const md = getMyData();
             db.ref('odalar/' + currentRoom).push({ uid: currentUser.uid, isim: md.name, avatar: md.avatar, type: 'code', code, zaman: Date.now() });
             document.getElementById('code-content-input').value = ''; closeModal('code-modal'); playWhatsAppSound('send');
-        }
+        };
         window.createPoll = function() {
             const q = document.getElementById('poll-question').value.trim();
             const o1 = document.getElementById('poll-opt1').value.trim();
             const o2 = document.getElementById('poll-opt2').value.trim();
-            if(!q || !o1 || !o2) return;
+            if (!q || !o1 || !o2) return;
             const md = getMyData();
             db.ref('odalar/' + currentRoom).push({ uid: currentUser.uid, isim: md.name, avatar: md.avatar, type: 'poll', question: filterBadWords(q), opt1: filterBadWords(o1), opt2: filterBadWords(o2), votes: {}, zaman: Date.now() });
             closeModal('poll-modal'); playWhatsAppSound('send');
-        }
-        window.votePoll = (room, key, choice) => { if(currentUser) db.ref(`odalar/${room}/${key}/votes/${currentUser.uid}`).set(choice); };
+        };
+        window.votePoll = (room, key, choice) => { if (currentUser) db.ref(`odalar/${room}/${key}/votes/${currentUser.uid}`).set(choice); };
 
         document.getElementById('img-file').onchange = e => {
-            const f = e.target.files[0]; if(!f) return;
+            const f = e.target.files[0]; if (!f) return;
             const r = new FileReader();
-            r.onload = ev => {
+            r.onload = async ev => {
+                const compressedUrl = await compressImageDataUrl(ev.target.result, 720, 0.72);
                 const md = getMyData();
-                db.ref('odalar/' + currentRoom).push({ uid: currentUser.uid, isim: md.name, avatar: md.avatar, url: ev.target.result, type: 'image', zaman: Date.now() });
+                db.ref('odalar/' + currentRoom).push({ uid: currentUser.uid, isim: md.name, avatar: md.avatar, url: compressedUrl, type: 'image', zaman: Date.now() });
                 playWhatsAppSound('send');
             };
             r.readAsDataURL(f);
         };
 
-        // SESLİ MESAJ (WALKIE-TALKIE) SORUNSUZ FORMAT VE KAYIT MANTIĞI
         let mediaRecorder, audioChunks = [];
         const wtBtn = document.getElementById('walkie-talkie-btn');
         wtBtn.onmousedown = wtBtn.ontouchstart = async (e) => {
             e.preventDefault();
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream); 
+                mediaRecorder = new MediaRecorder(stream);
                 audioChunks = [];
-                mediaRecorder.ondataavailable = ev => { if(ev.data.size > 0) audioChunks.push(ev.data); };
+                mediaRecorder.ondataavailable = ev => { if (ev.data.size > 0) audioChunks.push(ev.data); };
                 mediaRecorder.onstop = () => {
+                    setRecordingState(false);
                     const blob = new Blob(audioChunks, { type: 'audio/webm' });
                     const r = new FileReader();
                     r.onloadend = () => {
@@ -1318,8 +1568,9 @@
                     stream.getTracks().forEach(t => t.stop());
                 };
                 mediaRecorder.start();
+                setRecordingState(true);
                 wtBtn.classList.add('bg-rose-600', 'text-white', 'animate-pulse');
-            } catch(e) { alert("Mikrofon izni verilmedi veya desteklenmiyor."); }
+            } catch (e) { showToast("Mikrofon izni verilmedi veya desteklenmiyor.", 'error'); }
         };
         wtBtn.onmouseup = wtBtn.ontouchend = (e) => {
             e.preventDefault();
@@ -1362,7 +1613,7 @@
                     }
                 });
                 callRef.child('answerCandidates').on('child_added', s => { if (s.val()) peerConnection.addIceCandidate(new RTCIceCandidate(s.val())); });
-            } catch(e) { alert("Kamera/Mikrofon erişimi başarısız."); }
+            } catch (e) { showToast("Kamera/Mikrofon erişimi başarısız.", 'error'); }
         };
 
         window.startScreenShare = async () => {
@@ -1382,14 +1633,14 @@
                         await peerConnection.setRemoteDescription(new RTCSessionDescription(s.val()));
                     }
                 });
-            } catch(e) { alert("Ekran paylaşımı başlatılamadı."); }
+            } catch (e) { showToast("Ekran paylaşımı başlatılamadı.", 'error'); }
         };
 
         window.joinWebRTCCall = async () => {
             try {
                 const callRef = db.ref(`webrtc/${currentRoom}`);
                 const offer = (await callRef.child('offer').once('value')).val();
-                if(!offer) return alert("Aktif bir çağrı bulunamadı!");
+                if (!offer) return showToast("Aktif bir çağrı bulunamadı!", 'error');
                 localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true }).catch(() => navigator.mediaDevices.getUserMedia({ audio: true }));
                 document.getElementById('local-video').srcObject = localStream;
                 peerConnection = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
@@ -1401,7 +1652,7 @@
                 await callRef.child('answer').set({ type: ans.type, sdp: ans.sdp });
                 callRef.child('offerCandidates').on('child_added', s => { if (s.val()) peerConnection.addIceCandidate(new RTCIceCandidate(s.val())); });
                 document.getElementById('call-status').textContent = "Görüşmeye katıldın!";
-            } catch(e) { alert("Katılım başarısız."); }
+            } catch (e) { showToast("Katılım başarısız.", 'error'); }
         };
         window.endWebRTCCall = () => {
             if (localStream) localStream.getTracks().forEach(t => t.stop());
@@ -1410,7 +1661,7 @@
         };
 
         window.switchGameTab = g => {
-            ['xox', 'battleship'].forEach(x => {
+            ['xox', 'battleship', 'guess'].forEach(x => {
                 document.getElementById(`game-panel-${x}`).classList.toggle('hidden', x !== g);
                 document.getElementById(`tab-${x}`).className = x === g ? 'flex-1 py-1.5 rounded-lg text-xs font-bold bg-rose-600 text-white' : 'flex-1 py-1.5 rounded-lg text-xs font-bold text-rose-300/60';
             });
@@ -1422,13 +1673,13 @@
                 document.getElementById('xox-status').textContent = g.winner ? `Kazanan: ${g.winner}!` : `Sıra: ${g.turn}`;
             });
             listenBattleship();
-        }
+        };
         window.makeXOXMove = i => {
             db.ref(`games/${currentRoom}/xox`).once('value', s => {
                 let g = s.val() || { board: Array(9).fill(''), turn: 'X', winner: '' };
                 if (g.board[i] || g.winner) return;
                 g.board[i] = g.turn;
-                const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+                const wins = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
                 if (wins.some(w => g.board[w[0]] && g.board[w[0]] === g.board[w[1]] && g.board[w[1]] === g.board[w[2]])) {
                     g.winner = g.turn;
                 } else {
@@ -1457,7 +1708,7 @@
                     const btn = document.createElement('button');
                     btn.className = `w-10 h-10 rounded-lg font-bold text-xs border border-rose-900/50 ${hit ? (isShip ? 'bg-emerald-600 text-white' : 'bg-rose-950/60 text-rose-500') : 'bg-[#120409] hover:border-amber-500'} transition`;
                     btn.textContent = hit ? (isShip ? '🚢' : '❌') : '?';
-                    
+
                     btn.onclick = () => {
                         if (g.gameOver || hit || remainingShots <= 0) return;
                         db.ref(`games/${currentRoom}/bs/revealed/${i}`).set(true);
@@ -1470,7 +1721,7 @@
 
                 if (found >= 3) {
                     statusEl.textContent = '🎉 Tebrikler! Tüm gemileri buldun!';
-                    if(!g.scored && currentUser) {
+                    if (!g.scored && currentUser) {
                         incrementUserStat('score', 50);
                         db.ref(`leaderboard/${currentUser.uid}`).update({ name: getMyData().name, avatar: getMyData().avatar, score: firebase.database.ServerValue.increment(50) });
                         db.ref(`games/${currentRoom}/bs/scored`).set(true);
@@ -1490,6 +1741,31 @@
                 if (!ships.includes(r)) ships.push(r);
             }
             db.ref(`games/${currentRoom}/bs`).set({ ships, revealed: {}, gameOver: false, scored: false });
+        };
+
+        window.resetGuessGame = function() {
+            guessSecret = Math.floor(Math.random() * 50) + 1;
+            document.getElementById('guess-hint').textContent = 'Yeni sayı üretildi.';
+            document.getElementById('guess-input').value = '';
+        };
+        window.submitGuess = function() {
+            const val = parseInt(document.getElementById('guess-input').value, 10);
+            const hintEl = document.getElementById('guess-hint');
+            if (!val || val < 1 || val > 50) return showToast("1 ile 50 arası bir sayı gir.", 'error');
+            if (val === guessSecret) {
+                hintEl.textContent = `🎉 Bildin! Gizli sayı ${guessSecret} idi (+25 Puan).`;
+                if (currentUser) {
+                    incrementUserStat('score', 25);
+                    db.ref(`leaderboard/${currentUser.uid}`).update({
+                        name: getMyData().name,
+                        avatar: getMyData().avatar,
+                        score: firebase.database.ServerValue.increment(25)
+                    });
+                }
+                guessSecret = Math.floor(Math.random() * 50) + 1;
+            } else {
+                hintEl.textContent = val < guessSecret ? '⬆️ Daha yüksek bir sayı dene!' : '⬇️ Daha düşük bir sayı dene!';
+            }
         };
     </script>
 </body>
