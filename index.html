@@ -740,7 +740,6 @@
             if (currentPinnedKey) scrollToMessage(currentPinnedKey);
         };
 
-        // ORTAK SİNEMA & KUYRUK & OYNAT/DURAKLAT
         window.openCinemaModal = () => openModal('music-modal');
         window.toggleCinemaMute = function() {
             cinemaMuted = !cinemaMuted;
@@ -1029,7 +1028,7 @@
         });
 
         function getMyData() {
-            const name = localStorage.getItem('wrts_name_' + currentUser.uid) || currentUser.displayName || currentUser.email.split('@')[0];
+            const name = localStorage.getItem('wrts_name_' + currentUser.uid) || currentUser.displayName || (currentUser.email ? currentUser.email.split('@')[0] : 'Kullanıcı');
             const bio = localStorage.getItem('wrts_bio_' + currentUser.uid) || "WrtS Kullanıcısı";
             const avatar = localStorage.getItem('wrts_avatar_' + currentUser.uid) || currentUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=e11d48&color=fff`;
             return { name, avatar, bio };
@@ -1079,15 +1078,17 @@
                 const entries = Object.entries(reqs);
                 if (entries.length > 0) {
                     sec.classList.remove('hidden');
-                    list.innerHTML = entries.map(([uid, info]) => `
+                    list.innerHTML = entries.map(([uid, info]) => {
+                        const safeName = encodeURIComponent(info.name || 'İsimsiz');
+                        return `
                         <div class="flex items-center justify-between bg-[#120409] p-2 rounded-xl border border-amber-500/40">
-                            <span class="text-xs font-bold">${info.name}</span>
+                            <span class="text-xs font-bold">${info.name || 'İsimsiz'}</span>
                             <div class="flex gap-1">
-                                <button onclick="acceptFriend('${uid}', '${encodeURIComponent(info.name)}')" class="bg-emerald-600 text-white text-[10px] px-2 py-1 rounded font-bold">Kabul</button>
+                                <button onclick="acceptFriend('${uid}', '${safeName}')" class="bg-emerald-600 text-white text-[10px] px-2 py-1 rounded font-bold">Kabul</button>
                                 <button onclick="db.ref('friend_requests/${currentUser.uid}/${uid}').remove(); loadOnlineUsersList();" class="bg-red-600/30 text-red-400 text-[10px] px-2 py-1 rounded font-bold">Red</button>
                             </div>
-                        </div>
-                    `).join('');
+                        </div>`;
+                    }).join('');
                 } else { sec.classList.add('hidden'); }
             });
         };
@@ -1108,9 +1109,10 @@
             const fEntries = Object.entries(myFriends);
             fList.innerHTML = fEntries.length ? fEntries.map(([uid, info]) => {
                 const online = (activeUsersData[uid] || {}).state === 'online';
+                const safeName = encodeURIComponent(info.name || 'İsimsiz');
                 return `
-                    <div onclick="openUserProfileModal('${uid}', '${encodeURIComponent(info.name)}')" class="flex items-center justify-between bg-[#120409] p-2 rounded-xl border border-rose-500/30 cursor-pointer hover:border-amber-500">
-                        <span class="text-xs font-bold">${info.name} <span class="${online ? 'text-emerald-400' : 'text-rose-500'}">●</span></span>
+                    <div onclick="openUserProfileModal('${uid}', '${safeName}')" class="flex items-center justify-between bg-[#120409] p-2 rounded-xl border border-rose-500/30 cursor-pointer hover:border-amber-500">
+                        <span class="text-xs font-bold">${info.name || 'İsimsiz'} <span class="${online ? 'text-emerald-400' : 'text-rose-500'}">●</span></span>
                         <span class="text-[10px] text-amber-400 font-bold">Profili Aç</span>
                     </div>
                 `;
@@ -1121,12 +1123,14 @@
                 document.getElementById('all-users-list').innerHTML = Object.entries(all).filter(([uid]) => uid !== currentUser.uid).map(([uid, info]) => {
                     const st = activeUsersData[uid] || {};
                     const online = st.state === 'online';
+                    const displayName = info.name || 'İsimsiz';
+                    const safeName = encodeURIComponent(displayName);
                     return `
-                        <div onclick="openUserProfileModal('${uid}', '${encodeURIComponent(info.name || 'İsimsiz')}')" class="flex items-center justify-between bg-[#120409] p-2.5 rounded-xl border border-rose-900/50 hover:border-amber-500 cursor-pointer transition">
+                        <div onclick="openUserProfileModal('${uid}', '${safeName}')" class="flex items-center justify-between bg-[#120409] p-2.5 rounded-xl border border-rose-900/50 hover:border-amber-500 cursor-pointer transition">
                             <div class="flex items-center gap-2">
                                 <img src="${info.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-8 h-8 rounded-full object-cover">
                                 <div class="text-left">
-                                    <p class="text-xs font-bold text-rose-100">${info.name} <span class="${online ? 'text-emerald-400' : 'text-rose-500'}">●</span></p>
+                                    <p class="text-xs font-bold text-rose-100">${displayName} <span class="${online ? 'text-emerald-400' : 'text-rose-500'}">●</span></p>
                                     <p class="text-[9px] text-rose-300/60">${online ? 'Çevrimiçi' : 'Çevrimdışı'}</p>
                                 </div>
                             </div>
@@ -1140,7 +1144,7 @@
         window.openUserProfileModal = function(targetUid, encName) {
             closeModal('users-modal'); closeModal('menu-drawer-modal');
             if (targetUid === currentUser.uid) { openMyProfile(); return; }
-            const targetName = decodeURIComponent(encName);
+            const targetName = decodeURIComponent(encName || 'İsimsiz');
             openModal('user-profile-modal');
             document.getElementById('up-name').textContent = targetName;
             const upAvatar = document.getElementById('up-avatar');
@@ -1168,14 +1172,15 @@
             }
 
             const isFriend = !!myFriends[targetUid];
+            const safeTarget = encodeURIComponent(targetName);
             document.getElementById('up-actions').innerHTML = `
-                <button onclick="startDM('${targetUid}', '${encodeURIComponent(targetName)}'); closeModal('user-profile-modal');" class="flex-1 bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-xs font-bold text-white">💬 Özel Mesaj</button>
+                <button onclick="startDM('${targetUid}', '${safeTarget}'); closeModal('user-profile-modal');" class="flex-1 bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-xs font-bold text-white">💬 Özel Mesaj</button>
                 ${!isFriend ? `<button onclick="db.ref('friend_requests/${targetUid}/${currentUser.uid}').set({name: getMyData().name}); showToast('Arkadaşlık isteği gönderildi!');" class="bg-rose-600/30 text-rose-200 px-3 py-2.5 rounded-xl text-xs font-bold">💖 Ekle</button>` : `<span class="bg-emerald-600/20 text-emerald-400 px-3 py-2.5 rounded-xl text-xs font-bold">✔ Arkadaş</span>`}
             `;
         };
 
         window.startDM = function(targetUid, encName) {
-            const targetName = decodeURIComponent(encName);
+            const targetName = decodeURIComponent(encName || 'İsimsiz');
             const ids = [currentUser.uid, targetUid].sort();
             const dmId = `özel_dm_${ids[0]}_${ids[1]}`;
 
@@ -1201,16 +1206,19 @@
             db.ref(`gizli_dm_listesi/${currentUser.uid}`).once('value', snap => {
                 const dms = snap.val() || {};
                 const entries = Object.entries(dms);
-                listDiv.innerHTML = entries.length ? entries.map(([dmId, info]) => `
-                    <div onclick="openDMFromList('${dmId}', '${encodeURIComponent(info.targetName)}')" class="flex items-center justify-between bg-[#120409] p-3 rounded-xl border border-rose-900/50 hover:border-amber-500 cursor-pointer">
-                        <span class="text-xs font-bold text-rose-100">💬 ${info.targetName} ${info.unread ? '🔴' : ''}</span>
+                listDiv.innerHTML = entries.length ? entries.map(([dmId, info]) => {
+                    const safeTarget = encodeURIComponent(info.targetName || 'İsimsiz');
+                    return `
+                    <div onclick="openDMFromList('${dmId}', '${safeTarget}')" class="flex items-center justify-between bg-[#120409] p-3 rounded-xl border border-rose-900/50 hover:border-amber-500 cursor-pointer">
+                        <span class="text-xs font-bold text-rose-100">💬 ${info.targetName || 'İsimsiz'} ${info.unread ? '🔴' : ''}</span>
                         <span class="text-[10px] text-amber-400 font-bold">Sohbete Git</span>
                     </div>
-                `).join('') : '<p class="text-xs text-rose-300/60 italic">Özel mesajın yok.</p>';
+                `;
+                }).join('') : '<p class="text-xs text-rose-300/60 italic">Özel mesajın yok.</p>';
             });
         };
         window.openDMFromList = function(dmId, encName) {
-            const targetName = decodeURIComponent(encName);
+            const targetName = decodeURIComponent(encName || 'İsimsiz');
             db.ref(`gizli_dm_listesi/${currentUser.uid}/${dmId}/unread`).set(false);
             currentRoom = dmId;
             closeModal('dm-list-modal');
@@ -1253,7 +1261,7 @@
                 const users = snap.val() || {};
                 list.innerHTML = Object.entries(users).filter(([uid]) => uid !== currentUser.uid).map(([uid, info]) => `
                     <div class="flex items-center justify-between bg-[#120409] p-2 rounded-xl border border-rose-900/50">
-                        <span class="text-xs font-bold">${info.name}</span>
+                        <span class="text-xs font-bold">${info.name || 'İsimsiz'}</span>
                         <button onclick="db.ref('room_mutes/${currentRoom}/${uid}').set(true); showToast('Kullanıcı susturuldu.');" class="text-[10px] bg-red-600/30 text-red-400 px-2 py-1 rounded font-bold">Sustur</button>
                     </div>
                 `).join('');
@@ -1288,13 +1296,19 @@
         }
 
         function createMessageElement(snap, room) {
-            const data = snap.val(); const key = snap.key; const isMe = currentUser && data.uid === currentUser.uid;
+            const data = snap.val() || {};
+            const key = snap.key;
+            const senderUid = data.uid || '';
+            const senderName = data.isim || 'İsimsiz';
+            const isMe = !!(currentUser && senderUid === currentUser.uid);
 
             if (!isMe && currentUser && (!data.readBy || !data.readBy[currentUser.uid])) {
-                db.ref(`odalar/${room}/${key}/readBy/${currentUser.uid}`).set(true);
+                db.ref(`odalar/${room}/${key}/readBy/${currentUser.uid}`).set(true).catch(() => {});
             }
 
-            const div = document.createElement('div'); div.id = `msg-${key}`; div.className = `flex gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'} items-end transition-transform duration-150 select-none`;
+            const div = document.createElement('div');
+            div.id = `msg-${key}`;
+            div.className = `flex gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'} items-end transition-transform duration-150`;
 
             let content = '';
             if (data.type === 'image' || data.type === 'gif') content = `<img src="${data.url}" class="rounded-xl max-h-48 object-cover cursor-pointer" onclick="window.open('${data.url}', '_blank')">`;
@@ -1312,6 +1326,7 @@
 
             const timeStr = new Date(data.zaman || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             const safePreview = (data.mesaj || (data.type === 'audio' ? 'Sesli Mesaj' : 'Medya')).replace(/'/g, '').replace(/"/g, '');
+            const safeSenderEnc = encodeURIComponent(senderName);
 
             let seenHtml = '';
             if (isMe) {
@@ -1334,9 +1349,9 @@
             }
 
             div.innerHTML = `
-                <img onclick="openUserProfileModal('${data.uid}', '${encodeURIComponent(data.isim)}')" src="${data.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-6 h-6 rounded-full object-cover shrink-0 mb-1 cursor-pointer">
+                <img onclick="openUserProfileModal('${senderUid}', '${safeSenderEnc}')" src="${data.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-6 h-6 rounded-full object-cover shrink-0 mb-1 cursor-pointer">
                 <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[80%]">
-                    <span class="text-[10px] font-bold text-rose-200 px-1">${data.isim}</span>
+                    <span class="text-[10px] font-bold text-rose-200 px-1">${senderName}</span>
                     <div id="bubble-${key}" class="cursor-pointer ${isMe ? 'bg-gradient-to-r from-rose-600 to-rose-700' : 'bg-[#280c16]'} px-3 py-2 rounded-2xl shadow relative transition-all">
                         ${data.replyTo ? `<div onclick="event.stopPropagation(); scrollToMessage('${data.replyTo.key}')" class="mb-1 p-1.5 rounded bg-black/35 border-l-2 border-amber-400 text-[10px] cursor-pointer"><b>${data.replyTo.name}</b><br>${data.replyTo.text}</div>` : ''}
                         ${content}
@@ -1352,8 +1367,8 @@
                             <button onclick="toggleReaction('${room}', '${key}', '🎉')" class="hover:scale-125 transition">🎉</button>
                         </div>
                         <div class="flex gap-2 pt-0.5 flex-wrap">
-                            <button onclick="setReplyTo('${key}', '${data.isim}', '${safePreview}')" class="text-amber-400 font-bold">Yanıtla</button>
-                            <button onclick="pinMessage('${room}', '${key}', '${safePreview}', '${data.isim}')" class="text-emerald-400 font-bold">Sabitle</button>
+                            <button onclick="setReplyTo('${key}', '${senderName}', '${safePreview}')" class="text-amber-400 font-bold">Yanıtla</button>
+                            <button onclick="pinMessage('${room}', '${key}', '${safePreview}', '${senderName}')" class="text-emerald-400 font-bold">Sabitle</button>
                             ${isMe && data.type === 'text' ? `<button onclick="startEditMessage('${key}', '${safePreview}')" class="text-sky-400 font-bold">Düzenle</button>` : ''}
                             ${isMe ? `<button onclick="db.ref('odalar/${room}/${key}').remove()" class="text-red-400 font-bold">Sil</button>` : ''}
                         </div>
@@ -1361,36 +1376,48 @@
                 </div>
             `;
 
-            div.querySelector(`#bubble-${key}`).onclick = () => {
-                document.getElementById(`menu-${key}`).classList.toggle('hidden');
-            };
+            const bubbleEl = div.querySelector(`#bubble-${key}`);
+            if (bubbleEl) {
+                bubbleEl.onclick = () => {
+                    const menuEl = document.getElementById(`menu-${key}`);
+                    if (menuEl) menuEl.classList.toggle('hidden');
+                };
+            }
 
-            // Soldaki mesajlar sağa, sağdaki mesajlar sola kaydırılınca yanıtla
+            // Soldaki mesajlar sağa, sağdaki mesajlar sola kaydırılınca yanıtla (dikey kaydırmayı engellemeden)
             let startX = 0;
+            let startY = 0;
             let currentDelta = 0;
-            div.ontouchstart = e => {
+            div.addEventListener('touchstart', e => {
+                if (!e.touches || !e.touches[0]) return;
                 startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
                 currentDelta = 0;
-            };
-            div.ontouchmove = e => {
+            }, { passive: true });
+
+            div.addEventListener('touchmove', e => {
+                if (!e.touches || !e.touches[0]) return;
                 const dx = e.touches[0].clientX - startX;
+                const dy = e.touches[0].clientY - startY;
+                if (Math.abs(dx) <= Math.abs(dy) || Math.abs(dx) < 12) return;
                 if (!isMe && dx > 0) {
                     currentDelta = Math.min(70, dx);
-                    div.style.transform = `translateX(${currentDelta * 0.4}px)`;
+                    div.style.transform = `translateX(${currentDelta * 0.35}px)`;
                 } else if (isMe && dx < 0) {
                     currentDelta = Math.max(-70, dx);
-                    div.style.transform = `translateX(${currentDelta * 0.4}px)`;
+                    div.style.transform = `translateX(${currentDelta * 0.35}px)`;
                 }
-            };
-            div.ontouchend = () => {
+            }, { passive: true });
+
+            div.addEventListener('touchend', () => {
                 div.style.transform = '';
                 if (!isMe && currentDelta > 45) {
-                    setReplyTo(key, data.isim, safePreview);
+                    setReplyTo(key, senderName, safePreview);
                 } else if (isMe && currentDelta < -45) {
-                    setReplyTo(key, data.isim, safePreview);
+                    setReplyTo(key, senderName, safePreview);
                 }
                 currentDelta = 0;
-            };
+            }, { passive: true });
 
             return div;
         }
@@ -1466,9 +1493,10 @@
             roomRef = db.ref('odalar/' + room).limitToLast(60);
             roomRef.once('value', () => { isInitialLoad = false; });
             roomRef.on('child_added', snap => {
-                const d = snap.val(); messagesDiv.appendChild(createMessageElement(snap, room));
+                const d = snap.val() || {};
+                messagesDiv.appendChild(createMessageElement(snap, room));
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
-                if (!isInitialLoad && currentUser && d.uid !== currentUser.uid) {
+                if (!isInitialLoad && currentUser && d.uid && d.uid !== currentUser.uid) {
                     playWhatsAppSound('receive');
                     triggerNotification(d.isim || 'Yeni Mesaj', d.mesaj || (d.type === 'audio' ? 'Sesli mesaj gönderdi' : 'Yeni medya paylaştı'));
                 }
@@ -1587,7 +1615,7 @@
             r.readAsDataURL(f);
         };
 
-        // SESLİ MESAJ (DÜZELTİLDİ)
+        // SESLİ MESAJ
         let mediaRecorder = null;
         let audioChunks = [];
         let activeAudioStream = null;
@@ -1705,10 +1733,21 @@
         };
 
         document.getElementById('modal-logout').onclick = () => auth.signOut().then(() => window.location.reload());
-        window.toggleSearchBar = () => document.getElementById('search-bar').classList.toggle('hidden');
+        window.toggleSearchBar = () => {
+            const bar = document.getElementById('search-bar');
+            bar.classList.toggle('hidden');
+            if (bar.classList.contains('hidden')) {
+                const inp = document.getElementById('msg-search-input');
+                inp.value = '';
+                document.querySelectorAll('#messages > div').forEach(el => { el.style.display = ''; });
+            }
+        };
         document.getElementById('msg-search-input').oninput = e => {
             const t = e.target.value.toLowerCase();
-            document.querySelectorAll('#messages > div').forEach(el => el.style.display = el.innerText.toLowerCase().includes(t) ? 'flex' : 'none');
+            document.querySelectorAll('#messages > div').forEach(el => {
+                if (!t) el.style.display = '';
+                else el.style.display = el.innerText.toLowerCase().includes(t) ? 'flex' : 'none';
+            });
         };
 
         let localStream, peerConnection;
