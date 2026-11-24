@@ -72,6 +72,7 @@
         </div>
 
         <div class="flex items-center gap-2 shrink-0">
+            <button onclick="requestNotificationPermission()" class="bg-[#2b0d18] text-amber-300 p-2 rounded-xl text-xs font-bold" title="Bildirim İzni">🔔</button>
             <button onclick="toggleSearchBar()" class="bg-[#2b0d18] text-rose-200 p-2 rounded-xl text-xs font-bold">🔍</button>
             <button onclick="openModal('users-modal'); loadOnlineUsersList();" class="relative bg-[#2b0d18] px-2.5 py-1.5 rounded-xl border border-rose-800/60 text-xs text-emerald-400 flex items-center gap-1.5">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -108,7 +109,7 @@
             <span class="text-amber-300 font-bold shrink-0">📌 Sabit:</span>
             <span id="pinned-text" class="text-rose-100 truncate"></span>
         </div>
-        <button id="unpin-btn" onclick="unpinMessage()" class="hidden text-[10px] text-rose-300 bg-rose-950 px-2 py-0.5 rounded ml-2">Kaldır</button>
+        <button id="unpin-btn" onclick="unpinMessage()" class="text-[10px] text-rose-200 bg-rose-900/80 hover:bg-rose-800 px-2 py-0.5 rounded ml-2 font-bold">Sabiti Kaldır</button>
     </div>
 
     <!-- DM BİLGİ ÇUBUĞU -->
@@ -149,9 +150,9 @@
     <footer id="main-footer" class="bg-[#1a070e] border-t border-rose-900/60 p-2 sm:p-3 w-full max-w-4xl mx-auto shrink-0 z-20">
         <form id="msg-form" class="flex items-center gap-1.5 w-full">
             <button type="button" onclick="toggleToolsDrawer()" class="w-9 h-9 rounded-full bg-[#2b0d18] text-amber-400 font-black text-lg flex items-center justify-center shrink-0">+</button>
-            <button type="button" id="walkie-talkie-btn" class="w-9 h-9 rounded-full bg-[#2b0d18] text-rose-400 flex items-center justify-center shrink-0 text-sm" title="Sesli Not">🎙️</button>
+            <button type="button" id="walkie-talkie-btn" class="w-9 h-9 rounded-full bg-[#2b0d18] text-rose-400 flex items-center justify-center shrink-0 text-sm" title="Basılı Tutarak Sesli Not Gönder">🎙️</button>
             <input type="file" id="img-file" accept="image/*" class="hidden">
-            <input type="text" id="msg-input" placeholder="Mesaj yaz, @ai yaz..." autocomplete="off" class="flex-1 min-w-0 bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
+            <input type="text" id="msg-input" placeholder="Mesaj yaz..." autocomplete="off" class="flex-1 min-w-0 bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
             <button type="submit" class="bg-gradient-to-r from-rose-600 to-amber-600 px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm text-white shadow">Gönder</button>
         </form>
     </footer>
@@ -463,10 +464,6 @@
                     <option value="space">🌌 Yıldızlı Uzay</option>
                 </select>
             </div>
-            <div>
-                <label class="block text-[11px] text-rose-300/70">@ai Webhook / API Endpoint (Opsiyonel)</label>
-                <input type="text" id="edit-ai-endpoint" placeholder="https://..." class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
-            </div>
             <div class="flex gap-2 pt-1">
                 <button id="save-profile" class="flex-1 bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-xs font-bold text-white">Kaydet</button>
                 <button id="modal-logout" class="bg-amber-600/20 text-amber-400 px-3 py-2.5 rounded-xl text-xs font-bold">Çıkış</button>
@@ -494,6 +491,7 @@
         let currentRoom = 'genel';
         let roomRef = null;
         let pinnedRef = null;
+        let typingRoomRef = null;
         let currentPinnedKey = null;
         let customRoomsData = {};
         let activeUsersData = {};
@@ -545,6 +543,22 @@
             el.textContent = msg;
             box.appendChild(el);
             setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 250); }, 2800);
+        }
+
+        window.requestNotificationPermission = async function() {
+            if (!('Notification' in window)) return showToast("Tarayıcı bildirim desteklemiyor.", 'error');
+            if (Notification.permission === 'granted') return showToast("Bildirimler zaten açık.");
+            const perm = await Notification.requestPermission();
+            showToast(perm === 'granted' ? "Bildirimler açıldı!" : "Bildirim izni verilmedi.");
+        };
+
+        function triggerNotification(title, body) {
+            showToast(`${title}: ${body}`);
+            if ('Notification' in window && Notification.permission === 'granted') {
+                if (document.hidden) {
+                    try { new Notification(title, { body }); } catch (_) {}
+                }
+            }
         }
 
         function compressImageDataUrl(dataUrl, maxSize = 640, quality = 0.72) {
@@ -720,13 +734,13 @@
             showToast("Mesaj sabitlendi.");
         };
         window.unpinMessage = function() {
-            db.ref(`pinned/${currentRoom}`).remove();
-            showToast("Sabit mesaj kaldırıldı.");
+            db.ref(`pinned/${currentRoom}`).remove().then(() => showToast("Sabitlenen mesaj kaldırıldı."));
         };
         window.scrollToPinned = function() {
             if (currentPinnedKey) scrollToMessage(currentPinnedKey);
         };
 
+        // ORTAK SİNEMA & KUYRUK & OYNAT/DURAKLAT
         window.openCinemaModal = () => openModal('music-modal');
         window.toggleCinemaMute = function() {
             cinemaMuted = !cinemaMuted;
@@ -962,11 +976,17 @@
             if (err && err.code) setLoginError(mapAuthError(err));
         });
 
+        let lastFriendReqCount = 0;
+        let lastUnreadDmCount = 0;
+
         auth.onAuthStateChanged(user => {
             if (user) {
                 currentUser = user;
                 setLoginError('');
                 document.getElementById('login-screen').classList.add('hidden');
+                if ('Notification' in window && Notification.permission === 'default') {
+                    Notification.requestPermission().catch(() => {});
+                }
 
                 const savedBgef = localStorage.getItem('wrts_bgef_' + user.uid) || 'snow';
                 document.getElementById('bg-effect-select').value = savedBgef;
@@ -985,13 +1005,23 @@
                 db.ref('status').on('value', snap => { activeUsersData = snap.val() || {}; updateUsersUI(); });
                 db.ref(`friends/${user.uid}`).on('value', snap => { myFriends = snap.val() || {}; updateUsersUI(); });
                 db.ref(`friend_requests/${user.uid}`).on('value', snap => {
-                    const reqs = snap.val() || {}; const badge = document.getElementById('req-badge');
-                    if (Object.keys(reqs).length > 0) badge.classList.remove('hidden'); else badge.classList.add('hidden');
+                    const reqs = snap.val() || {};
+                    const count = Object.keys(reqs).length;
+                    const badge = document.getElementById('req-badge');
+                    if (count > 0) badge.classList.remove('hidden'); else badge.classList.add('hidden');
+                    if (count > lastFriendReqCount) triggerNotification("Yeni Arkadaşlık İsteği", "Sana yeni bir arkadaşlık isteği geldi.");
+                    lastFriendReqCount = count;
                 });
                 db.ref(`gizli_dm_listesi/${user.uid}`).on('value', snap => {
-                    const hasUnread = Object.values(snap.val() || {}).some(d => d.unread);
+                    const unreadList = Object.values(snap.val() || {}).filter(d => d.unread);
+                    const hasUnread = unreadList.length > 0;
                     document.getElementById('menu-inbox-dot').classList.toggle('hidden', !hasUnread);
                     document.getElementById('header-menu-dot').classList.toggle('hidden', !hasUnread);
+                    if (unreadList.length > lastUnreadDmCount) {
+                        const sender = unreadList[unreadList.length - 1]?.targetName || 'Bir kullanıcı';
+                        triggerNotification("Yeni Özel Mesaj", `${sender} sana DM gönderdi.`);
+                    }
+                    lastUnreadDmCount = unreadList.length;
                 });
 
                 loadUserDataToUI(); listenRooms(); loadRoom(currentRoom);
@@ -1002,8 +1032,7 @@
             const name = localStorage.getItem('wrts_name_' + currentUser.uid) || currentUser.displayName || currentUser.email.split('@')[0];
             const bio = localStorage.getItem('wrts_bio_' + currentUser.uid) || "WrtS Kullanıcısı";
             const avatar = localStorage.getItem('wrts_avatar_' + currentUser.uid) || currentUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=e11d48&color=fff`;
-            const aiEndpoint = localStorage.getItem('wrts_ai_url_' + currentUser.uid) || '';
-            return { name, avatar, bio, aiEndpoint };
+            return { name, avatar, bio };
         }
 
         function loadUserDataToUI() {
@@ -1012,17 +1041,14 @@
             document.getElementById('preview-avatar').src = d.avatar;
             document.getElementById('edit-name').value = d.name;
             document.getElementById('edit-bio').value = d.bio;
-            document.getElementById('edit-ai-endpoint').value = d.aiEndpoint;
         }
 
         document.getElementById('save-profile').onclick = async () => {
             const n = document.getElementById('edit-name').value.trim();
             const b = document.getElementById('edit-bio').value.trim();
-            const aiUrl = document.getElementById('edit-ai-endpoint').value.trim();
             if (!n) return;
             localStorage.setItem('wrts_name_' + currentUser.uid, n);
             localStorage.setItem('wrts_bio_' + currentUser.uid, b);
-            localStorage.setItem('wrts_ai_url_' + currentUser.uid, aiUrl);
             if (tempBase64Avatar) {
                 const compressedAvatar = await compressImageDataUrl(tempBase64Avatar, 160, 0.72);
                 localStorage.setItem('wrts_avatar_' + currentUser.uid, compressedAvatar);
@@ -1285,11 +1311,12 @@
             }
 
             const timeStr = new Date(data.zaman || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const safePreview = (data.mesaj || 'Medya').replace(/'/g, '').replace(/"/g, '');
+            const safePreview = (data.mesaj || (data.type === 'audio' ? 'Sesli Mesaj' : 'Medya')).replace(/'/g, '').replace(/"/g, '');
 
             let seenHtml = '';
             if (isMe) {
-                const isSeen = data.readBy && Object.keys(data.readBy).length > 1;
+                const readMap = data.readBy || {};
+                const isSeen = Object.keys(readMap).some(uid => uid !== currentUser.uid);
                 seenHtml = `<span class="text-[10px] ${isSeen ? 'text-sky-400 font-bold' : 'text-rose-200/60'} ml-1" title="${isSeen ? 'Görüldü' : 'İletildi'}">${isSeen ? '✓✓' : '✓'}</span>`;
             }
 
@@ -1338,13 +1365,31 @@
                 document.getElementById(`menu-${key}`).classList.toggle('hidden');
             };
 
+            // Soldaki mesajlar sağa, sağdaki mesajlar sola kaydırılınca yanıtla
             let startX = 0;
-            div.ontouchstart = e => startX = e.touches[0].clientX;
-            div.ontouchend = e => {
-                let endX = e.changedTouches[0].clientX;
-                if (startX - endX > 50) {
+            let currentDelta = 0;
+            div.ontouchstart = e => {
+                startX = e.touches[0].clientX;
+                currentDelta = 0;
+            };
+            div.ontouchmove = e => {
+                const dx = e.touches[0].clientX - startX;
+                if (!isMe && dx > 0) {
+                    currentDelta = Math.min(70, dx);
+                    div.style.transform = `translateX(${currentDelta * 0.4}px)`;
+                } else if (isMe && dx < 0) {
+                    currentDelta = Math.max(-70, dx);
+                    div.style.transform = `translateX(${currentDelta * 0.4}px)`;
+                }
+            };
+            div.ontouchend = () => {
+                div.style.transform = '';
+                if (!isMe && currentDelta > 45) {
+                    setReplyTo(key, data.isim, safePreview);
+                } else if (isMe && currentDelta < -45) {
                     setReplyTo(key, data.isim, safePreview);
                 }
+                currentDelta = 0;
             };
 
             return div;
@@ -1368,6 +1413,7 @@
         function loadRoom(room) {
             if (roomRef) roomRef.off();
             if (pinnedRef) pinnedRef.off();
+            if (typingRoomRef) typingRoomRef.off();
             const messagesDiv = document.getElementById('messages');
             messagesDiv.innerHTML = ''; isInitialLoad = true;
 
@@ -1377,11 +1423,9 @@
             const modBtn = document.getElementById('room-settings-btn');
             const pinnedBar = document.getElementById('pinned-bar');
             const pinnedText = document.getElementById('pinned-text');
-            const unpinBtn = document.getElementById('unpin-btn');
 
             const isCreator = !!(customRoomsData[room] && customRoomsData[room].creator === currentUser.uid);
             modBtn.classList.toggle('hidden', !isCreator);
-            unpinBtn.classList.toggle('hidden', !isCreator);
 
             pinnedRef = db.ref(`pinned/${room}`);
             pinnedRef.on('value', snap => {
@@ -1405,12 +1449,29 @@
                 });
             } else { annBar.classList.add('hidden'); }
 
+            typingRoomRef = db.ref(`typing/${room}`);
+            typingRoomRef.on('value', snap => {
+                const roomTyping = snap.val() || {};
+                const entries = Object.entries(roomTyping).filter(([uid]) => currentUser && uid !== currentUser.uid);
+                const indicator = document.getElementById('typing-indicator');
+                if (!entries.length) { indicator.textContent = ''; return; }
+                const recorders = entries.filter(([_, v]) => typeof v === 'object' && v.mode === 'recording').map(([_, v]) => v.name);
+                const typers = entries.filter(([_, v]) => !(typeof v === 'object' && v.mode === 'recording')).map(([_, v]) => typeof v === 'object' ? v.name : v);
+                const parts = [];
+                if (typers.length) parts.push(`${typers.join(', ')} yazıyor...`);
+                if (recorders.length) parts.push(`🎙️ ${recorders.join(', ')} ses kaydediyor...`);
+                indicator.textContent = parts.join(' • ');
+            });
+
             roomRef = db.ref('odalar/' + room).limitToLast(60);
             roomRef.once('value', () => { isInitialLoad = false; });
             roomRef.on('child_added', snap => {
                 const d = snap.val(); messagesDiv.appendChild(createMessageElement(snap, room));
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
-                if (!isInitialLoad && currentUser && d.uid !== currentUser.uid) playWhatsAppSound('receive');
+                if (!isInitialLoad && currentUser && d.uid !== currentUser.uid) {
+                    playWhatsAppSound('receive');
+                    triggerNotification(d.isim || 'Yeni Mesaj', d.mesaj || (d.type === 'audio' ? 'Sesli mesaj gönderdi' : 'Yeni medya paylaştı'));
+                }
             });
             roomRef.on('child_changed', snap => {
                 const oldEl = document.getElementById(`msg-${snap.key}`);
@@ -1424,7 +1485,7 @@
         msgInput.addEventListener('input', () => {
             if (!currentUser) return;
             const typingRef = db.ref(`typing/${currentRoom}/${currentUser.uid}`);
-            typingRef.set({ name: getMyData().name, mode: 'typing' });
+            typingRef.set({ name: getMyData().name, mode: 'typing', at: Date.now() });
             typingRef.onDisconnect().remove();
 
             clearTimeout(typingTimer);
@@ -1435,44 +1496,11 @@
             if (!currentUser) return;
             const typingRef = db.ref(`typing/${currentRoom}/${currentUser.uid}`);
             if (active) {
-                typingRef.set({ name: getMyData().name, mode: 'recording' });
+                typingRef.set({ name: getMyData().name, mode: 'recording', at: Date.now() });
                 typingRef.onDisconnect().remove();
             } else {
                 typingRef.remove();
             }
-        }
-
-        db.ref('typing').on('value', snap => {
-            const data = snap.val() || {};
-            const roomTyping = data[currentRoom] || {};
-            const entries = Object.entries(roomTyping).filter(([uid]) => currentUser && uid !== currentUser.uid);
-            const indicator = document.getElementById('typing-indicator');
-            if (!entries.length) { indicator.textContent = ''; return; }
-            const recorders = entries.filter(([_, v]) => typeof v === 'object' && v.mode === 'recording').map(([_, v]) => v.name);
-            const typers = entries.filter(([_, v]) => !(typeof v === 'object' && v.mode === 'recording')).map(([_, v]) => typeof v === 'object' ? v.name : v);
-            const parts = [];
-            if (typers.length) parts.push(`${typers.join(', ')} yazıyor...`);
-            if (recorders.length) parts.push(`🎙️ ${recorders.join(', ')} ses kaydediyor...`);
-            indicator.textContent = parts.join(' • ');
-        });
-
-        async function resolveAIResponse(promptText, endpoint) {
-            if (endpoint) {
-                try {
-                    const res = await fetch(endpoint, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ prompt: promptText, room: currentRoom })
-                    });
-                    if (res.ok) {
-                        const data = await res.json();
-                        if (data && (data.reply || data.text || data.message)) {
-                            return String(data.reply || data.text || data.message);
-                        }
-                    }
-                } catch (_) {}
-            }
-            return "🤖 **WrtS AI:** `@ai` komutu algılandı. İstersen Profil & Ayarlar menüsünden kendi webhook/API adresini ekleyebilirsin!";
         }
 
         document.getElementById('msg-form').onsubmit = async e => {
@@ -1490,25 +1518,10 @@
 
             const md = getMyData();
             const cleanText = filterBadWords(text);
-            const msgData = { uid: currentUser.uid, isim: md.name, avatar: md.avatar, mesaj: cleanText, type: 'text', zaman: Date.now() };
+            const msgData = { uid: currentUser.uid, isim: md.name, avatar: md.avatar, mesaj: cleanText, type: 'text', zaman: Date.now(), readBy: { [currentUser.uid]: true } };
             if (replyingTo) { msgData.replyTo = replyingTo; cancelReplyOrEdit(); }
             db.ref('odalar/' + currentRoom).push(msgData);
             incrementUserStat('msgs', 1);
-
-            if (cleanText.includes('@ai')) {
-                const aiQuestion = cleanText.replace(/@ai/gi, '').trim() || cleanText;
-                const replyText = await resolveAIResponse(aiQuestion, md.aiEndpoint);
-                setTimeout(() => {
-                    db.ref('odalar/' + currentRoom).push({
-                        uid: 'wrts_ai_bot',
-                        isim: '🤖 WrtS AI Asistan',
-                        avatar: 'https://ui-avatars.com/api/?name=AI&background=3b82f6&color=fff',
-                        mesaj: replyText,
-                        type: 'text',
-                        zaman: Date.now()
-                    });
-                }, 400);
-            }
 
             if (currentRoom.startsWith('özel_dm_')) {
                 const parts = currentRoom.replace('özel_dm_', '').split('_');
@@ -1574,39 +1587,83 @@
             r.readAsDataURL(f);
         };
 
-        let mediaRecorder, audioChunks = [];
+        // SESLİ MESAJ (DÜZELTİLDİ)
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let activeAudioStream = null;
         const wtBtn = document.getElementById('walkie-talkie-btn');
-        wtBtn.onmousedown = wtBtn.ontouchstart = async (e) => {
-            e.preventDefault();
+
+        function pickAudioMimeType() {
+            if (typeof MediaRecorder === 'undefined') return '';
+            const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg'];
+            return candidates.find(t => MediaRecorder.isTypeSupported(t)) || '';
+        }
+
+        async function startVoiceNote(e) {
+            if (e && e.cancelable) e.preventDefault();
+            if (!currentUser) return;
+            if (mediaRecorder && mediaRecorder.state === 'recording') return;
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    return showToast("Tarayıcı mikrofon erişimini desteklemiyor.", 'error');
+                }
+                activeAudioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const mimeType = pickAudioMimeType();
+                mediaRecorder = mimeType ? new MediaRecorder(activeAudioStream, { mimeType }) : new MediaRecorder(activeAudioStream);
                 audioChunks = [];
-                mediaRecorder.ondataavailable = ev => { if (ev.data.size > 0) audioChunks.push(ev.data); };
+
+                mediaRecorder.ondataavailable = ev => {
+                    if (ev.data && ev.data.size > 0) audioChunks.push(ev.data);
+                };
+
                 mediaRecorder.onstop = () => {
                     setRecordingState(false);
-                    const blob = new Blob(audioChunks, { type: 'audio/webm' });
-                    const r = new FileReader();
-                    r.onloadend = () => {
+                    wtBtn.classList.remove('bg-rose-600', 'text-white', 'animate-pulse');
+                    const finalMime = mediaRecorder.mimeType || mimeType || 'audio/webm';
+                    const blob = new Blob(audioChunks, { type: finalMime });
+                    if (activeAudioStream) {
+                        activeAudioStream.getTracks().forEach(t => t.stop());
+                        activeAudioStream = null;
+                    }
+                    if (!blob.size) return showToast("Ses kaydı boş oluştu.", 'error');
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
                         const md = getMyData();
-                        db.ref('odalar/' + currentRoom).push({ uid: currentUser.uid, isim: md.name, avatar: md.avatar, url: r.result, type: 'audio', zaman: Date.now() });
+                        db.ref('odalar/' + currentRoom).push({
+                            uid: currentUser.uid,
+                            isim: md.name,
+                            avatar: md.avatar,
+                            url: reader.result,
+                            type: 'audio',
+                            zaman: Date.now()
+                        });
                         playWhatsAppSound('send');
+                        showToast("Sesli not gönderildi.");
                     };
-                    r.readAsDataURL(blob);
-                    stream.getTracks().forEach(t => t.stop());
+                    reader.readAsDataURL(blob);
                 };
+
                 mediaRecorder.start();
                 setRecordingState(true);
                 wtBtn.classList.add('bg-rose-600', 'text-white', 'animate-pulse');
-            } catch (e) { showToast("Mikrofon izni verilmedi veya desteklenmiyor.", 'error'); }
-        };
-        wtBtn.onmouseup = wtBtn.ontouchend = (e) => {
-            e.preventDefault();
+            } catch (err) {
+                setRecordingState(false);
+                wtBtn.classList.remove('bg-rose-600', 'text-white', 'animate-pulse');
+                showToast("Mikrofon izni verilmedi veya erişilemedi.", 'error');
+            }
+        }
+
+        function stopVoiceNote(e) {
+            if (e && e.cancelable) e.preventDefault();
             if (mediaRecorder && mediaRecorder.state === 'recording') {
                 mediaRecorder.stop();
-                wtBtn.classList.remove('bg-rose-600', 'text-white', 'animate-pulse');
             }
-        };
+        }
+
+        wtBtn.onmousedown = startVoiceNote;
+        wtBtn.ontouchstart = startVoiceNote;
+        window.addEventListener('mouseup', stopVoiceNote);
+        window.addEventListener('touchend', stopVoiceNote);
 
         document.getElementById('google-btn').onclick = async () => {
             setLoginError('');
