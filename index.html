@@ -255,8 +255,8 @@
                 <button type="button" onclick="closeModal('menu-drawer-modal'); openModal('whiteboard-modal'); initWhiteboard();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎨</span> Ortak Tahta</button>
                 <button type="button" onclick="closeModal('menu-drawer-modal'); openCinemaModal();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎬</span> Ortak Sinema</button>
                 <button type="button" onclick="closeModal('menu-drawer-modal'); openModal('games-modal'); initGames();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎮</span> Oyun Salonu</button>
-                <button type="button" onclick="closeModal('menu-drawer-modal'); openModal('leaderboard-modal'); loadLeaderboard();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🏆</span> Skor Tablosu</button>
-                <button type="button" onclick="closeModal('menu-drawer-modal'); openModal('stats-modal'); loadStats();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>📊</span> İstatistikler</button>
+                <button type="button" onclick="closeModal('menu-drawer-modal'); openModal('leaderboard-modal'); loadLeaderboard();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🏅</span> Lig Tablosu</button>
+                <button type="button" onclick="closeModal('menu-drawer-modal'); openModal('stats-modal'); loadStats();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>📊</span> Lig & İstatistik</button>
                 <button type="button" onclick="closeModal('menu-drawer-modal'); openMyProfile();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left col-span-2"><span>👤</span> Profilim & Canlı Durum</button>
                 <button type="button" onclick="clearAllMessagesInRoom()" class="bg-red-600/20 hover:bg-red-600/40 border border-red-500/40 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-red-400 text-left col-span-2 transition"><span>🗑️</span> Bu Odadaki Tüm Mesajları Sil</button>
             </div>
@@ -326,15 +326,22 @@
         </div>
     </div>
 
-    <!-- İSTATİSTİK PANELI -->
+    <!-- LİG & İSTATİSTİK PANELI -->
     <div id="stats-modal" class="fixed inset-0 bg-black/85 z-50 hidden items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3">
-            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">📊 İstatistikler</h3><button type="button" onclick="closeModal('stats-modal')">✕</button></div>
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">📊 Lig & İstatistikler</h3><button type="button" onclick="closeModal('stats-modal')">✕</button></div>
             <div class="bg-[#120409] p-4 rounded-2xl space-y-2.5 text-xs">
+                <div class="flex justify-between items-center"><span class="text-rose-300">Mevcut Lig:</span><span id="stat-league" class="font-black text-amber-300">🥉 Bronz</span></div>
+                <div class="flex justify-between items-center"><span class="text-rose-300">Lig Puanı (LP):</span><span id="stat-lp" class="font-bold text-amber-400">0 LP</span></div>
+                <div class="space-y-1">
+                    <div class="flex justify-between text-[10px] text-rose-300/75"><span id="stat-league-progress-label">Sonraki lige: 100 LP</span><span id="stat-league-pct">0%</span></div>
+                    <div class="w-full h-2 bg-[#1c0910] rounded-full overflow-hidden border border-rose-900/40">
+                        <div id="stat-league-bar" class="h-full bg-gradient-to-r from-rose-500 to-amber-400 transition-all" style="width: 0%"></div>
+                    </div>
+                </div>
                 <div class="flex justify-between"><span class="text-rose-300">Toplam Mesaj:</span><span id="stat-msgs" class="font-bold text-amber-400">0</span></div>
-                <div class="flex justify-between"><span class="text-rose-300">Skor:</span><span id="stat-score" class="font-bold text-amber-400">0</span></div>
                 <div class="pt-1 border-t border-rose-900/40">
-                    <span class="text-rose-300 block mb-1.5">Rozetler:</span>
+                    <span class="text-rose-300 block mb-1.5">Lig Rozetleri:</span>
                     <div id="stat-badges" class="flex flex-wrap gap-1.5"></div>
                 </div>
             </div>
@@ -348,12 +355,14 @@
             <div class="flex flex-col items-center gap-2">
                 <img id="up-avatar" src="" class="w-20 h-20 rounded-full object-cover border-2 border-amber-500 shadow-xl">
                 <h3 id="up-name" class="font-black text-lg text-rose-50 mt-1"></h3>
-                <span id="up-live-status" class="hidden bg-amber-500/20 border border-amber-400/40 text-amber-200 px-2.5 py-0.5 rounded-full text-[11px] font-bold"></span>
+                <span id="up-league-badge" class="bg-amber-500/15 border border-amber-400/40 text-amber-300 px-2.5 py-0.5 rounded-full text-[11px] font-bold">🥉 Bronz • 0 LP</span>
+                <span id="up-live-status" class="hidden bg-rose-500/20 border border-rose-400/40 text-rose-100 px-2.5 py-0.5 rounded-full text-[11px] font-bold"></span>
                 <span id="up-bio" class="text-xs text-rose-300 italic">WrtS Kullanıcısı</span>
             </div>
             <div class="bg-[#120409] p-3.5 rounded-2xl border border-rose-900/50 space-y-2.5 text-left text-xs">
                 <div class="flex justify-between items-center"><span class="text-rose-300/70">Durum:</span><span id="up-status-text" class="font-bold text-emerald-400">Çevrimiçi</span></div>
-                <div class="flex justify-between items-center"><span class="text-rose-300/70">Son Görülme:</span><span id="up-last-seen" class="text-rose-100">Az önce</span></div>
+                <div class="flex justify-between items-center gap-2"><span class="text-rose-300/70">Bulunduğu Oda:</span><span id="up-room-text" class="font-bold text-amber-300 truncate"># Genel</span></div>
+                <div class="flex justify-between items-center gap-2"><span class="text-rose-300/70">Son Görülme:</span><span id="up-last-seen" class="text-rose-100 text-right">Az önce</span></div>
             </div>
             <div id="up-actions" class="flex gap-2 pt-1"></div>
         </div>
@@ -415,10 +424,17 @@
         </div>
     </div>
 
-    <!-- SKOR TABLOSU -->
+    <!-- LİG TABLOSU -->
     <div id="leaderboard-modal" class="fixed inset-0 bg-black/85 z-50 hidden items-center justify-center p-4">
-        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-4 max-h-[85vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">🏆 Skor Tablosu</h3><button type="button" onclick="closeModal('leaderboard-modal')">✕</button></div>
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3 max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">🏅 Lig Sıralaması</h3><button type="button" onclick="closeModal('leaderboard-modal')">✕</button></div>
+            <div class="bg-[#120409] border border-amber-500/25 rounded-2xl p-2.5 text-[10px] text-rose-200/80 flex flex-wrap gap-1.5">
+                <span class="bg-amber-950/50 text-amber-200 px-2 py-0.5 rounded-full">🥉 Bronz 0+</span>
+                <span class="bg-slate-800/70 text-slate-200 px-2 py-0.5 rounded-full">🥈 Gümüş 100+</span>
+                <span class="bg-yellow-900/50 text-yellow-200 px-2 py-0.5 rounded-full">🥇 Altın 250+</span>
+                <span class="bg-cyan-950/60 text-cyan-200 px-2 py-0.5 rounded-full">💎 Elmas 500+</span>
+                <span class="bg-rose-950/70 text-rose-200 px-2 py-0.5 rounded-full">👑 Şampiyon 900+</span>
+            </div>
             <div id="leaderboard-list" class="space-y-2"></div>
         </div>
     </div>
@@ -462,25 +478,25 @@
                 <button type="button" onclick="switchGameTab('guess')" id="tab-guess" class="flex-1 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold text-rose-300/60">Sayı</button>
             </div>
 
-            <!-- SATRANÇ PANELİ (BETA + TERFİ + BERABERLİK + ODA MESAJI/EMOJİ + TERKET) -->
+            <!-- SATRANÇ PANELİ (BETA + HAZIR BUTONU + SÜRE KİLİDİ + TERFİ + BERABERLİK + ODA MESAJI/EMOJİ + TERKET) -->
             <div id="game-panel-chess" class="space-y-2 py-0.5">
                 <div class="flex items-center justify-between bg-[#120409] border border-rose-900/50 rounded-xl px-2.5 py-1.5 text-[11px] sm:text-xs gap-1">
                     <div class="text-left min-w-0">
-                        <div class="text-rose-100 font-bold truncate">⚪ <span id="chess-white-name" class="text-amber-300">Bekleniyor</span></div>
+                        <div class="text-rose-100 font-bold truncate">⚪ <span id="chess-white-name" class="text-amber-300">Bekleniyor</span> <span id="chess-white-ready-badge" class="text-[9px] text-rose-400">⏳</span></div>
                         <div class="text-[10px] font-mono text-emerald-400">⏱️ <span id="chess-white-time">05:00</span></div>
                     </div>
                     <div class="text-center shrink-0">
                         <span class="inline-block bg-amber-500/20 text-amber-300 border border-amber-500/40 px-1.5 py-0.2 rounded-full text-[9px] font-black uppercase">BETA</span>
-                        <div id="chess-turn-badge" class="text-rose-200 text-[10px] font-bold">Sıra: Beyaz</div>
+                        <div id="chess-turn-badge" class="text-rose-200 text-[10px] font-bold">Hazır Bekleniyor</div>
                     </div>
                     <div class="text-right min-w-0">
-                        <div class="text-rose-100 font-bold truncate">⚫ <span id="chess-black-name" class="text-rose-300">Bekleniyor</span></div>
+                        <div class="text-rose-100 font-bold truncate"><span id="chess-black-ready-badge" class="text-[9px] text-rose-400">⏳</span> ⚫ <span id="chess-black-name" class="text-rose-300">Bekleniyor</span></div>
                         <div class="text-[10px] font-mono text-emerald-400">⏱️ <span id="chess-black-time">05:00</span></div>
                     </div>
                 </div>
 
                 <p id="chess-status" class="text-[11px] sm:text-xs text-amber-300 font-bold bg-[#120409]/80 border border-rose-900/40 rounded-xl py-1.5 px-2">
-                    Karşılıklı maç için koltuk kap veya odaya davet gönder!
+                    Koltuk al ve "Hazır" butonuna bas; iki taraf da hazır olmadan süre başlamaz!
                 </p>
 
                 <!-- PİYON TERFİ SEÇİM PANELİ -->
@@ -519,6 +535,7 @@
                 <div class="flex flex-wrap gap-1 justify-center">
                     <button type="button" id="chess-join-white-btn" onclick="joinChessSeat('w')" class="bg-[#2b0d18] hover:bg-rose-900/60 border border-amber-500/40 text-amber-200 px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold">⚪ Beyaz</button>
                     <button type="button" id="chess-join-black-btn" onclick="joinChessSeat('b')" class="bg-[#2b0d18] hover:bg-rose-900/60 border border-rose-500/40 text-rose-200 px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold">⚫ Siyah</button>
+                    <button type="button" id="chess-ready-btn" onclick="toggleChessReady()" class="bg-emerald-700 hover:bg-emerald-600 border border-emerald-400/50 text-white px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold">✅ Hazır</button>
                     <button type="button" onclick="sendChessInvite(); closeModal('games-modal');" class="bg-sky-600/30 hover:bg-sky-600/50 border border-sky-500/40 text-sky-200 px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold">📨 Davet</button>
                     <button type="button" id="chess-draw-btn" onclick="offerChessDraw()" class="bg-amber-600/25 hover:bg-amber-600/40 border border-amber-500/40 text-amber-200 px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold">🤝 Beraberlik</button>
                     <button type="button" id="chess-resign-btn" onclick="resignChessMatch()" class="bg-red-700/80 hover:bg-red-600 border border-red-500/50 text-white px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold">🏳️ Terket</button>
@@ -569,7 +586,7 @@
             </div>
 
             <div id="game-panel-guess" class="hidden space-y-3 py-2">
-                <p id="guess-status" class="text-xs text-amber-300 font-bold">1 ile 50 arasında gizli sayıyı bul! (+25 Puan)</p>
+                <p id="guess-status" class="text-xs text-amber-300 font-bold">1 ile 50 arasında gizli sayıyı bul! (+25 LP)</p>
                 <div class="flex gap-2 justify-center">
                     <input type="number" id="guess-input" min="1" max="50" placeholder="1-50" class="w-24 bg-[#120409] border border-rose-900/60 rounded-xl px-3 py-2 text-xs text-center">
                     <button type="button" onclick="submitGuess()" class="bg-gradient-to-r from-rose-600 to-amber-600 px-4 py-2 rounded-xl text-xs font-bold text-white">Tahmin Et</button>
@@ -707,6 +724,7 @@
         let customRoomsData = {};
         let activeUsersData = {};
         let registryUsersData = {};
+        let leagueDataMap = {};
         let myFriends = {};
         let tempBase64Avatar = null;
         let replyingTo = null;
@@ -729,6 +747,102 @@
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;');
+        }
+
+        function formatDateTimeTR(ts) {
+            if (!ts) return "Bilinmiyor";
+            const d = new Date(ts);
+            if (isNaN(d.getTime())) return "Bilinmiyor";
+            const datePart = d.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            const timePart = d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+            return `${datePart} ${timePart}`;
+        }
+
+        function getRoomLabel(roomId, explicitName = '') {
+            if (explicitName) return explicitName;
+            if (!roomId || roomId === 'genel') return '# Genel';
+            if (roomId === 'sohbet') return '# Muhabbet';
+            if (roomId === 'oyun') return '# Oyun';
+            if (roomId.startsWith('özel_dm_')) return '💬 Özel DM';
+            if (customRoomsData[roomId] && customRoomsData[roomId].name) {
+                return `# ${customRoomsData[roomId].name}`;
+            }
+            return `# ${roomId}`;
+        }
+
+        function syncCurrentRoomPresence() {
+            if (!currentUser) return;
+            const md = getMyData();
+            const roomLabel = getRoomLabel(currentRoom);
+            db.ref('status/' + currentUser.uid).update({
+                name: md.name,
+                avatar: md.avatar,
+                activity: md.activity,
+                roomId: currentRoom,
+                roomName: roomLabel
+            }).catch(() => {});
+            db.ref('users_registry/' + currentUser.uid).update({
+                name: md.name,
+                avatar: md.avatar,
+                bio: md.bio,
+                activity: md.activity,
+                roomId: currentRoom,
+                roomName: roomLabel
+            }).catch(() => {});
+        }
+
+        // ==================== LİG SİSTEMİ (SIFIRDAN BAŞLAYAN) ====================
+        const LEAGUE_TIERS = [
+            { id: 'bronze', name: 'Bronz', icon: '🥉', minLp: 0, maxLp: 99, nextAt: 100 },
+            { id: 'silver', name: 'Gümüş', icon: '🥈', minLp: 100, maxLp: 249, nextAt: 250 },
+            { id: 'gold', name: 'Altın', icon: '🥇', minLp: 250, maxLp: 499, nextAt: 500 },
+            { id: 'diamond', name: 'Elmas', icon: '💎', minLp: 500, maxLp: 899, nextAt: 900 },
+            { id: 'champion', name: 'Şampiyon', icon: '👑', minLp: 900, maxLp: Infinity, nextAt: null }
+        ];
+
+        function getLeagueInfo(rawLp) {
+            const lp = Math.max(0, Number(rawLp) || 0);
+            for (let i = LEAGUE_TIERS.length - 1; i >= 0; i--) {
+                const t = LEAGUE_TIERS[i];
+                if (lp >= t.minLp) {
+                    let pct = 100;
+                    let progressText = `Maksimum Lig (${t.icon} ${t.name})`;
+                    if (t.nextAt !== null) {
+                        const span = t.nextAt - t.minLp;
+                        const cur = lp - t.minLp;
+                        pct = Math.min(100, Math.max(0, Math.round((cur / span) * 100)));
+                        progressText = `Sonraki lige: ${t.nextAt - lp} LP`;
+                    }
+                    return { ...t, lp, pct, progressText };
+                }
+            }
+            return { ...LEAGUE_TIERS[0], lp: 0, pct: 0, progressText: 'Sonraki lige: 100 LP' };
+        }
+
+        function awardLeagueLP(lpGain, reasonText = '') {
+            if (!currentUser || !lpGain) return;
+            const md = getMyData();
+            const leagueRef = db.ref(`leagues/${currentUser.uid}`);
+            leagueRef.transaction(curr => {
+                const prevLp = (curr && typeof curr.lp === 'number') ? Math.max(0, curr.lp) : 0;
+                const nextLp = Math.max(0, prevLp + lpGain);
+                const tier = getLeagueInfo(nextLp);
+                return {
+                    name: md.name,
+                    avatar: md.avatar,
+                    lp: nextLp,
+                    leagueId: tier.id,
+                    leagueName: tier.name,
+                    leagueIcon: tier.icon,
+                    updatedAt: Date.now()
+                };
+            }, (err, committed, snap) => {
+                if (!err && committed && snap) {
+                    const saved = snap.val();
+                    const tier = getLeagueInfo(saved ? saved.lp : lpGain);
+                    showToast(`+${lpGain} LP (${tier.icon} ${tier.name})${reasonText ? ' — ' + reasonText : ''}`);
+                }
+            });
         }
 
         function setLoginError(msg) {
@@ -930,20 +1044,30 @@
 
         window.loadStats = function() {
             if (!currentUser) return;
-            db.ref(`stats/${currentUser.uid}`).once('value', s => {
-                const st = s.val() || { msgs: 0, score: 0 };
+            db.ref(`stats/${currentUser.uid}`).once('value', async s => {
+                const st = s.val() || { msgs: 0 };
                 const msgs = st.msgs || 0;
-                const score = st.score || 0;
+                const leagueSnap = await db.ref(`leagues/${currentUser.uid}`).once('value');
+                const lVal = leagueSnap.val() || {};
+                const tier = getLeagueInfo(lVal.lp || 0);
+
+                document.getElementById('stat-league').textContent = `${tier.icon} ${tier.name}`;
+                document.getElementById('stat-lp').textContent = `${tier.lp} LP`;
+                document.getElementById('stat-league-progress-label').textContent = tier.progressText;
+                document.getElementById('stat-league-pct').textContent = `${tier.pct}%`;
+                document.getElementById('stat-league-bar').style.width = `${tier.pct}%`;
                 document.getElementById('stat-msgs').textContent = msgs;
-                document.getElementById('stat-score').textContent = score;
+
                 const badges = [];
                 if (msgs >= 10) badges.push('💬 Aktif Konuşmacı');
                 if (msgs >= 50) badges.push('🔥 Sohbet Ustası');
-                if (score >= 50) badges.push('🏅 Oyuncu');
-                if (score >= 150) badges.push('👑 Şampiyon');
+                if (tier.lp >= 100) badges.push('🥈 Gümüş Lig');
+                if (tier.lp >= 250) badges.push('🥇 Altın Lig');
+                if (tier.lp >= 500) badges.push('💎 Elmas Lig');
+                if (tier.lp >= 900) badges.push('👑 Şampiyon');
                 document.getElementById('stat-badges').innerHTML = badges.length
                     ? badges.map(b => `<span class="bg-amber-500/15 border border-amber-500/40 text-amber-300 px-2 py-0.5 rounded-full text-[10px] font-bold">${b}</span>`).join('')
-                    : '<span class="text-rose-300/50 text-[10px]">Henüz rozet kazanılmadı.</span>';
+                    : '<span class="text-rose-300/50 text-[10px]">Henüz lig rozeti kazanılmadı.</span>';
             });
         };
 
@@ -982,6 +1106,7 @@
                 db.ref(`users_registry/${uid}`).remove();
                 db.ref(`status/${uid}`).remove();
                 db.ref(`stats/${uid}`).remove();
+                db.ref(`leagues/${uid}`).remove();
                 user.delete().then(() => {
                     showToast("Hesabınız kalıcı olarak silindi.");
                     window.location.reload();
@@ -1224,19 +1349,25 @@
 
         window.loadLeaderboard = function() {
             const listDiv = document.getElementById('leaderboard-list');
-            db.ref('leaderboard').once('value', snap => {
+            db.ref('leagues').once('value', snap => {
                 const data = snap.val() || {};
-                const sorted = Object.entries(data).sort((a, b) => (b[1].score || 0) - (a[1].score || 0));
-                listDiv.innerHTML = sorted.length ? sorted.map(([uid, info], idx) => `
-                    <div class="flex items-center justify-between bg-[#120409] p-2.5 rounded-xl border border-rose-900/50">
-                        <div class="flex items-center gap-2.5">
-                            <span class="font-bold text-xs text-rose-400">#${idx + 1}</span>
-                            <img src="${info.avatar}" class="w-7 h-7 rounded-full object-cover">
-                            <span class="text-xs font-bold text-rose-100">${info.name}</span>
+                const sorted = Object.entries(data).sort((a, b) => (b[1].lp || 0) - (a[1].lp || 0));
+                listDiv.innerHTML = sorted.length ? sorted.map(([uid, info], idx) => {
+                    const tier = getLeagueInfo(info.lp || 0);
+                    return `
+                    <div class="flex items-center justify-between bg-[#120409] p-2.5 rounded-xl border border-rose-900/50 gap-2">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="font-bold text-xs text-rose-400 shrink-0">#${idx + 1}</span>
+                            <img src="${info.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-7 h-7 rounded-full object-cover shrink-0">
+                            <div class="min-w-0">
+                                <div class="text-xs font-bold text-rose-100 truncate">${escapeHtml(info.name || 'İsimsiz')}</div>
+                                <div class="text-[10px] text-amber-300 font-semibold">${tier.icon} ${tier.name}</div>
+                            </div>
                         </div>
-                        <span class="text-xs font-black text-amber-400">${info.score || 0} Puan</span>
+                        <span class="text-xs font-black text-amber-400 shrink-0">${tier.lp} LP</span>
                     </div>
-                `).join('') : '<p class="text-xs text-rose-300/60 italic">Skor tablosu boş.</p>';
+                `;
+                }).join('') : '<p class="text-xs text-rose-300/60 italic">Henüz lig kaydı yok. Oyun oynayarak LP kazan!</p>';
             });
         };
 
@@ -1411,18 +1542,60 @@
                 document.getElementById('theme-select').value = savedTheme;
                 changeColorTheme(savedTheme);
 
+                const mdInit = getMyData();
+                db.ref(`leagues/${user.uid}`).transaction(curr => {
+                    if (curr && typeof curr.lp === 'number') {
+                        return { ...curr, name: mdInit.name, avatar: mdInit.avatar };
+                    }
+                    const baseTier = getLeagueInfo(0);
+                    return {
+                        name: mdInit.name,
+                        avatar: mdInit.avatar,
+                        lp: 0,
+                        leagueId: baseTier.id,
+                        leagueName: baseTier.name,
+                        leagueIcon: baseTier.icon,
+                        updatedAt: Date.now()
+                    };
+                });
+
                 const statusRef = db.ref('status/' + user.uid);
                 db.ref('.info/connected').on('value', snap => {
                     if (snap.val() === true) {
                         const md = getMyData();
-                        statusRef.onDisconnect().set({ state: 'offline', name: md.name, avatar: md.avatar, activity: md.activity, lastSeen: firebase.database.ServerValue.TIMESTAMP });
-                        statusRef.set({ state: 'online', name: md.name, avatar: md.avatar, activity: md.activity, lastSeen: firebase.database.ServerValue.TIMESTAMP });
-                        db.ref('users_registry/' + user.uid).update({ name: md.name, avatar: md.avatar, bio: md.bio, activity: md.activity });
+                        const roomLabel = getRoomLabel(currentRoom);
+                        statusRef.onDisconnect().set({
+                            state: 'offline',
+                            name: md.name,
+                            avatar: md.avatar,
+                            activity: md.activity,
+                            roomId: currentRoom,
+                            roomName: roomLabel,
+                            lastSeen: firebase.database.ServerValue.TIMESTAMP
+                        });
+                        statusRef.set({
+                            state: 'online',
+                            name: md.name,
+                            avatar: md.avatar,
+                            activity: md.activity,
+                            roomId: currentRoom,
+                            roomName: roomLabel,
+                            lastSeen: firebase.database.ServerValue.TIMESTAMP
+                        });
+                        db.ref('users_registry/' + user.uid).update({
+                            name: md.name,
+                            avatar: md.avatar,
+                            bio: md.bio,
+                            activity: md.activity,
+                            roomId: currentRoom,
+                            roomName: roomLabel
+                        });
                     }
                 });
 
                 db.ref('status').on('value', snap => { activeUsersData = snap.val() || {}; updateUsersUI(); });
-                db.ref('users_registry').on('value', snap => { registryUsersData = snap.val() || {}; });
+                db.ref('users_registry').on('value', snap => { registryUsersData = snap.val() || {}; updateUsersUI(); });
+                db.ref('leagues').on('value', snap => { leagueDataMap = snap.val() || {}; updateUsersUI(); });
                 db.ref(`friends/${user.uid}`).on('value', snap => { myFriends = snap.val() || {}; updateUsersUI(); });
                 db.ref(`friend_requests/${user.uid}`).on('value', snap => {
                     const reqs = snap.val() || {};
@@ -1486,8 +1659,10 @@
             }
             loadUserDataToUI(); closeModal('profile-modal');
             const md = getMyData();
-            db.ref('status/' + currentUser.uid).update({ name: md.name, avatar: md.avatar, activity: md.activity });
-            db.ref('users_registry/' + currentUser.uid).update({ name: md.name, avatar: md.avatar, bio: md.bio, activity: md.activity });
+            const roomLabel = getRoomLabel(currentRoom);
+            db.ref('status/' + currentUser.uid).update({ name: md.name, avatar: md.avatar, activity: md.activity, roomId: currentRoom, roomName: roomLabel });
+            db.ref('users_registry/' + currentUser.uid).update({ name: md.name, avatar: md.avatar, bio: md.bio, activity: md.activity, roomId: currentRoom, roomName: roomLabel });
+            db.ref('leagues/' + currentUser.uid).update({ name: md.name, avatar: md.avatar });
             showToast(md.activity ? `Durum güncellendi: ${md.activity}` : "Profil kaydedildi.");
         };
 
@@ -1541,42 +1716,46 @@
             const fEntries = Object.entries(myFriends);
             fList.innerHTML = fEntries.length ? fEntries.map(([uid, info]) => {
                 const st = activeUsersData[uid] || {};
+                const reg = registryUsersData[uid] || {};
                 const online = st.state === 'online';
-                const act = st.activity || (registryUsersData[uid] && registryUsersData[uid].activity) || '';
+                const act = st.activity || reg.activity || '';
+                const roomLbl = getRoomLabel(st.roomId || reg.roomId || 'genel', st.roomName || reg.roomName || '');
+                const tier = getLeagueInfo((leagueDataMap[uid] && leagueDataMap[uid].lp) || 0);
                 const safeName = encodeURIComponent(info.name || 'İsimsiz');
                 return `
                     <div onclick="openUserProfileModal('${uid}', '${safeName}')" class="flex items-center justify-between bg-[#120409] p-2 rounded-xl border border-rose-500/30 cursor-pointer hover:border-amber-500 gap-2">
                         <div class="min-w-0">
-                            <div class="text-xs font-bold truncate">${info.name || 'İsimsiz'} <span class="${online ? 'text-emerald-400' : 'text-rose-500'}">●</span></div>
-                            ${act ? `<div class="text-[10px] text-amber-300 truncate">${escapeHtml(act)}</div>` : ''}
+                            <div class="text-xs font-bold truncate">${info.name || 'İsimsiz'} <span class="${online ? 'text-emerald-400' : 'text-rose-500'}">●</span> <span class="text-[10px] text-amber-300 font-semibold">${tier.icon} ${tier.name}</span></div>
+                            <div class="text-[10px] text-rose-200/75 truncate">${escapeHtml(roomLbl)}${act ? ' • ' + escapeHtml(act) : ''}</div>
                         </div>
                         <span class="text-[10px] text-amber-400 font-bold shrink-0">Profili Aç</span>
                     </div>
                 `;
             }).join('') : '<p class="text-xs text-rose-300/60 italic">Henüz arkadaşın yok.</p>';
 
-            db.ref('users_registry').once('value', snap => {
-                const all = snap.val() || {};
-                document.getElementById('all-users-list').innerHTML = Object.entries(all).filter(([uid]) => uid !== currentUser.uid).map(([uid, info]) => {
-                    const st = activeUsersData[uid] || {};
-                    const online = st.state === 'online';
-                    const act = st.activity || info.activity || '';
-                    const displayName = info.name || 'İsimsiz';
-                    const safeName = encodeURIComponent(displayName);
-                    return `
-                        <div onclick="openUserProfileModal('${uid}', '${safeName}')" class="flex items-center justify-between bg-[#120409] p-2.5 rounded-xl border border-rose-900/50 hover:border-amber-500 cursor-pointer transition gap-2">
-                            <div class="flex items-center gap-2 min-w-0">
-                                <img src="${info.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-8 h-8 rounded-full object-cover shrink-0">
-                                <div class="text-left min-w-0">
-                                    <p class="text-xs font-bold text-rose-100 truncate">${displayName} <span class="${online ? 'text-emerald-400' : 'text-rose-500'}">●</span></p>
-                                    <p class="text-[9px] text-amber-300/90 truncate">${act ? escapeHtml(act) : (online ? 'Çevrimiçi' : 'Çevrimdışı')}</p>
-                                </div>
+            const allList = document.getElementById('all-users-list');
+            if (!allList || !currentUser) return;
+            allList.innerHTML = Object.entries(registryUsersData).filter(([uid]) => uid !== currentUser.uid).map(([uid, info]) => {
+                const st = activeUsersData[uid] || {};
+                const online = st.state === 'online';
+                const act = st.activity || info.activity || '';
+                const roomLbl = getRoomLabel(st.roomId || info.roomId || 'genel', st.roomName || info.roomName || '');
+                const tier = getLeagueInfo((leagueDataMap[uid] && leagueDataMap[uid].lp) || 0);
+                const displayName = info.name || 'İsimsiz';
+                const safeName = encodeURIComponent(displayName);
+                return `
+                    <div onclick="openUserProfileModal('${uid}', '${safeName}')" class="flex items-center justify-between bg-[#120409] p-2.5 rounded-xl border border-rose-900/50 hover:border-amber-500 cursor-pointer transition gap-2">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <img src="${info.avatar || 'https://ui-avatars.com/api/?name=U'}" class="w-8 h-8 rounded-full object-cover shrink-0">
+                            <div class="text-left min-w-0">
+                                <p class="text-xs font-bold text-rose-100 truncate">${displayName} <span class="${online ? 'text-emerald-400' : 'text-rose-500'}">●</span> <span class="text-[9px] text-amber-300">${tier.icon} ${tier.name}</span></p>
+                                <p class="text-[9px] text-rose-200/80 truncate">${escapeHtml(roomLbl)}${act ? ' • ' + escapeHtml(act) : ''}</p>
                             </div>
-                            <span class="text-[10px] text-amber-400 font-bold bg-amber-950/60 px-2 py-1 rounded-lg shrink-0">Profili Aç</span>
                         </div>
-                    `;
-                }).join('');
-            });
+                        <span class="text-[10px] text-amber-400 font-bold bg-amber-950/60 px-2 py-1 rounded-lg shrink-0">Profili Aç</span>
+                    </div>
+                `;
+            }).join('');
         }
 
         window.openUserProfileModal = function(targetUid, encName) {
@@ -1589,9 +1768,17 @@
             upAvatar.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(targetName) + '&background=e11d48&color=fff';
 
             const st = activeUsersData[targetUid] || {};
+            const regInit = registryUsersData[targetUid] || {};
+            const tierInit = getLeagueInfo((leagueDataMap[targetUid] && leagueDataMap[targetUid].lp) || 0);
+            const upLeagueBadge = document.getElementById('up-league-badge');
+            if (upLeagueBadge) upLeagueBadge.textContent = `${tierInit.icon} ${tierInit.name} • ${tierInit.lp} LP`;
+
+            const upRoomText = document.getElementById('up-room-text');
+            if (upRoomText) upRoomText.textContent = getRoomLabel(st.roomId || regInit.roomId || 'genel', st.roomName || regInit.roomName || '');
+
             const liveStatusEl = document.getElementById('up-live-status');
             if (liveStatusEl) {
-                const initAct = st.activity || (registryUsersData[targetUid] && registryUsersData[targetUid].activity) || '';
+                const initAct = st.activity || regInit.activity || '';
                 if (initAct) {
                     liveStatusEl.textContent = initAct;
                     liveStatusEl.classList.remove('hidden');
@@ -1604,6 +1791,9 @@
                 const uData = snap.val() || {};
                 if (uData.avatar) upAvatar.src = uData.avatar;
                 document.getElementById('up-bio').textContent = uData.bio || "WrtS Kullanıcısı";
+                if (upRoomText) {
+                    upRoomText.textContent = getRoomLabel(st.roomId || uData.roomId || 'genel', st.roomName || uData.roomName || '');
+                }
                 const finalAct = st.activity || uData.activity || '';
                 if (liveStatusEl) {
                     if (finalAct) {
@@ -1626,7 +1816,7 @@
             } else {
                 statusText.textContent = "Çevrimdışı";
                 statusText.className = "font-bold text-rose-400";
-                lastSeenText.textContent = st.lastSeen ? new Date(st.lastSeen).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Az önce";
+                lastSeenText.textContent = st.lastSeen ? formatDateTimeTR(st.lastSeen) : "Kayıt yok";
             }
 
             const isFriend = !!myFriends[targetUid];
@@ -1697,6 +1887,8 @@
                     }
                 });
                 if (!currentRoom.startsWith('özel_dm_')) roomSelect.value = currentRoom;
+                syncCurrentRoomPresence();
+                updateUsersUI();
             });
         }
         document.getElementById('create-room-btn').onclick = () => {
@@ -1758,7 +1950,9 @@
             const key = snap.key;
             const senderUid = data.uid || '';
             const senderName = data.isim || 'İsimsiz';
-            const liveActivity = (activeUsersData[senderUid] && activeUsersData[senderUid].activity) || data.activity || '';
+            const liveSt = activeUsersData[senderUid] || {};
+            const liveActivity = liveSt.activity || data.activity || '';
+            const liveRoomLbl = getRoomLabel(liveSt.roomId || '', liveSt.roomName || '');
             const isMe = !!(currentUser && senderUid === currentUser.uid);
 
             if (!isMe && currentUser && (!data.readBy || !data.readBy[currentUser.uid])) {
@@ -1793,6 +1987,9 @@
             const safePreview = (data.mesaj || (data.type === 'audio' ? 'Sesli Mesaj' : 'Medya')).replace(/'/g, '').replace(/"/g, '');
             const safeSenderEnc = encodeURIComponent(senderName);
             const effectClass = (data.effect === 'glow' || data.effect === 'confetti') ? 'glow-bubble' : '';
+            const roomBadgeHtml = (liveSt.state === 'online' && liveRoomLbl)
+                ? `<span class="bg-[#120409]/80 border border-rose-800/50 text-rose-200 px-1.5 py-0.2 rounded-full text-[9px] font-semibold">${escapeHtml(liveRoomLbl)}</span>`
+                : '';
             const activityBadgeHtml = liveActivity
                 ? `<span class="bg-[#120409]/90 border border-amber-500/35 text-amber-200 px-1.5 py-0.2 rounded-full text-[9px] font-semibold">${escapeHtml(liveActivity)}</span>`
                 : '';
@@ -1822,6 +2019,7 @@
                 <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[82%] sm:max-w-[80%]">
                     <div class="flex items-center gap-1 flex-wrap px-1 mb-0.5">
                         <span class="text-[10px] font-bold text-rose-200">${escapeHtml(senderName)}</span>
+                        ${roomBadgeHtml}
                         ${activityBadgeHtml}
                     </div>
                     <div id="bubble-${key}" class="cursor-pointer ${isMe ? 'bg-gradient-to-r from-rose-600 to-rose-700' : 'bg-[#280c16]'} ${effectClass} px-3 py-2 rounded-2xl shadow relative transition-all">
@@ -1906,6 +2104,7 @@
             if (roomRef) roomRef.off();
             if (pinnedRef) pinnedRef.off();
             if (typingRoomRef) typingRoomRef.off();
+            syncCurrentRoomPresence();
             watchRoomActivityNotifications(room);
 
             const messagesDiv = document.getElementById('messages');
@@ -3007,7 +3206,7 @@
             showToast("Görüşmeden ayrıldın.");
         };
 
-        // ==================== GERÇEK OYUNCU SATRANÇ MOTORU (BETA) ====================
+        // ==================== GERÇEK OYUNCU SATRANÇ MOTORU (BETA + HAZIR SİSTEMİ) ====================
         const CHESS_INITIAL_MS = 5 * 60 * 1000;
         const CHESS_GLYPHS = {
             wK: '♔', wQ: '♕', wR: '♖', wB: '♗', wN: '♘', wP: '♙',
@@ -3171,6 +3370,14 @@
             return false;
         }
 
+        function areBothChessPlayersReady(state) {
+            if (!state || !state.players) return false;
+            const w = state.players.w;
+            const b = state.players.b;
+            const readyMap = state.ready || {};
+            return !!(w && b && readyMap[w.uid] && readyMap[b.uid]);
+        }
+
         function formatClock(ms) {
             const clamped = Math.max(0, Math.floor(ms / 1000));
             const m = Math.floor(clamped / 60);
@@ -3182,7 +3389,7 @@
             if (!state) return { wMs: CHESS_INITIAL_MS, bMs: CHESS_INITIAL_MS };
             let wMs = typeof state.wMs === 'number' ? state.wMs : CHESS_INITIAL_MS;
             let bMs = typeof state.bMs === 'number' ? state.bMs : CHESS_INITIAL_MS;
-            if (!state.winner && state.lastMoveAt && state.players && state.players.w && state.players.b) {
+            if (!state.winner && state.lastMoveAt && areBothChessPlayersReady(state)) {
                 const elapsed = Math.max(0, Date.now() - state.lastMoveAt);
                 if (state.turn === 'w') wMs = Math.max(0, wMs - elapsed);
                 else bMs = Math.max(0, bMs - elapsed);
@@ -3198,20 +3405,55 @@
             if (wEl) wEl.textContent = formatClock(wMs);
             if (bEl) bEl.textContent = formatClock(bMs);
 
-            if (!chessState.winner && chessState.players && chessState.players.w && chessState.players.b) {
+            if (!chessState.winner && areBothChessPlayersReady(chessState)) {
                 if (wMs <= 0 || bMs <= 0) {
                     const loserColor = wMs <= 0 ? 'w' : 'b';
                     const winnerColor = loserColor === 'w' ? 'b' : 'w';
-                    const winnerName = chessState.players[winnerColor]?.name || (winnerColor === 'w' ? 'Beyaz' : 'Siyah');
+                    const winnerPlayer = chessState.players[winnerColor];
+                    const winnerName = winnerPlayer?.name || (winnerColor === 'w' ? 'Beyaz' : 'Siyah');
                     db.ref(`games/${currentRoom}/chess`).update({
                         winner: winnerColor,
                         wMs,
                         bMs,
                         reason: `Süre doldu! Kazanan: ${winnerName}`
                     }).catch(() => {});
+                    if (winnerPlayer && currentUser && winnerPlayer.uid === currentUser.uid) {
+                        awardLeagueLP(40, 'Satranç Galibiyeti');
+                    }
                 }
             }
         }
+
+        window.toggleChessReady = function() {
+            if (!currentUser || !chessState || chessState.winner) return;
+            const wPlayer = chessState.players && chessState.players.w;
+            const bPlayer = chessState.players && chessState.players.b;
+            const myColor = wPlayer && wPlayer.uid === currentUser.uid ? 'w' : (bPlayer && bPlayer.uid === currentUser.uid ? 'b' : null);
+            if (!myColor) {
+                return showToast("Önce Beyaz veya Siyah koltuğu seçmelisin.", 'error');
+            }
+            const ref = db.ref(`games/${currentRoom}/chess`);
+            ref.transaction(curr => {
+                if (!curr || curr.winner) return curr;
+                curr.ready = curr.ready || {};
+                const nextReady = !curr.ready[currentUser.uid];
+                curr.ready[currentUser.uid] = nextReady;
+
+                const wU = curr.players && curr.players.w && curr.players.w.uid;
+                const bU = curr.players && curr.players.b && curr.players.b.uid;
+                const bothReadyNow = !!(wU && bU && curr.ready[wU] && curr.ready[bU]);
+                if (bothReadyNow) {
+                    curr.lastMoveAt = Date.now();
+                } else {
+                    curr.lastMoveAt = null;
+                }
+                return curr;
+            }, (err, committed) => {
+                if (!err && committed) {
+                    showToast("Hazır durumun güncellendi.");
+                }
+            });
+        };
 
         window.sendChessQuickEmoji = function(emoji) {
             if (!currentUser || !emoji) return;
@@ -3349,7 +3591,7 @@
             const now = Date.now();
             let wMs = typeof chessState.wMs === 'number' ? chessState.wMs : CHESS_INITIAL_MS;
             let bMs = typeof chessState.bMs === 'number' ? chessState.bMs : CHESS_INITIAL_MS;
-            if (chessState.lastMoveAt) {
+            if (chessState.lastMoveAt && areBothChessPlayersReady(chessState)) {
                 const elapsed = Math.max(0, now - chessState.lastMoveAt);
                 if (chessState.turn === 'w') wMs = Math.max(0, wMs - elapsed);
                 else bMs = Math.max(0, bMs - elapsed);
@@ -3365,12 +3607,7 @@
                 if (opponentInCheck) {
                     winner = chessState.turn;
                     reason = `♟️ Şah Mat! Kazanan: ${getMyData().name} (${winner === 'w' ? 'Beyaz' : 'Siyah'})`;
-                    incrementUserStat('score', 40);
-                    db.ref(`leaderboard/${currentUser.uid}`).update({
-                        name: getMyData().name,
-                        avatar: getMyData().avatar,
-                        score: firebase.database.ServerValue.increment(40)
-                    });
+                    awardLeagueLP(40, 'Satranç Şah Mat');
                 } else {
                     winner = 'draw';
                     reason = '🤝 Pat! Hamle kalmadı, oyun berabere.';
@@ -3391,7 +3628,7 @@
                 turn: nextTurn,
                 wMs,
                 bMs,
-                lastMoveAt: now,
+                lastMoveAt: winner ? null : now,
                 lastMove: { fr: sr, fc: sc, tr: r, tc: c },
                 history: nextHist,
                 drawOffer: null,
@@ -3413,11 +3650,37 @@
             const board = normalizeChessBoard(chessState.board);
             const wPlayer = chessState.players && chessState.players.w ? chessState.players.w : null;
             const bPlayer = chessState.players && chessState.players.b ? chessState.players.b : null;
+            const readyMap = chessState.ready || {};
+            const wReady = !!(wPlayer && readyMap[wPlayer.uid]);
+            const bReady = !!(bPlayer && readyMap[bPlayer.uid]);
+            const bothReady = areBothChessPlayersReady(chessState);
 
             document.getElementById('chess-white-name').textContent = wPlayer ? wPlayer.name : 'Boş';
             document.getElementById('chess-black-name').textContent = bPlayer ? bPlayer.name : 'Boş';
 
+            const wReadyBadge = document.getElementById('chess-white-ready-badge');
+            const bReadyBadge = document.getElementById('chess-black-ready-badge');
+            if (wReadyBadge) {
+                wReadyBadge.textContent = wPlayer ? (wReady ? '✅ Hazır' : '⏳ Bekliyor') : '';
+                wReadyBadge.className = wReady ? 'text-[9px] text-emerald-400 font-bold' : 'text-[9px] text-amber-300';
+            }
+            if (bReadyBadge) {
+                bReadyBadge.textContent = bPlayer ? (bReady ? '✅ Hazır' : '⏳ Bekliyor') : '';
+                bReadyBadge.className = bReady ? 'text-[9px] text-emerald-400 font-bold' : 'text-[9px] text-amber-300';
+            }
+
             const myColor = !currentUser ? null : (wPlayer && wPlayer.uid === currentUser.uid ? 'w' : (bPlayer && bPlayer.uid === currentUser.uid ? 'b' : null));
+            const amIReady = !!(currentUser && readyMap[currentUser.uid]);
+            const readyBtn = document.getElementById('chess-ready-btn');
+            if (readyBtn) {
+                readyBtn.disabled = !myColor || !!chessState.winner;
+                readyBtn.classList.toggle('opacity-40', !myColor || !!chessState.winner);
+                readyBtn.textContent = amIReady ? '✔ Hazırsın' : '✅ Hazır';
+                readyBtn.className = amIReady
+                    ? 'bg-amber-600 hover:bg-amber-500 border border-amber-300/60 text-white px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold'
+                    : 'bg-emerald-700 hover:bg-emerald-600 border border-emerald-400/50 text-white px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold';
+            }
+
             const resignBtn = document.getElementById('chess-resign-btn');
             const drawBtn = document.getElementById('chess-draw-btn');
             if (resignBtn) {
@@ -3425,8 +3688,8 @@
                 resignBtn.classList.toggle('opacity-40', !myColor || !!chessState.winner);
             }
             if (drawBtn) {
-                drawBtn.disabled = !myColor || !wPlayer || !bPlayer || !!chessState.winner;
-                drawBtn.classList.toggle('opacity-40', !myColor || !wPlayer || !bPlayer || !!chessState.winner);
+                drawBtn.disabled = !myColor || !bothReady || !!chessState.winner;
+                drawBtn.classList.toggle('opacity-40', !myColor || !bothReady || !!chessState.winner);
             }
 
             const drawPanel = document.getElementById('chess-draw-offer-panel');
@@ -3445,7 +3708,7 @@
             const turnBadge = document.getElementById('chess-turn-badge');
             const statusEl = document.getElementById('chess-status');
             if (turnBadge) {
-                turnBadge.textContent = chessState.turn === 'w' ? 'Sıra: Beyaz' : 'Sıra: Siyah';
+                turnBadge.textContent = !bothReady ? 'Hazır Bekleniyor' : (chessState.turn === 'w' ? 'Sıra: Beyaz' : 'Sıra: Siyah');
             }
 
             if (chessState.winner) {
@@ -3454,7 +3717,9 @@
                     : (chessState.reason || `🏆 Kazanan: ${chessState.winner === 'w' ? 'Beyaz' : 'Siyah'}!`);
                 statusEl.textContent = winText;
             } else if (!wPlayer || !bPlayer) {
-                statusEl.textContent = 'Karşılıklı maç için 2 gerçek oyuncu koltuk almalı (Beyaz / Siyah).';
+                statusEl.textContent = '2 oyuncu koltuk almalı ve ikisi de "Hazır"a basmalı. Süre kilitli!';
+            } else if (!bothReady) {
+                statusEl.textContent = '⏸️ Süre duruyor! İki oyuncu da "Hazır"a bastığında maç ve süre başlar.';
             } else {
                 const inCheck = isInCheck(board, chessState.turn);
                 const turnName = chessState.turn === 'w' ? wPlayer.name : bPlayer.name;
@@ -3522,9 +3787,11 @@
                     winner: '',
                     reason: '',
                     history: [],
-                    players: {}
+                    players: {},
+                    ready: {}
                 };
                 st.players = st.players || {};
+                st.ready = st.ready || {};
                 const otherColor = color === 'w' ? 'b' : 'w';
                 if (st.players[otherColor] && st.players[otherColor].uid === currentUser.uid) {
                     delete st.players[otherColor];
@@ -3533,14 +3800,13 @@
                     return;
                 }
                 st.players[color] = { uid: currentUser.uid, name: md.name };
-                if (st.players.w && st.players.b && !st.lastMoveAt && !st.winner) {
-                    st.lastMoveAt = Date.now();
-                }
+                st.ready[currentUser.uid] = false;
+                st.lastMoveAt = null;
                 return st;
             }, (err, committed) => {
                 if (err) return showToast("Koltuk alınamadı.", 'error');
                 if (!committed) return showToast("Bu taraf şu an başka bir oyuncuda!", 'error');
-                showToast(color === 'w' ? "Beyaz taşlarla yerini aldın." : "Siyah taşlarla yerini aldın.");
+                showToast(color === 'w' ? "Beyaz taşlarla yerini aldın; Hazır'a bas!" : "Siyah taşlarla yerini aldın; Hazır'a bas!");
             });
         };
 
@@ -3551,7 +3817,10 @@
             const bPlayer = chessState.players && chessState.players.b;
 
             if (!wPlayer || !bPlayer) {
-                return showToast("Maça başlamak için iki gerçek oyuncunun da koltuk alması gerekir.", 'error');
+                return showToast("Maça başlamak için iki oyuncunun da koltuk alması gerekir.", 'error');
+            }
+            if (!areBothChessPlayersReady(chessState)) {
+                return showToast("İki oyuncu da 'Hazır' butonuna basmadan hamle yapılamaz!", 'error');
             }
 
             const myColor = wPlayer.uid === currentUser.uid ? 'w' : (bPlayer.uid === currentUser.uid ? 'b' : null);
@@ -3581,46 +3850,42 @@
             if (clickedPiece && clickedPiece[0] === myColor) {
                 chessSelected = [r, c];
                 chessLegalTargets = getLegalMovesForSquare(board, r, c);
-                renderChessBoard();
             } else {
                 chessSelected = null;
                 chessLegalTargets = [];
-                renderChessBoard();
             }
+            renderChessBoard();
         }
 
         window.resetChessGame = function() {
-            const preservePlayers = chessState && chessState.players ? chessState.players : {};
-            const hasBoth = !!(preservePlayers.w && preservePlayers.b);
             chessSelected = null;
             chessLegalTargets = [];
             pendingPromotionMove = null;
             document.getElementById('chess-promotion-panel')?.classList.add('hidden');
+            const prevPlayers = (chessState && chessState.players) ? chessState.players : {};
+            const resetReady = {};
             db.ref(`games/${currentRoom}/chess`).set({
                 board: createInitialChessBoard(),
                 turn: 'w',
                 wMs: CHESS_INITIAL_MS,
                 bMs: CHESS_INITIAL_MS,
-                lastMoveAt: hasBoth ? Date.now() : null,
+                lastMoveAt: null,
                 lastMove: null,
+                history: [],
+                roomMessages: {},
                 drawOffer: null,
                 winner: '',
                 reason: '',
-                history: [],
-                roomMessages: {},
-                players: preservePlayers
+                players: prevPlayers,
+                ready: resetReady
             });
-            showToast("Satranç tahtası sıfırlandı (5 dk süre).");
         };
 
-        function listenChess() {
-            if (chessRoomRef) {
-                chessRoomRef.off();
-                chessRoomRef = null;
-            }
+        function listenChessGame() {
+            if (chessRoomRef) chessRoomRef.off();
             chessRoomRef = db.ref(`games/${currentRoom}/chess`);
-            chessRoomRef.on('value', s => {
-                const val = s.val();
+            chessRoomRef.on('value', snap => {
+                const val = snap.val();
                 if (!val) {
                     chessState = {
                         board: createInitialChessBoard(),
@@ -3628,136 +3893,154 @@
                         wMs: CHESS_INITIAL_MS,
                         bMs: CHESS_INITIAL_MS,
                         lastMoveAt: null,
+                        lastMove: null,
+                        history: [],
+                        roomMessages: {},
                         drawOffer: null,
                         winner: '',
                         reason: '',
-                        history: [],
-                        roomMessages: {},
-                        players: {}
+                        players: {},
+                        ready: {}
                     };
                 } else {
-                    chessState = val;
+                    chessState = {
+                        ...val,
+                        board: normalizeChessBoard(val.board),
+                        wMs: typeof val.wMs === 'number' ? val.wMs : CHESS_INITIAL_MS,
+                        bMs: typeof val.bMs === 'number' ? val.bMs : CHESS_INITIAL_MS,
+                        players: val.players || {},
+                        ready: val.ready || {}
+                    };
                 }
                 renderChessBoard();
             });
 
-            if (!chessClockInterval) {
-                chessClockInterval = setInterval(() => {
-                    updateChessClocksUI();
-                }, 1000);
-            }
+            if (chessClockInterval) clearInterval(chessClockInterval);
+            chessClockInterval = setInterval(updateChessClocksUI, 500);
         }
 
-        window.switchGameTab = g => {
-            ['chess', 'xox', 'battleship', 'guess'].forEach(x => {
-                document.getElementById(`game-panel-${x}`).classList.toggle('hidden', x !== g);
-                document.getElementById(`tab-${x}`).className = x === g
-                    ? 'flex-1 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold bg-rose-600 text-white flex items-center justify-center gap-1'
-                    : 'flex-1 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold text-rose-300/60';
+        // ==================== XOX, AMİRAL BATTI & SAYI TAHMİN ====================
+        let xoxBoard = Array(9).fill('');
+        let xoxTurn = 'X';
+        let bsShips = [];
+        let bsShots = 10;
+        let bsHits = 0;
+
+        window.switchGameTab = function(tab) {
+            ['chess', 'xox', 'battleship', 'guess'].forEach(t => {
+                document.getElementById(`game-panel-${t}`).classList.toggle('hidden', t !== tab);
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === tab) {
+                    btn.className = 'flex-1 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold bg-rose-600 text-white flex items-center justify-center gap-1';
+                } else {
+                    btn.className = 'flex-1 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold text-rose-300/60 flex items-center justify-center gap-1';
+                }
             });
-            if (g === 'chess') listenChess();
+            if (tab === 'chess') listenChessGame();
         };
+
         window.initGames = function() {
-            listenChess();
-            db.ref(`games/${currentRoom}/xox`).on('value', s => {
-                const g = s.val() || { board: Array(9).fill(''), turn: 'X', winner: '' };
-                for (let i = 0; i < 9; i++) document.getElementById(`cell-${i}`).textContent = g.board[i] || '';
-                document.getElementById('xox-status').textContent = g.winner ? `Kazanan: ${g.winner}!` : `Sıra: ${g.turn}`;
-            });
-            listenBattleship();
+            switchGameTab('chess');
+            renderXOX();
+            resetBattleship();
+            resetGuessGame();
         };
-        window.makeXOXMove = i => {
-            db.ref(`games/${currentRoom}/xox`).once('value', s => {
-                let g = s.val() || { board: Array(9).fill(''), turn: 'X', winner: '' };
-                if (g.board[i] || g.winner) return;
-                g.board[i] = g.turn;
-                const wins = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
-                if (wins.some(w => g.board[w[0]] && g.board[w[0]] === g.board[w[1]] && g.board[w[1]] === g.board[w[2]])) {
-                    g.winner = g.turn;
-                } else {
-                    g.turn = g.turn === 'X' ? 'O' : 'X';
-                }
-                db.ref(`games/${currentRoom}/xox`).set(g);
+
+        function renderXOX() {
+            xoxBoard.forEach((v, i) => {
+                const cell = document.getElementById(`cell-${i}`);
+                if (cell) cell.textContent = v;
             });
-        };
-        window.resetXOXGame = () => db.ref(`games/${currentRoom}/xox`).set({ board: Array(9).fill(''), turn: 'X', winner: '' });
-
-        function listenBattleship() {
-            db.ref(`games/${currentRoom}/bs`).on('value', s => {
-                let g = s.val();
-                if (!g) { resetBattleship(); return; }
-                const grid = document.getElementById('bs-grid');
-                grid.innerHTML = '';
-                let found = 0;
-                let shotsUsed = g.revealed ? Object.keys(g.revealed).length : 0;
-                let maxShots = 10;
-                let remainingShots = maxShots - shotsUsed;
-
-                for (let i = 0; i < 25; i++) {
-                    const hit = g.revealed && g.revealed[i];
-                    const isShip = g.ships && g.ships.includes(i);
-                    if (hit && isShip) found++;
-                    const btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.className = `w-10 h-10 rounded-lg font-bold text-xs border border-rose-900/50 ${hit ? (isShip ? 'bg-emerald-600 text-white' : 'bg-rose-950/60 text-rose-500') : 'bg-[#120409] hover:border-amber-500'} transition`;
-                    btn.textContent = hit ? (isShip ? '🚢' : '❌') : '?';
-
-                    btn.onclick = () => {
-                        if (g.gameOver || hit || remainingShots <= 0) return;
-                        db.ref(`games/${currentRoom}/bs/revealed/${i}`).set(true);
-                    };
-                    grid.appendChild(btn);
-                }
-
-                const statusEl = document.getElementById('bs-status');
-                document.getElementById('bs-shots').textContent = Math.max(0, remainingShots);
-
-                if (found >= 3) {
-                    statusEl.textContent = '🎉 Tebrikler! Tüm gemileri buldun!';
-                    if (!g.scored && currentUser) {
-                        incrementUserStat('score', 50);
-                        db.ref(`leaderboard/${currentUser.uid}`).update({ name: getMyData().name, avatar: getMyData().avatar, score: firebase.database.ServerValue.increment(50) });
-                        db.ref(`games/${currentRoom}/bs/scored`).set(true);
-                    }
-                } else if (remainingShots <= 0) {
-                    statusEl.textContent = '💥 Hak bitti! Kaybettin.';
-                } else {
-                    statusEl.innerHTML = `3 gizli gemiyi bul! Kalan Hak: <span id="bs-shots">${remainingShots}</span>`;
-                }
-            });
+            document.getElementById('xox-status').textContent = `Sıra: ${xoxTurn}`;
         }
 
-        window.resetBattleship = () => {
-            const ships = [];
-            while (ships.length < 3) {
-                const r = Math.floor(Math.random() * 25);
-                if (!ships.includes(r)) ships.push(r);
+        window.makeXOXMove = function(idx) {
+            if (xoxBoard[idx]) return;
+            xoxBoard[idx] = xoxTurn;
+            const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+            const won = wins.some(([a,b,c]) => xoxBoard[a] && xoxBoard[a] === xoxBoard[b] && xoxBoard[a] === xoxBoard[c]);
+            if (won) {
+                renderXOX();
+                document.getElementById('xox-status').textContent = `🏆 Kazanan: ${xoxTurn}!`;
+                return;
             }
-            db.ref(`games/${currentRoom}/bs`).set({ ships, revealed: {}, gameOver: false, scored: false });
+            if (xoxBoard.every(Boolean)) {
+                renderXOX();
+                document.getElementById('xox-status').textContent = '🤝 Berabere!';
+                return;
+            }
+            xoxTurn = xoxTurn === 'X' ? 'O' : 'X';
+            renderXOX();
+        };
+
+        window.resetXOXGame = function() {
+            xoxBoard = Array(9).fill('');
+            xoxTurn = 'X';
+            renderXOX();
+        };
+
+        window.resetBattleship = function() {
+            bsShots = 10; bsHits = 0;
+            const pool = Array.from({ length: 25 }, (_, i) => i);
+            bsShips = [];
+            while (bsShips.length < 3 && pool.length) {
+                const pick = pool.splice(Math.floor(Math.random() * pool.length), 1)[0];
+                bsShips.push(pick);
+            }
+            document.getElementById('bs-shots').textContent = bsShots;
+            document.getElementById('bs-status').innerHTML = '3 gizli gemiyi bul! Kalan Hak: <span id="bs-shots">10</span> (+50 LP)';
+            const grid = document.getElementById('bs-grid');
+            grid.innerHTML = '';
+            for (let i = 0; i < 25; i++) {
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.className = 'w-10 h-10 bg-[#120409] border border-rose-900/50 rounded-lg text-xs font-bold hover:border-amber-400';
+                b.textContent = '•';
+                b.onclick = () => {
+                    if (b.dataset.fired || bsShots <= 0 || bsHits >= 3) return;
+                    b.dataset.fired = '1';
+                    bsShots -= 1;
+                    document.getElementById('bs-shots').textContent = bsShots;
+                    if (bsShips.includes(i)) {
+                        bsHits += 1;
+                        b.textContent = '💥';
+                        b.className = 'w-10 h-10 bg-rose-700 border border-amber-400 rounded-lg text-xs font-bold';
+                    } else {
+                        b.textContent = '🌊';
+                        b.className = 'w-10 h-10 bg-sky-950/70 border border-sky-700/40 rounded-lg text-xs font-bold';
+                    }
+                    if (bsHits >= 3) {
+                        document.getElementById('bs-status').textContent = '🎉 Tüm gemileri batırdın! (+50 LP)';
+                        awardLeagueLP(50, 'Amiral Battı');
+                    } else if (bsShots <= 0) {
+                        document.getElementById('bs-status').textContent = '💥 Hakların bitti! Yeni harita başlat.';
+                    }
+                };
+                grid.appendChild(b);
+            }
         };
 
         window.resetGuessGame = function() {
             guessSecret = Math.floor(Math.random() * 50) + 1;
-            document.getElementById('guess-hint').textContent = 'Yeni sayı üretildi.';
+            document.getElementById('guess-hint').textContent = '';
             document.getElementById('guess-input').value = '';
         };
+
         window.submitGuess = function() {
-            const val = parseInt(document.getElementById('guess-input').value, 10);
+            const val = Number(document.getElementById('guess-input').value);
             const hintEl = document.getElementById('guess-hint');
-            if (!val || val < 1 || val > 50) return showToast("1 ile 50 arası bir sayı gir.", 'error');
+            if (!val || val < 1 || val > 50) {
+                hintEl.textContent = '1 ile 50 arasında bir sayı gir.';
+                return;
+            }
             if (val === guessSecret) {
-                hintEl.textContent = `🎉 Bildin! Gizli sayı ${guessSecret} idi (+25 Puan).`;
-                if (currentUser) {
-                    incrementUserStat('score', 25);
-                    db.ref(`leaderboard/${currentUser.uid}`).update({
-                        name: getMyData().name,
-                        avatar: getMyData().avatar,
-                        score: firebase.database.ServerValue.increment(25)
-                    });
-                }
+                hintEl.textContent = `🎉 Bildin! Gizli sayı ${guessSecret} idi! (+25 LP)`;
+                awardLeagueLP(25, 'Sayı Tahmini');
                 guessSecret = Math.floor(Math.random() * 50) + 1;
+            } else if (val < guessSecret) {
+                hintEl.textContent = '📈 Daha büyük bir sayı dene!';
             } else {
-                hintEl.textContent = val < guessSecret ? '⬆️ Daha yüksek bir sayı dene!' : '⬇️ Daha düşük bir sayı dene!';
+                hintEl.textContent = '📉 Daha küçük bir sayı dene!';
             }
         };
     </script>
