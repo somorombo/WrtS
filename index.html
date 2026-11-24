@@ -221,16 +221,13 @@
                 Odadaki görüşmeye katılmak için "Katıl"a bas veya yeni görüşme başlat.
             </p>
 
-            <!-- Kendi Akışım -->
             <div id="local-video-box" class="relative bg-[#120409] rounded-xl overflow-hidden border border-rose-900/50 aspect-video max-h-44 mx-auto w-full">
                 <video id="local-video" autoplay muted playsinline class="w-full h-full object-cover"></video>
                 <span id="local-video-label" class="absolute bottom-1.5 left-2 text-[10px] bg-black/70 text-amber-300 px-2 py-0.5 rounded-md font-bold">Sen</span>
             </div>
 
-            <!-- Bağlı Katılımcıların Görüntü & Ses Alanı -->
             <div id="remote-peers-container" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
 
-            <!-- Başlatma / Katılma Butonları -->
             <div class="flex flex-wrap gap-1.5 justify-center pt-1">
                 <button type="button" onclick="startWebRTCCall(true)" class="bg-emerald-600 hover:bg-emerald-500 px-3 py-2 rounded-xl text-xs font-bold text-white transition">📹 Görüntülü Başlat</button>
                 <button type="button" onclick="startWebRTCCall(false)" class="bg-amber-600 hover:bg-amber-500 px-3 py-2 rounded-xl text-xs font-bold text-white transition">🎙️ Sesli Başlat</button>
@@ -238,7 +235,6 @@
                 <button type="button" onclick="joinWebRTCCall()" class="bg-rose-600 hover:bg-rose-500 px-3 py-2 rounded-xl text-xs font-bold text-white transition">📲 Görüşmeye Katıl</button>
             </div>
 
-            <!-- Görüşme İçi Kontroller -->
             <div class="flex flex-wrap gap-1.5 justify-center border-t border-rose-900/40 pt-2.5">
                 <button type="button" id="toggle-mic-btn" onclick="toggleCallMic()" class="bg-[#2b0d18] hover:bg-rose-900/60 text-rose-100 border border-rose-800/50 px-3 py-1.5 rounded-xl text-xs font-bold transition">🎤 Mikrofon Açık</button>
                 <button type="button" id="toggle-cam-btn" onclick="toggleCallCam()" class="bg-[#2b0d18] hover:bg-rose-900/60 text-rose-100 border border-rose-800/50 px-3 py-1.5 rounded-xl text-xs font-bold transition">📷 Kamera Açık</button>
@@ -390,21 +386,25 @@
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-4 w-full max-w-md space-y-3 text-center max-h-[92vh] overflow-y-auto">
             <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">🎮 Oyun Salonu</h3><button type="button" onclick="closeModal('games-modal')">✕</button></div>
             <div class="flex gap-1 bg-[#120409] p-1 rounded-xl">
-                <button type="button" onclick="switchGameTab('chess')" id="tab-chess" class="flex-1 py-1.5 rounded-lg text-xs font-bold bg-rose-600 text-white">♟️ Satranç</button>
+                <button type="button" onclick="switchGameTab('chess')" id="tab-chess" class="flex-1 py-1.5 rounded-lg text-xs font-bold bg-rose-600 text-white flex items-center justify-center gap-1">
+                    <span>♟️ Satranç</span>
+                    <span class="bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[9px] px-1.5 py-0.2 rounded-full uppercase">BETA</span>
+                </button>
                 <button type="button" onclick="switchGameTab('xox')" id="tab-xox" class="flex-1 py-1.5 rounded-lg text-xs font-bold text-rose-300/60">XOX</button>
                 <button type="button" onclick="switchGameTab('battleship')" id="tab-battleship" class="flex-1 py-1.5 rounded-lg text-xs font-bold text-rose-300/60">Amiral Battı</button>
                 <button type="button" onclick="switchGameTab('guess')" id="tab-guess" class="flex-1 py-1.5 rounded-lg text-xs font-bold text-rose-300/60">Sayı Tahmini</button>
             </div>
 
-            <!-- SATRANÇ PANELİ (GERÇEK OYUNCU + DAVET + 5 DK SÜRE) -->
-            <div id="game-panel-chess" class="space-y-2.5 py-1">
+            <!-- SATRANÇ PANELİ (BETA + GERÇEK OYUNCU + DAVET + 5 DK SÜRE + EMOJİ + TERKET) -->
+            <div id="game-panel-chess" class="space-y-2 py-1">
                 <div class="flex items-center justify-between bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
                     <div class="text-left">
                         <div class="text-rose-100 font-bold">⚪ Beyaz: <span id="chess-white-name" class="text-amber-300">Bekleniyor</span></div>
                         <div class="text-[11px] font-mono text-emerald-400">⏱️ <span id="chess-white-time">05:00</span></div>
                     </div>
                     <div class="text-center">
-                        <span id="chess-turn-badge" class="bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded-full text-[10px] font-bold">Sıra: Beyaz</span>
+                        <span class="inline-block bg-amber-500/20 text-amber-300 border border-amber-500/40 px-1.5 py-0.2 rounded-full text-[9px] font-black uppercase mb-0.5">BETA</span>
+                        <div id="chess-turn-badge" class="text-rose-200 text-[10px] font-bold">Sıra: Beyaz</div>
                     </div>
                     <div class="text-right">
                         <div class="text-rose-100 font-bold">⚫ Siyah: <span id="chess-black-name" class="text-rose-300">Bekleniyor</span></div>
@@ -416,10 +416,27 @@
                     Karşılıklı maç için koltuk kap veya odaya davet gönder!
                 </p>
 
+                <!-- ANLIK SATRANÇ EMOJİ REAKSİYON BANDI -->
+                <div id="chess-reaction-banner" class="hidden bg-amber-950/70 border border-amber-500/40 rounded-xl px-3 py-1.5 text-xs text-amber-200 font-bold"></div>
+
+                <!-- KISAYOL EMOJİ ÇUBUĞU -->
+                <div class="flex items-center justify-between gap-1 bg-[#120409] border border-rose-900/50 rounded-xl px-2 py-1.5">
+                    <span class="text-[10px] text-rose-300/70 font-bold shrink-0">Kısayol:</span>
+                    <div class="flex items-center gap-1 flex-wrap justify-end">
+                        <button type="button" onclick="sendChessQuickEmoji('😂')" class="bg-[#1c0910] hover:bg-rose-900/60 px-2 py-0.5 rounded-lg text-sm transition">😂</button>
+                        <button type="button" onclick="sendChessQuickEmoji('🔥')" class="bg-[#1c0910] hover:bg-rose-900/60 px-2 py-0.5 rounded-lg text-sm transition">🔥</button>
+                        <button type="button" onclick="sendChessQuickEmoji('😎')" class="bg-[#1c0910] hover:bg-rose-900/60 px-2 py-0.5 rounded-lg text-sm transition">😎</button>
+                        <button type="button" onclick="sendChessQuickEmoji('🤔')" class="bg-[#1c0910] hover:bg-rose-900/60 px-2 py-0.5 rounded-lg text-sm transition">🤔</button>
+                        <button type="button" onclick="sendChessQuickEmoji('👏')" class="bg-[#1c0910] hover:bg-rose-900/60 px-2 py-0.5 rounded-lg text-sm transition">👏</button>
+                        <button type="button" onclick="sendChessQuickEmoji('💀')" class="bg-[#1c0910] hover:bg-rose-900/60 px-2 py-0.5 rounded-lg text-sm transition">💀</button>
+                    </div>
+                </div>
+
                 <div class="flex flex-wrap gap-1.5 justify-center">
                     <button type="button" id="chess-join-white-btn" onclick="joinChessSeat('w')" class="bg-[#2b0d18] hover:bg-rose-900/60 border border-amber-500/40 text-amber-200 px-2.5 py-1 rounded-lg text-[11px] font-bold">⚪ Beyaz Ol</button>
                     <button type="button" id="chess-join-black-btn" onclick="joinChessSeat('b')" class="bg-[#2b0d18] hover:bg-rose-900/60 border border-rose-500/40 text-rose-200 px-2.5 py-1 rounded-lg text-[11px] font-bold">⚫ Siyah Ol</button>
-                    <button type="button" onclick="sendChessInvite(); closeModal('games-modal');" class="bg-sky-600/30 hover:bg-sky-600/50 border border-sky-500/40 text-sky-200 px-2.5 py-1 rounded-lg text-[11px] font-bold">📨 Sohbete Davet At</button>
+                    <button type="button" onclick="sendChessInvite(); closeModal('games-modal');" class="bg-sky-600/30 hover:bg-sky-600/50 border border-sky-500/40 text-sky-200 px-2.5 py-1 rounded-lg text-[11px] font-bold">📨 Davet At</button>
+                    <button type="button" id="chess-resign-btn" onclick="resignChessMatch()" class="bg-red-700/80 hover:bg-red-600 border border-red-500/50 text-white px-2.5 py-1 rounded-lg text-[11px] font-bold">🏳️ Maçı Terket</button>
                 </div>
 
                 <div id="chess-board" class="grid grid-cols-8 w-full max-w-[296px] aspect-square mx-auto rounded-xl overflow-hidden border-2 border-amber-500/50 shadow-xl select-none"></div>
@@ -1028,7 +1045,7 @@
                 isim: md.name,
                 avatar: md.avatar,
                 type: 'chess_invite',
-                mesaj: 'Seni karşılıklı Satranç maçına davet etti!',
+                mesaj: 'Seni karşılıklı Satranç [BETA] maçına davet etti!',
                 zaman: Date.now()
             });
             playWhatsAppSound('send');
@@ -1429,7 +1446,7 @@
                 const votes = data.votes || {}; const v1 = Object.values(votes).filter(v => v === 1).length; const v2 = Object.values(votes).filter(v => v === 2).length;
                 content = `<div class="bg-[#120409]/90 border border-rose-900/50 rounded-xl p-2.5 space-y-1.5 min-w-[200px]"><p class="text-xs font-bold text-amber-300">📊 ${data.question}</p><button type="button" onclick="votePoll('${room}', '${key}', 1)" class="w-full flex justify-between bg-[#1c0910] px-2.5 py-1 rounded-lg text-xs"><span>${data.opt1}</span><span class="font-bold text-amber-400">${v1}</span></button><button type="button" onclick="votePoll('${room}', '${key}', 2)" class="w-full flex justify-between bg-[#1c0910] px-2.5 py-1 rounded-lg text-xs"><span>${data.opt2}</span><span class="font-bold text-amber-400">${v2}</span></button></div>`;
             } else if (data.type === 'chess_invite') {
-                content = `<div class="bg-[#120409]/95 border border-amber-500/50 rounded-xl p-2.5 space-y-2 min-w-[200px]"><p class="text-xs font-bold text-amber-300">♟️ ${data.mesaj || 'Satranç maçı daveti!'}</p><button type="button" onclick="openModal('games-modal'); initGames(); switchGameTab('chess');" class="w-full bg-gradient-to-r from-amber-600 to-rose-600 py-1.5 rounded-lg text-xs font-bold text-white">Satranca Katıl</button></div>`;
+                content = `<div class="bg-[#120409]/95 border border-amber-500/50 rounded-xl p-2.5 space-y-2 min-w-[200px]"><p class="text-xs font-bold text-amber-300">♟️ ${data.mesaj || 'Satranç maçı daveti!'} <span class="bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[9px] px-1.5 py-0.2 rounded-full ml-1">BETA</span></p><button type="button" onclick="openModal('games-modal'); initGames(); switchGameTab('chess');" class="w-full bg-gradient-to-r from-amber-600 to-rose-600 py-1.5 rounded-lg text-xs font-bold text-white">Satranca Katıl</button></div>`;
             } else if (data.type === 'game_invite') {
                 content = `<div class="bg-[#120409]/90 border border-amber-500/40 rounded-xl p-2.5 space-y-2 min-w-[190px]"><p class="text-xs font-bold text-amber-300">🎲 ${data.mesaj || 'Oyun daveti!'}</p><button type="button" onclick="openModal('games-modal'); initGames();" class="w-full bg-gradient-to-r from-rose-600 to-amber-600 py-1.5 rounded-lg text-xs font-bold text-white">Salona Katıl</button></div>`;
             } else {
@@ -2530,7 +2547,7 @@
             showToast("Görüşmeden ayrıldın.");
         };
 
-        // ==================== GERÇEK OYUNCU SATRANÇ MOTORU ====================
+        // ==================== GERÇEK OYUNCU SATRANÇ MOTORU (BETA) ====================
         const CHESS_INITIAL_MS = 5 * 60 * 1000;
         const CHESS_GLYPHS = {
             wK: '♔', wQ: '♕', wR: '♖', wB: '♗', wN: '♘', wP: '♙',
@@ -2543,6 +2560,7 @@
         let chessLegalTargets = [];
         let chessRoomRef = null;
         let chessClockInterval = null;
+        let chessReactionTimeout = null;
 
         function createInitialChessBoard() {
             const b = Array.from({ length: 8 }, () => Array(8).fill(''));
@@ -2735,6 +2753,51 @@
             }
         }
 
+        window.sendChessQuickEmoji = function(emoji) {
+            if (!currentUser || !emoji) return;
+            const md = getMyData();
+            const now = Date.now();
+            db.ref(`games/${currentRoom}/chess/lastReaction`).set({
+                by: md.name,
+                emoji,
+                at: now
+            });
+            db.ref('odalar/' + currentRoom).push({
+                uid: currentUser.uid,
+                isim: md.name,
+                avatar: md.avatar,
+                mesaj: `♟️ Satranç: ${emoji}`,
+                type: 'text',
+                zaman: now,
+                readBy: { [currentUser.uid]: true }
+            });
+            playWhatsAppSound('send');
+        };
+
+        window.resignChessMatch = function() {
+            if (!currentUser || !chessState) return;
+            if (chessState.winner) return showToast("Bu maç zaten sona erdi.", 'error');
+            const wPlayer = chessState.players && chessState.players.w;
+            const bPlayer = chessState.players && chessState.players.b;
+            const myColor = wPlayer && wPlayer.uid === currentUser.uid ? 'w' : (bPlayer && bPlayer.uid === currentUser.uid ? 'b' : null);
+            if (!myColor) {
+                return showToast("Maçı terk etmek için Beyaz veya Siyah koltuğunda olmalısın.", 'error');
+            }
+            const winnerColor = myColor === 'w' ? 'b' : 'w';
+            const winnerName = chessState.players[winnerColor]?.name || (winnerColor === 'w' ? 'Beyaz' : 'Siyah');
+            const myName = getMyData().name;
+            const { wMs, bMs } = computeLiveChessClocks(chessState);
+
+            db.ref(`games/${currentRoom}/chess`).update({
+                winner: winnerColor,
+                wMs,
+                bMs,
+                reason: `🏳️ ${myName} maçı terk etti! Kazanan: ${winnerName}`
+            }).then(() => {
+                showToast("Maçı terk ettin.");
+            });
+        };
+
         function renderChessBoard() {
             const boardEl = document.getElementById('chess-board');
             if (!boardEl || !chessState) return;
@@ -2747,6 +2810,12 @@
             document.getElementById('chess-black-name').textContent = bPlayer ? bPlayer.name : 'Boş';
 
             const myColor = !currentUser ? null : (wPlayer && wPlayer.uid === currentUser.uid ? 'w' : (bPlayer && bPlayer.uid === currentUser.uid ? 'b' : null));
+            const resignBtn = document.getElementById('chess-resign-btn');
+            if (resignBtn) {
+                resignBtn.disabled = !myColor || !!chessState.winner;
+                resignBtn.classList.toggle('opacity-40', !myColor || !!chessState.winner);
+            }
+
             const flipBoard = myColor === 'b';
 
             const turnBadge = document.getElementById('chess-turn-badge');
@@ -2767,6 +2836,21 @@
                 const turnName = chessState.turn === 'w' ? wPlayer.name : bPlayer.name;
                 const roleHint = myColor ? (myColor === chessState.turn ? 'Senin sıran!' : 'Rakip hamlesi bekleniyor...') : 'İzleyici modundasın';
                 statusEl.textContent = `${inCheck ? '⚠️ ŞAH! ' : ''}Sıra ${turnName} (${chessState.turn === 'w' ? 'Beyaz' : 'Siyah'}) — ${roleHint}`;
+            }
+
+            const rxBanner = document.getElementById('chess-reaction-banner');
+            if (rxBanner && chessState.lastReaction && chessState.lastReaction.emoji) {
+                const age = Date.now() - (chessState.lastReaction.at || 0);
+                if (age < 7000) {
+                    rxBanner.textContent = `${chessState.lastReaction.by || 'Oyuncu'}: ${chessState.lastReaction.emoji}`;
+                    rxBanner.classList.remove('hidden');
+                    clearTimeout(chessReactionTimeout);
+                    chessReactionTimeout = setTimeout(() => {
+                        rxBanner.classList.add('hidden');
+                    }, 7000 - age);
+                } else {
+                    rxBanner.classList.add('hidden');
+                }
             }
 
             const histEl = document.getElementById('chess-history');
@@ -2993,7 +3077,7 @@
         window.switchGameTab = g => {
             ['chess', 'xox', 'battleship', 'guess'].forEach(x => {
                 document.getElementById(`game-panel-${x}`).classList.toggle('hidden', x !== g);
-                document.getElementById(`tab-${x}`).className = x === g ? 'flex-1 py-1.5 rounded-lg text-xs font-bold bg-rose-600 text-white' : 'flex-1 py-1.5 rounded-lg text-xs font-bold text-rose-300/60';
+                document.getElementById(`tab-${x}`).className = x === g ? 'flex-1 py-1.5 rounded-lg text-xs font-bold bg-rose-600 text-white flex items-center justify-center gap-1' : 'flex-1 py-1.5 rounded-lg text-xs font-bold text-rose-300/60';
             });
             if (g === 'chess') listenChess();
         };
