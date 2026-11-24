@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WrtS - Fixed & Final</title>
+    <title>WrtS - Tam Sürüm</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -89,6 +89,18 @@
         </div>
     </header>
 
+    <!-- ARKA PLAN GÖRÜŞME BARI -->
+    <div id="active-call-floating-bar" class="hidden bg-gradient-to-r from-emerald-950 via-[#1d0b14] to-rose-950 border-b border-emerald-500/40 px-3 py-1.5 flex items-center justify-between gap-2 text-xs shrink-0 z-20">
+        <div class="flex items-center gap-2 truncate">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0"></span>
+            <span id="floating-call-label" class="font-bold text-emerald-300 truncate">Görüşme Arka Planda Aktif</span>
+        </div>
+        <div class="flex items-center gap-1.5 shrink-0">
+            <button type="button" onclick="openModal('call-modal')" class="bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-200 border border-emerald-500/40 px-2.5 py-1 rounded-lg text-[10px] font-bold">Ekranı Aç</button>
+            <button type="button" onclick="endWebRTCCall()" class="bg-red-700/80 hover:bg-red-600 text-white px-2.5 py-1 rounded-lg text-[10px] font-bold">Ayrıl</button>
+        </div>
+    </div>
+
     <!-- MESAJ ARAMA ÇUBUĞU -->
     <div id="search-bar" class="hidden bg-[#1a070e] border-b border-rose-900/60 px-4 py-2 flex items-center gap-2 w-full mx-auto shrink-0 z-20">
         <input type="text" id="msg-search-input" placeholder="Sohbette ara..." class="flex-1 bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-1.5 text-xs focus:outline-none">
@@ -172,7 +184,7 @@
                     <span>💬</span> Özel DM
                     <span id="menu-inbox-dot" class="hidden w-2.5 h-2.5 rounded-full bg-red-500 ml-auto"></span>
                 </button>
-                <button type="button" onclick="closeModal('menu-drawer-modal'); openModal('call-modal');" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>📹</span> Sesli / Görüntülü</button>
+                <button type="button" onclick="closeModal('menu-drawer-modal'); openCallModalAndListen();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>📹</span> Sesli / Görüntülü</button>
                 <button type="button" onclick="closeModal('menu-drawer-modal'); openModal('whiteboard-modal'); initWhiteboard();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎨</span> Ortak Tahta</button>
                 <button type="button" onclick="closeModal('menu-drawer-modal'); openCinemaModal();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎬</span> Ortak Sinema</button>
                 <button type="button" onclick="closeModal('menu-drawer-modal'); openModal('games-modal'); initGames();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎮</span> Oyun Salonu</button>
@@ -194,20 +206,43 @@
     </div>
 
     <!-- SESLİ & GÖRÜNTÜLÜ EKRAN PAYLAŞIMI MODALI -->
-    <div id="call-modal" class="fixed inset-0 bg-black/85 z-50 hidden items-center justify-center p-4">
-        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-md space-y-3 text-center">
-            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">📹 Sesli / Görüntülü Görüşme</h3><button type="button" onclick="endWebRTCCall()">✕</button></div>
-            <p id="call-status" class="text-xs text-rose-200/70">Bağlanmak için seçeneklerden birini seçin...</p>
-            <div class="grid grid-cols-2 gap-2">
-                <video id="local-video" autoplay muted playsinline class="w-full aspect-video bg-[#120409] rounded-xl object-cover"></video>
-                <video id="remote-video" autoplay playsinline class="w-full aspect-video bg-[#120409] rounded-xl object-cover"></video>
+    <div id="call-modal" class="fixed inset-0 bg-black/85 z-50 hidden items-center justify-center p-3">
+        <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-4 w-full max-w-lg space-y-3 text-center shadow-2xl max-h-[92vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2">
+                <div class="flex items-center gap-2">
+                    <h3 class="font-bold text-amber-400 text-sm">📹 Sesli / Görüntülü / Ekran</h3>
+                    <span id="call-mode-badge" class="text-[10px] bg-rose-900/60 text-rose-200 px-2 py-0.5 rounded-full font-bold">Hazır</span>
+                </div>
+                <button type="button" onclick="minimizeCallModal()" class="bg-[#2b0d18] hover:bg-rose-900/60 text-amber-300 text-xs font-bold px-2.5 py-1 rounded-lg" title="Arka Plana Al">↙ Arka Plan</button>
             </div>
-            <div class="flex flex-wrap gap-2 justify-center">
-                <button type="button" onclick="startWebRTCCall(true)" class="bg-emerald-600 px-3 py-2 rounded-xl text-xs font-bold text-white">📹 Görüntülü</button>
-                <button type="button" onclick="startWebRTCCall(false)" class="bg-amber-600 px-3 py-2 rounded-xl text-xs font-bold text-white">🎙️ Sadece Ses</button>
-                <button type="button" onclick="startScreenShare()" class="bg-sky-600 px-3 py-2 rounded-xl text-xs font-bold text-white">💻 Ekran Paylaş</button>
-                <button type="button" onclick="joinWebRTCCall()" class="bg-rose-600 px-3 py-2 rounded-xl text-xs font-bold text-white">📲 Katıl</button>
-                <button type="button" onclick="endWebRTCCall()" class="bg-red-700 px-3 py-2 rounded-xl text-xs font-bold text-white">Ayrıl</button>
+
+            <p id="call-status" class="text-xs text-rose-200/80 bg-[#120409] border border-rose-900/40 rounded-xl py-2 px-3">
+                Odadaki görüşmeye katılmak için "Katıl"a bas veya yeni görüşme başlat.
+            </p>
+
+            <!-- Kendi Akışım -->
+            <div class="relative bg-[#120409] rounded-xl overflow-hidden border border-rose-900/50 aspect-video max-h-40 mx-auto w-full">
+                <video id="local-video" autoplay muted playsinline class="w-full h-full object-cover"></video>
+                <span class="absolute bottom-1.5 left-2 text-[10px] bg-black/70 text-amber-300 px-2 py-0.5 rounded-md font-bold">Sen</span>
+            </div>
+
+            <!-- Bağlı Katılımcıların Görüntü & Ses Alanı -->
+            <div id="remote-peers-container" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
+
+            <!-- Başlatma / Katılma Butonları -->
+            <div class="flex flex-wrap gap-1.5 justify-center pt-1">
+                <button type="button" onclick="startWebRTCCall(true)" class="bg-emerald-600 hover:bg-emerald-500 px-3 py-2 rounded-xl text-xs font-bold text-white transition">📹 Görüntülü Başlat</button>
+                <button type="button" onclick="startWebRTCCall(false)" class="bg-amber-600 hover:bg-amber-500 px-3 py-2 rounded-xl text-xs font-bold text-white transition">🎙️ Sesli Başlat</button>
+                <button type="button" onclick="startScreenShare()" class="bg-sky-600 hover:bg-sky-500 px-3 py-2 rounded-xl text-xs font-bold text-white transition">💻 Ekran Paylaş</button>
+                <button type="button" onclick="joinWebRTCCall()" class="bg-rose-600 hover:bg-rose-500 px-3 py-2 rounded-xl text-xs font-bold text-white transition">📲 Görüşmeye Katıl</button>
+            </div>
+
+            <!-- Görüşme İçi Kontroller -->
+            <div class="flex flex-wrap gap-1.5 justify-center border-t border-rose-900/40 pt-2.5">
+                <button type="button" id="toggle-mic-btn" onclick="toggleCallMic()" class="bg-[#2b0d18] hover:bg-rose-900/60 text-rose-100 border border-rose-800/50 px-3 py-1.5 rounded-xl text-xs font-bold transition">🎤 Mikrofon Açık</button>
+                <button type="button" id="toggle-cam-btn" onclick="toggleCallCam()" class="bg-[#2b0d18] hover:bg-rose-900/60 text-rose-100 border border-rose-800/50 px-3 py-1.5 rounded-xl text-xs font-bold transition">📷 Kamera Açık</button>
+                <button type="button" onclick="minimizeCallModal()" class="bg-amber-950/80 hover:bg-amber-900/80 text-amber-200 border border-amber-600/40 px-3 py-1.5 rounded-xl text-xs font-bold transition">🎮 Arka Planda Tut</button>
+                <button type="button" onclick="endWebRTCCall()" class="bg-red-700 hover:bg-red-600 px-3.5 py-1.5 rounded-xl text-xs font-bold text-white transition">📞 Ayrıl</button>
             </div>
         </div>
     </div>
@@ -1408,7 +1443,6 @@
                 };
             }
 
-            // Soldaki mesajlar sağa, sağdaki mesajlar sola kaydırılınca yanıtla
             let startX = 0;
             let startY = 0;
             let triggered = false;
@@ -1630,7 +1664,7 @@
             r.readAsDataURL(f);
         };
 
-        // SESLİ MESAJ
+        // SESLİ MESAJ (BAS-KONUŞ)
         let mediaRecorder = null;
         let audioChunks = [];
         let activeAudioStream = null;
@@ -1748,7 +1782,10 @@
             }
         };
 
-        document.getElementById('modal-logout').onclick = () => auth.signOut().then(() => window.location.reload());
+        document.getElementById('modal-logout').onclick = () => {
+            endWebRTCCall();
+            auth.signOut().then(() => window.location.reload());
+        };
         window.toggleSearchBar = () => {
             const bar = document.getElementById('search-bar');
             bar.classList.toggle('hidden');
@@ -1766,71 +1803,397 @@
             });
         };
 
-        let localStream, peerConnection;
-        window.startWebRTCCall = async (video) => {
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia({ video, audio: true });
-                document.getElementById('local-video').srcObject = localStream;
-                document.getElementById('call-status').textContent = "Arama başlatıldı, karşı taraf bekleniyor...";
-                peerConnection = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
-                localStream.getTracks().forEach(t => peerConnection.addTrack(t, localStream));
-                peerConnection.ontrack = e => document.getElementById('remote-video').srcObject = e.streams[0];
-                const callRef = db.ref(`webrtc/${currentRoom}`); await callRef.remove();
-                peerConnection.onicecandidate = e => { if (e.candidate) callRef.child('offerCandidates').push(e.candidate.toJSON()); };
-                const offer = await peerConnection.createOffer(); await peerConnection.setLocalDescription(offer);
-                await callRef.child('offer').set({ type: offer.type, sdp: offer.sdp });
-                callRef.child('answer').on('value', async s => {
-                    if (!peerConnection.currentRemoteDescription && s.val()) {
-                        await peerConnection.setRemoteDescription(new RTCSessionDescription(s.val()));
-                        document.getElementById('call-status').textContent = "Bağlantı kuruldu!";
+        // ==================== ÇOKLU / KARŞILIKLI WEBRTC GÖRÜŞME & EKRAN PAYLAŞIMI ====================
+        let localStream = null;
+        let peerConnections = {}; // { peerUid: RTCPeerConnection }
+        let pendingCandidatesByPeer = {}; // { peerUid: [candidate] }
+        let remoteDescSetByPeer = {}; // { peerUid: boolean }
+        let callRoomWatcherRef = null;
+        let myCallSessionRef = null;
+        let inCallSession = false;
+        let isMicMuted = false;
+        let isCamOff = false;
+        let currentCallModeLabel = "Hazır";
+
+        function updateCallUIButtons() {
+            const micBtn = document.getElementById('toggle-mic-btn');
+            const camBtn = document.getElementById('toggle-cam-btn');
+            if (micBtn) {
+                micBtn.textContent = isMicMuted ? '🔇 Mikrofon Kapalı' : '🎤 Mikrofon Açık';
+                micBtn.className = isMicMuted
+                    ? 'bg-red-950 text-red-300 border border-red-600/60 px-3 py-1.5 rounded-xl text-xs font-bold transition'
+                    : 'bg-[#2b0d18] hover:bg-rose-900/60 text-rose-100 border border-rose-800/50 px-3 py-1.5 rounded-xl text-xs font-bold transition';
+            }
+            if (camBtn) {
+                camBtn.textContent = isCamOff ? '🚫 Kamera Kapalı' : '📷 Kamera Açık';
+                camBtn.className = isCamOff
+                    ? 'bg-red-950 text-red-300 border border-red-600/60 px-3 py-1.5 rounded-xl text-xs font-bold transition'
+                    : 'bg-[#2b0d18] hover:bg-rose-900/60 text-rose-100 border border-rose-800/50 px-3 py-1.5 rounded-xl text-xs font-bold transition';
+            }
+        }
+
+        function setCallBadge(label) {
+            currentCallModeLabel = label;
+            const badge = document.getElementById('call-mode-badge');
+            if (badge) badge.textContent = label;
+            const floatBar = document.getElementById('active-call-floating-bar');
+            const floatLabel = document.getElementById('floating-call-label');
+            if (floatBar && floatLabel) {
+                if (inCallSession) {
+                    floatBar.classList.remove('hidden');
+                    floatLabel.textContent = `📞 ${label} Aktif (Arka Plan)`;
+                } else {
+                    floatBar.classList.add('hidden');
+                }
+            }
+        }
+
+        window.minimizeCallModal = function() {
+            closeModal('call-modal');
+            if (inCallSession) {
+                showToast("Görüşme arka planda açık kalıyor. Oyun/sohbete devam edebilirsin.");
+            }
+        };
+
+        window.openCallModalAndListen = function() {
+            openModal('call-modal');
+            if (!inCallSession && currentUser) {
+                watchRoomCallPeers();
+            }
+        };
+
+        function ensureRemotePeerTile(peerUid, peerName = 'Katılımcı') {
+            const container = document.getElementById('remote-peers-container');
+            if (!container) return null;
+            let tile = document.getElementById(`remote-tile-${peerUid}`);
+            if (!tile) {
+                tile = document.createElement('div');
+                tile.id = `remote-tile-${peerUid}`;
+                tile.className = 'relative bg-[#120409] rounded-xl overflow-hidden border border-emerald-500/40 aspect-video';
+                tile.innerHTML = `
+                    <video id="remote-video-${peerUid}" autoplay playsinline class="w-full h-full object-cover"></video>
+                    <span id="remote-label-${peerUid}" class="absolute bottom-1.5 left-2 text-[10px] bg-black/70 text-emerald-300 px-2 py-0.5 rounded-md font-bold">${peerName}</span>
+                `;
+                container.appendChild(tile);
+            } else {
+                const lbl = document.getElementById(`remote-label-${peerUid}`);
+                if (lbl && peerName) lbl.textContent = peerName;
+            }
+            return document.getElementById(`remote-video-${peerUid}`);
+        }
+
+        function removeRemotePeerTile(peerUid) {
+            const tile = document.getElementById(`remote-tile-${peerUid}`);
+            if (tile) tile.remove();
+            if (peerConnections[peerUid]) {
+                try { peerConnections[peerUid].close(); } catch (_) {}
+                delete peerConnections[peerUid];
+            }
+            delete pendingCandidatesByPeer[peerUid];
+            delete remoteDescSetByPeer[peerUid];
+        }
+
+        window.toggleCallMic = function() {
+            if (!localStream) return showToast("Aktif bir ses akışı yok.", 'error');
+            const audioTracks = localStream.getAudioTracks();
+            if (!audioTracks.length) return showToast("Mikrofon kanalı bulunamadı.", 'error');
+            isMicMuted = !isMicMuted;
+            audioTracks.forEach(t => { t.enabled = !isMicMuted; });
+            updateCallUIButtons();
+            showToast(isMicMuted ? "Mikrofon kapatıldı." : "Mikrofon açıldı.");
+        };
+
+        window.toggleCallCam = function() {
+            if (!localStream) return showToast("Aktif bir görüntü akışı yok.", 'error');
+            const videoTracks = localStream.getVideoTracks();
+            if (!videoTracks.length) return showToast("Kamera veya ekran kanalı yok.", 'error');
+            isCamOff = !isCamOff;
+            videoTracks.forEach(t => { t.enabled = !isCamOff; });
+            updateCallUIButtons();
+            showToast(isCamOff ? "Görüntü gizlendi." : "Görüntü açıldı.");
+        };
+
+        async function flushCandidatesForPeer(peerUid) {
+            const pc = peerConnections[peerUid];
+            const queue = pendingCandidatesByPeer[peerUid] || [];
+            if (!pc || !remoteDescSetByPeer[peerUid]) return;
+            while (queue.length > 0) {
+                const cand = queue.shift();
+                try { await pc.addIceCandidate(new RTCIceCandidate(cand)); } catch (_) {}
+            }
+        }
+
+        function createPeerConnectionFor(remoteUid, remoteName, isInitiator) {
+            if (!currentUser || remoteUid === currentUser.uid) return null;
+            if (peerConnections[remoteUid]) return peerConnections[remoteUid];
+
+            const pc = new RTCPeerConnection({
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' }
+                ]
+            });
+            peerConnections[remoteUid] = pc;
+            pendingCandidatesByPeer[remoteUid] = [];
+            remoteDescSetByPeer[remoteUid] = false;
+
+            const remoteVideoEl = ensureRemotePeerTile(remoteUid, remoteName);
+
+            if (localStream) {
+                localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+            }
+
+            pc.ontrack = event => {
+                const vid = ensureRemotePeerTile(remoteUid, remoteName);
+                if (vid && event.streams && event.streams[0]) {
+                    vid.srcObject = event.streams[0];
+                    vid.play().catch(() => {});
+                } else if (remoteVideoEl && event.streams && event.streams[0]) {
+                    remoteVideoEl.srcObject = event.streams[0];
+                }
+            };
+
+            const signalPath = isInitiator
+                ? `webrtc_mesh/${currentRoom}/${currentUser.uid}_${remoteUid}`
+                : `webrtc_mesh/${currentRoom}/${remoteUid}_${currentUser.uid}`;
+            const signalRef = db.ref(signalPath);
+
+            pc.onicecandidate = event => {
+                if (event.candidate) {
+                    const candNode = isInitiator ? 'callerCandidates' : 'calleeCandidates';
+                    signalRef.child(candNode).push(event.candidate.toJSON());
+                }
+            };
+
+            pc.onconnectionstatechange = () => {
+                if (pc.connectionState === 'connected') {
+                    document.getElementById('call-status').textContent = `${remoteName} ile ses ve görüntü bağlantısı kuruldu!`;
+                } else if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed' || pc.connectionState === 'closed') {
+                    removeRemotePeerTile(remoteUid);
+                }
+            };
+
+            const remoteCandNode = isInitiator ? 'calleeCandidates' : 'callerCandidates';
+            signalRef.child(remoteCandNode).on('child_added', async snap => {
+                const cand = snap.val();
+                if (!cand) return;
+                if (remoteDescSetByPeer[remoteUid] && pc.remoteDescription) {
+                    try { await pc.addIceCandidate(new RTCIceCandidate(cand)); } catch (_) {}
+                } else {
+                    pendingCandidatesByPeer[remoteUid].push(cand);
+                }
+            });
+
+            if (isInitiator) {
+                signalRef.child('answer').on('value', async snap => {
+                    const ans = snap.val();
+                    if (ans && !pc.currentRemoteDescription) {
+                        await pc.setRemoteDescription(new RTCSessionDescription(ans));
+                        remoteDescSetByPeer[remoteUid] = true;
+                        await flushCandidatesForPeer(remoteUid);
                     }
                 });
-                callRef.child('answerCandidates').on('child_added', s => { if (s.val()) peerConnection.addIceCandidate(new RTCIceCandidate(s.val())); });
-            } catch (e) { showToast("Kamera/Mikrofon erişimi başarısız.", 'error'); }
+
+                pc.createOffer()
+                    .then(offer => pc.setLocalDescription(offer).then(() => offer))
+                    .then(offer => signalRef.child('offer').set({
+                        fromUid: currentUser.uid,
+                        fromName: getMyData().name,
+                        toUid: remoteUid,
+                        type: offer.type,
+                        sdp: offer.sdp
+                    }))
+                    .catch(() => {});
+            } else {
+                signalRef.child('offer').on('value', async snap => {
+                    const offerData = snap.val();
+                    if (offerData && offerData.sdp && !pc.currentRemoteDescription) {
+                        await pc.setRemoteDescription(new RTCSessionDescription({ type: offerData.type, sdp: offerData.sdp }));
+                        remoteDescSetByPeer[remoteUid] = true;
+                        await flushCandidatesForPeer(remoteUid);
+                        const answer = await pc.createAnswer();
+                        await pc.setLocalDescription(answer);
+                        await signalRef.child('answer').set({
+                            fromUid: currentUser.uid,
+                            fromName: getMyData().name,
+                            toUid: remoteUid,
+                            type: answer.type,
+                            sdp: answer.sdp
+                        });
+                    }
+                });
+            }
+
+            return pc;
+        }
+
+        function watchRoomCallPeers() {
+            if (callRoomWatcherRef) {
+                callRoomWatcherRef.off();
+                callRoomWatcherRef = null;
+            }
+            if (!currentUser) return;
+            const peersRef = db.ref(`webrtc_peers/${currentRoom}`);
+            callRoomWatcherRef = peersRef;
+
+            peersRef.on('child_added', snap => {
+                const peerUid = snap.key;
+                const peerInfo = snap.val() || {};
+                if (!peerUid || peerUid === currentUser.uid) return;
+                if (!inCallSession) return;
+                const shouldInitiate = currentUser.uid < peerUid;
+                createPeerConnectionFor(peerUid, peerInfo.name || 'Katılımcı', shouldInitiate);
+            });
+
+            peersRef.on('child_changed', snap => {
+                const peerUid = snap.key;
+                const peerInfo = snap.val() || {};
+                if (!peerUid || peerUid === currentUser.uid) return;
+                ensureRemotePeerTile(peerUid, peerInfo.name || 'Katılımcı');
+            });
+
+            peersRef.on('child_removed', snap => {
+                const peerUid = snap.key;
+                if (!peerUid || peerUid === currentUser.uid) return;
+                removeRemotePeerTile(peerUid);
+            });
+        }
+
+        async function acquireMediaStream({ video = false, screen = false }) {
+            if (localStream) {
+                localStream.getTracks().forEach(t => t.stop());
+                localStream = null;
+            }
+            isMicMuted = false;
+            isCamOff = false;
+
+            if (screen) {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+                    throw new Error("Bu cihaz/tarayıcı ekran paylaşımını desteklemiyor.");
+                }
+                const displayStream = await navigator.mediaDevices.getDisplayMedia({
+                    video: { cursor: "always" },
+                    audio: true
+                });
+                try {
+                    const micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                    micStream.getAudioTracks().forEach(track => displayStream.addTrack(track));
+                } catch (_) {}
+
+                const primaryVideoTrack = displayStream.getVideoTracks()[0];
+                if (primaryVideoTrack) {
+                    primaryVideoTrack.onended = () => {
+                        showToast("Ekran paylaşımı durduruldu.");
+                        endWebRTCCall();
+                    };
+                }
+                return displayStream;
+            }
+
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                throw new Error("Tarayıcı kamera/mikrofon erişimini desteklemiyor.");
+            }
+            return await navigator.mediaDevices.getUserMedia({
+                video: video ? { facingMode: "user" } : false,
+                audio: { echoCancellation: true, noiseSuppression: true }
+            });
+        }
+
+        async function enterCallWithMedia(modeLabel, mediaOpts) {
+            if (!currentUser) return;
+            try {
+                Object.keys(peerConnections).forEach(uid => removeRemotePeerTile(uid));
+                document.getElementById('remote-peers-container').innerHTML = '';
+
+                document.getElementById('call-status').textContent = `${modeLabel} için izin bekleniyor...`;
+                setCallBadge("Hazırlanıyor");
+
+                localStream = await acquireMediaStream(mediaOpts);
+                document.getElementById('local-video').srcObject = localStream;
+                updateCallUIButtons();
+
+                inCallSession = true;
+                setCallBadge(modeLabel);
+
+                const md = getMyData();
+                myCallSessionRef = db.ref(`webrtc_peers/${currentRoom}/${currentUser.uid}`);
+                await myCallSessionRef.set({
+                    uid: currentUser.uid,
+                    name: md.name,
+                    mode: modeLabel,
+                    joinedAt: Date.now()
+                });
+                myCallSessionRef.onDisconnect().remove();
+
+                watchRoomCallPeers();
+
+                const snap = await db.ref(`webrtc_peers/${currentRoom}`).once('value');
+                const peers = snap.val() || {};
+                Object.entries(peers).forEach(([peerUid, info]) => {
+                    if (peerUid !== currentUser.uid) {
+                        const shouldInitiate = currentUser.uid < peerUid;
+                        createPeerConnectionFor(peerUid, (info && info.name) || 'Katılımcı', shouldInitiate);
+                    }
+                });
+
+                document.getElementById('call-status').textContent = `${modeLabel} aktif! Karşı tarafın katılması bekleniyor veya bağlanılıyor...`;
+            } catch (err) {
+                inCallSession = false;
+                setCallBadge("Hazır");
+                document.getElementById('call-status').textContent = err.message || "Görüşme başlatılamadı.";
+                showToast(err.message || "Kamera/Mikrofon/Ekran erişimi başarısız.", 'error');
+            }
+        }
+
+        window.startWebRTCCall = async (video) => {
+            await enterCallWithMedia(video ? "Görüntülü Görüşme" : "Sesli Görüşme", { video: !!video, screen: false });
         };
 
         window.startScreenShare = async () => {
-            try {
-                localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-                document.getElementById('local-video').srcObject = localStream;
-                document.getElementById('call-status').textContent = "Ekran paylaşımı aktif!";
-                peerConnection = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
-                localStream.getTracks().forEach(t => peerConnection.addTrack(t, localStream));
-                peerConnection.ontrack = e => document.getElementById('remote-video').srcObject = e.streams[0];
-                const callRef = db.ref(`webrtc/${currentRoom}`); await callRef.remove();
-                peerConnection.onicecandidate = e => { if (e.candidate) callRef.child('offerCandidates').push(e.candidate.toJSON()); };
-                const offer = await peerConnection.createOffer(); await peerConnection.setLocalDescription(offer);
-                await callRef.child('offer').set({ type: offer.type, sdp: offer.sdp });
-                callRef.child('answer').on('value', async s => {
-                    if (!peerConnection.currentRemoteDescription && s.val()) {
-                        await peerConnection.setRemoteDescription(new RTCSessionDescription(s.val()));
-                    }
-                });
-            } catch (e) { showToast("Ekran paylaşımı başlatılamadı.", 'error'); }
+            await enterCallWithMedia("Ekran Paylaşımı", { video: true, screen: true });
         };
 
         window.joinWebRTCCall = async () => {
-            try {
-                const callRef = db.ref(`webrtc/${currentRoom}`);
-                const offer = (await callRef.child('offer').once('value')).val();
-                if (!offer) return showToast("Aktif bir çağrı bulunamadı!", 'error');
-                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true }).catch(() => navigator.mediaDevices.getUserMedia({ audio: true }));
-                document.getElementById('local-video').srcObject = localStream;
-                peerConnection = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
-                localStream.getTracks().forEach(t => peerConnection.addTrack(t, localStream));
-                peerConnection.ontrack = e => document.getElementById('remote-video').srcObject = e.streams[0];
-                peerConnection.onicecandidate = e => { if (e.candidate) callRef.child('answerCandidates').push(e.candidate.toJSON()); };
-                await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-                const ans = await peerConnection.createAnswer(); await peerConnection.setLocalDescription(ans);
-                await callRef.child('answer').set({ type: ans.type, sdp: ans.sdp });
-                callRef.child('offerCandidates').on('child_added', s => { if (s.val()) peerConnection.addIceCandidate(new RTCIceCandidate(s.val())); });
-                document.getElementById('call-status').textContent = "Görüşmeye katıldın!";
-            } catch (e) { showToast("Katılım başarısız.", 'error'); }
+            if (!currentUser) return;
+            const snap = await db.ref(`webrtc_peers/${currentRoom}`).once('value');
+            const peers = snap.val() || {};
+            const hasVideoPeer = Object.values(peers).some(p => p && p.mode && (p.mode.includes("Görüntülü") || p.mode.includes("Ekran")));
+            await enterCallWithMedia(hasVideoPeer ? "Görüntülü Görüşme" : "Sesli Görüşme", { video: !!hasVideoPeer, screen: false });
         };
+
         window.endWebRTCCall = () => {
-            if (localStream) localStream.getTracks().forEach(t => t.stop());
-            if (peerConnection) peerConnection.close();
+            inCallSession = false;
+            if (callRoomWatcherRef) {
+                callRoomWatcherRef.off();
+                callRoomWatcherRef = null;
+            }
+            if (myCallSessionRef) {
+                myCallSessionRef.onDisconnect().cancel().catch(() => {});
+                myCallSessionRef.remove().catch(() => {});
+                myCallSessionRef = null;
+            }
+            Object.keys(peerConnections).forEach(uid => removeRemotePeerTile(uid));
+            if (localStream) {
+                localStream.getTracks().forEach(t => {
+                    t.enabled = false;
+                    t.stop();
+                });
+                localStream = null;
+            }
+            const localVid = document.getElementById('local-video');
+            if (localVid) {
+                localVid.pause();
+                localVid.srcObject = null;
+            }
+            const remoteContainer = document.getElementById('remote-peers-container');
+            if (remoteContainer) remoteContainer.innerHTML = '';
+            isMicMuted = false;
+            isCamOff = false;
+            updateCallUIButtons();
+            setCallBadge("Hazır");
+            document.getElementById('call-status').textContent = "Görüşmeden ayrıldın.";
             closeModal('call-modal');
+            showToast("Görüşmeden ayrıldın.");
         };
 
         window.switchGameTab = g => {
