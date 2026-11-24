@@ -13,6 +13,10 @@
         body {
             overscroll-behavior-y: none;
             background: radial-gradient(circle at top right, #2e0916, #14050a 45%, #090306 100%);
+            touch-action: manipulation;
+        }
+        button, input, select, textarea {
+            touch-action: manipulation;
         }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -57,7 +61,7 @@
     <!-- ÜST BAR -->
     <header id="main-header" class="bg-[#1a070e]/95 backdrop-blur border-b border-rose-900/60 px-3 py-2.5 flex items-center justify-between gap-2 shrink-0 z-20 shadow-lg">
         <div class="flex items-center gap-2 shrink-0">
-            <button onclick="openModal('menu-drawer-modal')" class="relative bg-[#2b0d18] hover:bg-rose-900/50 text-amber-400 p-2 rounded-xl text-base font-bold flex items-center justify-center transition" title="Menü">
+            <button type="button" onclick="openModal('menu-drawer-modal')" class="relative bg-[#2b0d18] hover:bg-rose-900/50 text-amber-400 p-2 rounded-xl text-base font-bold flex items-center justify-center transition" title="Menü">
                 ☰
                 <span id="header-menu-dot" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full animate-ping"></span>
             </button>
@@ -67,19 +71,19 @@
                 <option value="sohbet"># Muhabbet</option>
                 <option value="oyun"># Oyun</option>
             </select>
-            <button onclick="openModal('room-modal')" class="bg-amber-500/20 text-amber-400 border border-amber-500/30 w-7 h-7 rounded-xl flex items-center justify-center font-bold text-sm shrink-0">+</button>
-            <button id="room-settings-btn" onclick="openRoomRolesModal()" class="hidden bg-rose-600/20 text-rose-400 border border-rose-500/30 w-7 h-7 rounded-xl flex items-center justify-center text-xs shrink-0" title="Moderatör">🛡️</button>
+            <button type="button" onclick="openModal('room-modal')" class="bg-amber-500/20 text-amber-400 border border-amber-500/30 w-7 h-7 rounded-xl flex items-center justify-center font-bold text-sm shrink-0">+</button>
+            <button type="button" id="room-settings-btn" onclick="openRoomRolesModal()" class="hidden bg-rose-600/20 text-rose-400 border border-rose-500/30 w-7 h-7 rounded-xl flex items-center justify-center text-xs shrink-0" title="Moderatör">🛡️</button>
         </div>
 
         <div class="flex items-center gap-2 shrink-0">
-            <button onclick="requestNotificationPermission()" class="bg-[#2b0d18] text-amber-300 p-2 rounded-xl text-xs font-bold" title="Bildirim İzni">🔔</button>
-            <button onclick="toggleSearchBar()" class="bg-[#2b0d18] text-rose-200 p-2 rounded-xl text-xs font-bold">🔍</button>
-            <button onclick="openModal('users-modal'); loadOnlineUsersList();" class="relative bg-[#2b0d18] px-2.5 py-1.5 rounded-xl border border-rose-800/60 text-xs text-emerald-400 flex items-center gap-1.5">
+            <button type="button" onclick="requestNotificationPermission()" class="bg-[#2b0d18] text-amber-300 p-2 rounded-xl text-xs font-bold" title="Bildirim İzni">🔔</button>
+            <button type="button" onclick="toggleSearchBar()" class="bg-[#2b0d18] text-rose-200 p-2 rounded-xl text-xs font-bold">🔍</button>
+            <button type="button" onclick="openModal('users-modal'); loadOnlineUsersList();" class="relative bg-[#2b0d18] px-2.5 py-1.5 rounded-xl border border-rose-800/60 text-xs text-emerald-400 flex items-center gap-1.5">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 <span id="online-count">1</span>
                 <span id="req-badge" class="hidden absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">!</span>
             </button>
-            <button onclick="openMyProfile()" class="flex items-center gap-1 bg-[#2b0d18] p-1 rounded-full border border-rose-800/60">
+            <button type="button" onclick="openMyProfile()" class="flex items-center gap-1 bg-[#2b0d18] p-1 rounded-full border border-rose-800/60">
                 <img id="header-avatar" src="" class="w-6 h-6 rounded-full object-cover">
             </button>
         </div>
@@ -88,7 +92,7 @@
     <!-- MESAJ ARAMA ÇUBUĞU -->
     <div id="search-bar" class="hidden bg-[#1a070e] border-b border-rose-900/60 px-4 py-2 flex items-center gap-2 w-full mx-auto shrink-0 z-20">
         <input type="text" id="msg-search-input" placeholder="Sohbette ara..." class="flex-1 bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-1.5 text-xs focus:outline-none">
-        <button onclick="toggleSearchBar()" class="text-xs text-rose-300 px-2">Kapat</button>
+        <button type="button" onclick="toggleSearchBar()" class="text-xs text-rose-300 px-2">Kapat</button>
     </div>
 
     <!-- DUYURU BANNER ALANI -->
@@ -98,8 +102,8 @@
             <span id="announcement-text" class="text-amber-100 truncate font-medium">Duyuru yok.</span>
         </div>
         <div class="flex items-center gap-1.5 shrink-0 ml-2">
-            <button onclick="openModal('announcement-modal')" class="bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-1 rounded-lg text-[10px] font-bold">+ Duyuru</button>
-            <button id="delete-announcement-btn" onclick="deleteAnnouncement()" class="hidden text-rose-300 font-bold text-[10px] bg-rose-900/60 px-2 py-1 rounded-lg">Sil</button>
+            <button type="button" onclick="openModal('announcement-modal')" class="bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-1 rounded-lg text-[10px] font-bold">+ Duyuru</button>
+            <button type="button" id="delete-announcement-btn" onclick="deleteAnnouncement()" class="hidden text-rose-300 font-bold text-[10px] bg-rose-900/60 px-2 py-1 rounded-lg">Sil</button>
         </div>
     </div>
 
@@ -109,13 +113,13 @@
             <span class="text-amber-300 font-bold shrink-0">📌 Sabit:</span>
             <span id="pinned-text" class="text-rose-100 truncate"></span>
         </div>
-        <button id="unpin-btn" onclick="unpinMessage()" class="text-[10px] text-rose-200 bg-rose-900/80 hover:bg-rose-800 px-2 py-0.5 rounded ml-2 font-bold">Sabiti Kaldır</button>
+        <button type="button" id="unpin-btn" onclick="unpinMessage()" class="text-[10px] text-rose-200 bg-rose-900/80 hover:bg-rose-800 px-2 py-0.5 rounded ml-2 font-bold">Sabiti Kaldır</button>
     </div>
 
     <!-- DM BİLGİ ÇUBUĞU -->
     <div id="dm-banner" class="hidden bg-rose-950/90 border-b border-rose-500/40 px-3 py-1.5 flex items-center justify-between text-xs shrink-0 z-15">
         <span id="dm-banner-text" class="text-rose-200 font-bold">💬 Özel Sohbet</span>
-        <button onclick="exitDM()" class="bg-rose-600/30 text-rose-200 px-2.5 py-0.5 rounded-lg text-[10px] font-bold">Genel Odalara Dön</button>
+        <button type="button" onclick="exitDM()" class="bg-rose-600/30 text-rose-200 px-2.5 py-0.5 rounded-lg text-[10px] font-bold">Genel Odalara Dön</button>
     </div>
 
     <!-- MESAJ ALANI -->
@@ -133,7 +137,7 @@
             <span id="preview-mode-title" class="text-amber-400 font-bold">Yanıtlanıyor:</span>
             <span id="reply-preview-text" class="text-rose-200 truncate"></span>
         </div>
-        <button onclick="cancelReplyOrEdit()" class="text-rose-300 font-bold text-xs px-2">✕</button>
+        <button type="button" onclick="cancelReplyOrEdit()" class="text-rose-300 font-bold text-xs px-2">✕</button>
     </div>
 
     <!-- EKSTRA ARAÇLAR -->
@@ -160,74 +164,74 @@
     <!-- ==================== MODALLAR ==================== -->
 
     <!-- HIZLI MENÜ -->
-    <div id="menu-drawer-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+    <div id="menu-drawer-modal" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3 max-h-[85vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">🧭 WrtS Menü</h3><button onclick="closeModal('menu-drawer-modal')">✕</button></div>
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">🧭 WrtS Menü</h3><button type="button" onclick="closeModal('menu-drawer-modal')">✕</button></div>
             <div class="grid grid-cols-2 gap-2 pt-1">
-                <button onclick="closeModal('menu-drawer-modal'); openDMListModal();" class="relative bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left">
+                <button type="button" onclick="closeModal('menu-drawer-modal'); openDMListModal();" class="relative bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left">
                     <span>💬</span> Özel DM
                     <span id="menu-inbox-dot" class="hidden w-2.5 h-2.5 rounded-full bg-red-500 ml-auto"></span>
                 </button>
-                <button onclick="closeModal('menu-drawer-modal'); openModal('call-modal');" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>📹</span> Sesli / Görüntülü</button>
-                <button onclick="closeModal('menu-drawer-modal'); openModal('whiteboard-modal'); initWhiteboard();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎨</span> Ortak Tahta</button>
-                <button onclick="closeModal('menu-drawer-modal'); openCinemaModal();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎬</span> Ortak Sinema</button>
-                <button onclick="closeModal('menu-drawer-modal'); openModal('games-modal'); initGames();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎮</span> Oyun Salonu</button>
-                <button onclick="closeModal('menu-drawer-modal'); openModal('leaderboard-modal'); loadLeaderboard();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🏆</span> Skor Tablosu</button>
-                <button onclick="closeModal('menu-drawer-modal'); openModal('stats-modal'); loadStats();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>📊</span> İstatistikler</button>
-                <button onclick="closeModal('menu-drawer-modal'); openMyProfile();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left col-span-2"><span>👤</span> Profilim & Ayarlar</button>
-                <button onclick="clearAllMessagesInRoom()" class="bg-red-600/20 hover:bg-red-600/40 border border-red-500/40 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-red-400 text-left col-span-2 transition"><span>🗑️</span> Bu Odadaki Tüm Mesajları Sil</button>
+                <button type="button" onclick="closeModal('menu-drawer-modal'); openModal('call-modal');" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>📹</span> Sesli / Görüntülü</button>
+                <button type="button" onclick="closeModal('menu-drawer-modal'); openModal('whiteboard-modal'); initWhiteboard();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎨</span> Ortak Tahta</button>
+                <button type="button" onclick="closeModal('menu-drawer-modal'); openCinemaModal();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎬</span> Ortak Sinema</button>
+                <button type="button" onclick="closeModal('menu-drawer-modal'); openModal('games-modal'); initGames();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎮</span> Oyun Salonu</button>
+                <button type="button" onclick="closeModal('menu-drawer-modal'); openModal('leaderboard-modal'); loadLeaderboard();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🏆</span> Skor Tablosu</button>
+                <button type="button" onclick="closeModal('menu-drawer-modal'); openModal('stats-modal'); loadStats();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>📊</span> İstatistikler</button>
+                <button type="button" onclick="closeModal('menu-drawer-modal'); openMyProfile();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left col-span-2"><span>👤</span> Profilim & Ayarlar</button>
+                <button type="button" onclick="clearAllMessagesInRoom()" class="bg-red-600/20 hover:bg-red-600/40 border border-red-500/40 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-red-400 text-left col-span-2 transition"><span>🗑️</span> Bu Odadaki Tüm Mesajları Sil</button>
             </div>
         </div>
     </div>
 
     <!-- DUYURU MODALI -->
-    <div id="announcement-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+    <div id="announcement-modal" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-amber-500/40 rounded-3xl p-5 w-full max-w-sm space-y-3">
-            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">📢 Duyuru Yayınla</h3><button onclick="closeModal('announcement-modal')">✕</button></div>
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">📢 Duyuru Yayınla</h3><button type="button" onclick="closeModal('announcement-modal')">✕</button></div>
             <textarea id="announcement-input" rows="3" placeholder="Duyuru metni yazın..." class="w-full bg-[#120409] border border-rose-900/60 rounded-xl p-3 text-xs focus:outline-none"></textarea>
-            <button onclick="publishAnnouncement()" class="w-full bg-gradient-to-r from-amber-600 to-rose-600 py-2.5 rounded-xl text-xs font-bold text-white">Yayınla</button>
+            <button type="button" onclick="publishAnnouncement()" class="w-full bg-gradient-to-r from-amber-600 to-rose-600 py-2.5 rounded-xl text-xs font-bold text-white">Yayınla</button>
         </div>
     </div>
 
     <!-- SESLİ & GÖRÜNTÜLÜ EKRAN PAYLAŞIMI MODALI -->
-    <div id="call-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
+    <div id="call-modal" class="fixed inset-0 bg-black/85 z-50 hidden items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-md space-y-3 text-center">
-            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">📹 Sesli / Görüntülü Görüşme</h3><button onclick="endWebRTCCall()">✕</button></div>
+            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">📹 Sesli / Görüntülü Görüşme</h3><button type="button" onclick="endWebRTCCall()">✕</button></div>
             <p id="call-status" class="text-xs text-rose-200/70">Bağlanmak için seçeneklerden birini seçin...</p>
             <div class="grid grid-cols-2 gap-2">
                 <video id="local-video" autoplay muted playsinline class="w-full aspect-video bg-[#120409] rounded-xl object-cover"></video>
                 <video id="remote-video" autoplay playsinline class="w-full aspect-video bg-[#120409] rounded-xl object-cover"></video>
             </div>
             <div class="flex flex-wrap gap-2 justify-center">
-                <button onclick="startWebRTCCall(true)" class="bg-emerald-600 px-3 py-2 rounded-xl text-xs font-bold text-white">📹 Görüntülü</button>
-                <button onclick="startWebRTCCall(false)" class="bg-amber-600 px-3 py-2 rounded-xl text-xs font-bold text-white">🎙️ Sadece Ses</button>
-                <button onclick="startScreenShare()" class="bg-sky-600 px-3 py-2 rounded-xl text-xs font-bold text-white">💻 Ekran Paylaş</button>
-                <button onclick="joinWebRTCCall()" class="bg-rose-600 px-3 py-2 rounded-xl text-xs font-bold text-white">📲 Katıl</button>
-                <button onclick="endWebRTCCall()" class="bg-red-700 px-3 py-2 rounded-xl text-xs font-bold text-white">Ayrıl</button>
+                <button type="button" onclick="startWebRTCCall(true)" class="bg-emerald-600 px-3 py-2 rounded-xl text-xs font-bold text-white">📹 Görüntülü</button>
+                <button type="button" onclick="startWebRTCCall(false)" class="bg-amber-600 px-3 py-2 rounded-xl text-xs font-bold text-white">🎙️ Sadece Ses</button>
+                <button type="button" onclick="startScreenShare()" class="bg-sky-600 px-3 py-2 rounded-xl text-xs font-bold text-white">💻 Ekran Paylaş</button>
+                <button type="button" onclick="joinWebRTCCall()" class="bg-rose-600 px-3 py-2 rounded-xl text-xs font-bold text-white">📲 Katıl</button>
+                <button type="button" onclick="endWebRTCCall()" class="bg-red-700 px-3 py-2 rounded-xl text-xs font-bold text-white">Ayrıl</button>
             </div>
         </div>
     </div>
 
     <!-- 2 ADIMLI HESAP SİLME MODALI -->
-    <div id="delete-account-modal" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center p-4">
+    <div id="delete-account-modal" class="fixed inset-0 bg-black/90 z-50 hidden items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-red-600/60 rounded-3xl p-5 w-full max-w-sm space-y-4 text-center">
-            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-red-500">⚠️ Hesap Silme</h3><button onclick="closeModal('delete-account-modal')">✕</button></div>
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-red-500">⚠️ Hesap Silme</h3><button type="button" onclick="closeModal('delete-account-modal')">✕</button></div>
             <div id="del-step-1" class="space-y-3">
                 <p class="text-xs text-rose-200">Hesabınızı kalıcı olarak silmek istiyor musunuz?</p>
-                <button onclick="proceedToDeleteStep2()" class="w-full bg-red-600 hover:bg-red-700 py-2.5 rounded-xl text-xs font-bold text-white">Devam Et</button>
+                <button type="button" onclick="proceedToDeleteStep2()" class="w-full bg-red-600 hover:bg-red-700 py-2.5 rounded-xl text-xs font-bold text-white">Devam Et</button>
             </div>
             <div id="del-step-2" class="hidden space-y-3">
                 <p class="text-xs text-amber-400 font-bold">Lütfen şifrenizi girerek onaylayın.</p>
                 <input type="password" id="del-confirm-pass" placeholder="Şifreniz" class="w-full bg-[#120409] border border-red-900 rounded-xl px-3 py-2 text-xs focus:outline-none">
-                <button onclick="executeAccountDeletion()" class="w-full bg-red-700 py-2.5 rounded-xl text-xs font-bold text-white shadow-lg">Hesabımı Sil</button>
+                <button type="button" onclick="executeAccountDeletion()" class="w-full bg-red-700 py-2.5 rounded-xl text-xs font-bold text-white shadow-lg">Hesabımı Sil</button>
             </div>
         </div>
     </div>
 
     <!-- İSTATİSTİK PANELI -->
-    <div id="stats-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
+    <div id="stats-modal" class="fixed inset-0 bg-black/85 z-50 hidden items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3">
-            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">📊 İstatistikler</h3><button onclick="closeModal('stats-modal')">✕</button></div>
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">📊 İstatistikler</h3><button type="button" onclick="closeModal('stats-modal')">✕</button></div>
             <div class="bg-[#120409] p-4 rounded-2xl space-y-2.5 text-xs">
                 <div class="flex justify-between"><span class="text-rose-300">Toplam Mesaj:</span><span id="stat-msgs" class="font-bold text-amber-400">0</span></div>
                 <div class="flex justify-between"><span class="text-rose-300">Skor:</span><span id="stat-score" class="font-bold text-amber-400">0</span></div>
@@ -240,9 +244,9 @@
     </div>
 
     <!-- KULLANICI PROFİL KARTI -->
-    <div id="user-profile-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
+    <div id="user-profile-modal" class="fixed inset-0 bg-black/85 z-50 hidden items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-6 w-full max-w-sm space-y-4 text-center relative shadow-2xl">
-            <button onclick="closeModal('user-profile-modal')" class="absolute top-4 right-4 text-rose-300 font-bold">✕</button>
+            <button type="button" onclick="closeModal('user-profile-modal')" class="absolute top-4 right-4 text-rose-300 font-bold">✕</button>
             <div class="flex flex-col items-center gap-2">
                 <img id="up-avatar" src="" class="w-20 h-20 rounded-full object-cover border-2 border-amber-500 shadow-xl">
                 <h3 id="up-name" class="font-black text-lg text-rose-50 mt-1"></h3>
@@ -257,29 +261,29 @@
     </div>
 
     <!-- ORTAK SİNEMA -->
-    <div id="music-modal" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center p-3">
+    <div id="music-modal" class="fixed inset-0 bg-black/90 z-50 hidden items-center justify-center p-3">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-4 w-full max-w-md space-y-2.5 max-h-[95vh] flex flex-col">
             <div class="flex justify-between items-center shrink-0">
                 <div class="flex items-center gap-2">
                     <h3 class="font-bold text-amber-400 text-sm">🎬 Ortak Sinema</h3>
-                    <button id="cinema-mute-btn" onclick="toggleCinemaMute()" class="bg-rose-950 text-rose-300 border border-rose-700/50 px-2 py-0.5 rounded-lg text-[10px] font-bold">🔕 Sessiz</button>
+                    <button type="button" id="cinema-mute-btn" onclick="toggleCinemaMute()" class="bg-rose-950 text-rose-300 border border-rose-700/50 px-2 py-0.5 rounded-lg text-[10px] font-bold">🔕 Sessiz</button>
                 </div>
-                <button onclick="closeModal('music-modal')" class="text-rose-300 font-bold">✕</button>
+                <button type="button" onclick="closeModal('music-modal')" class="text-rose-300 font-bold">✕</button>
             </div>
             <div class="flex gap-1.5 shrink-0">
                 <input type="text" id="yt-url-input" placeholder="YouTube linki yapıştır..." class="flex-1 bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-1.5 text-xs">
-                <button onclick="syncYoutubeVideo(false)" class="bg-gradient-to-r from-rose-600 to-amber-600 px-2.5 py-1.5 rounded-xl text-xs font-bold text-white">Oynat</button>
-                <button onclick="addToCinemaQueue()" class="bg-[#2b0d18] border border-amber-500/40 text-amber-300 px-2.5 py-1.5 rounded-xl text-xs font-bold">+ Kuyruk</button>
+                <button type="button" onclick="syncYoutubeVideo(false)" class="bg-gradient-to-r from-rose-600 to-amber-600 px-2.5 py-1.5 rounded-xl text-xs font-bold text-white">Oynat</button>
+                <button type="button" onclick="addToCinemaQueue()" class="bg-[#2b0d18] border border-amber-500/40 text-amber-300 px-2.5 py-1.5 rounded-xl text-xs font-bold">+ Kuyruk</button>
             </div>
             <div class="aspect-video bg-black rounded-2xl overflow-hidden border border-rose-900/50 relative shrink-0 shadow-xl">
                 <div id="yt-player-frame" class="w-full h-full"></div>
             </div>
             <div class="flex items-center justify-between gap-1 shrink-0 flex-wrap">
                 <p id="music-sync-info" class="text-[11px] text-rose-200/70 truncate flex-1">Sinema salonu boş.</p>
-                <button onclick="toggleCinemaPlayPause()" id="cinema-playpause-btn" class="bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 px-2 py-1 rounded-lg text-[10px] font-bold">⏯️ Oynat/Duraklat</button>
-                <button onclick="playNextInQueue()" class="bg-sky-600/30 text-sky-300 border border-sky-500/40 px-2 py-1 rounded-lg text-[10px] font-bold">⏭️ Sıradaki</button>
-                <button onclick="forceSyncAllToMyTime()" class="bg-amber-600/30 text-amber-300 border border-amber-500/40 px-2 py-1 rounded-lg text-[10px] font-bold">🔄 Senkron</button>
-                <button onclick="stopAndDeleteMusic()" class="bg-rose-950 text-rose-300 border border-rose-700/50 px-2 py-1 rounded-lg text-[10px] font-bold">Kapat</button>
+                <button type="button" onclick="toggleCinemaPlayPause()" id="cinema-playpause-btn" class="bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 px-2 py-1 rounded-lg text-[10px] font-bold">⏯️ Oynat/Duraklat</button>
+                <button type="button" onclick="playNextInQueue()" class="bg-sky-600/30 text-sky-300 border border-sky-500/40 px-2 py-1 rounded-lg text-[10px] font-bold">⏭️ Sıradaki</button>
+                <button type="button" onclick="forceSyncAllToMyTime()" class="bg-amber-600/30 text-amber-300 border border-amber-500/40 px-2 py-1 rounded-lg text-[10px] font-bold">🔄 Senkron</button>
+                <button type="button" onclick="stopAndDeleteMusic()" class="bg-rose-950 text-rose-300 border border-rose-700/50 px-2 py-1 rounded-lg text-[10px] font-bold">Kapat</button>
             </div>
             <div id="cinema-queue-list" class="flex gap-1.5 overflow-x-auto no-scrollbar shrink-0 text-[10px]"></div>
             <div class="flex-1 bg-[#120409] border border-rose-900/50 rounded-2xl p-2.5 flex flex-col min-h-[90px] max-h-[120px]">
@@ -293,9 +297,9 @@
     </div>
 
     <!-- KULLANICILAR & ARKADAŞLAR -->
-    <div id="users-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+    <div id="users-modal" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-4 max-h-[85vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">Kullanıcılar & Arkadaşlar</h3><button onclick="closeModal('users-modal')">✕</button></div>
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">Kullanıcılar & Arkadaşlar</h3><button type="button" onclick="closeModal('users-modal')">✕</button></div>
             <div id="friend-requests-section" class="hidden">
                 <h4 class="text-xs font-bold text-amber-400 mb-2">📩 İstekler</h4>
                 <div id="friend-requests-list" class="space-y-2 mb-2"></div>
@@ -313,135 +317,135 @@
     </div>
 
     <!-- SKOR TABLOSU -->
-    <div id="leaderboard-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
+    <div id="leaderboard-modal" class="fixed inset-0 bg-black/85 z-50 hidden items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-4 max-h-[85vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">🏆 Skor Tablosu</h3><button onclick="closeModal('leaderboard-modal')">✕</button></div>
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">🏆 Skor Tablosu</h3><button type="button" onclick="closeModal('leaderboard-modal')">✕</button></div>
             <div id="leaderboard-list" class="space-y-2"></div>
         </div>
     </div>
 
     <!-- ÖZEL DM LİSTESİ -->
-    <div id="dm-list-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+    <div id="dm-list-modal" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3 max-h-[85vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">💬 Özel Mesajlarım (DM)</h3><button onclick="closeModal('dm-list-modal')">✕</button></div>
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">💬 Özel Mesajlarım (DM)</h3><button type="button" onclick="closeModal('dm-list-modal')">✕</button></div>
             <div id="my-dms-list" class="space-y-2 pt-1"></div>
         </div>
     </div>
 
     <!-- ORTAK TAHTA -->
-    <div id="whiteboard-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-3">
+    <div id="whiteboard-modal" class="fixed inset-0 bg-black/85 z-50 hidden items-center justify-center p-3">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-4 w-full max-w-md space-y-3">
-            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">🎨 Ortak Tahta</h3><button onclick="closeModal('whiteboard-modal')">✕</button></div>
+            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">🎨 Ortak Tahta</h3><button type="button" onclick="closeModal('whiteboard-modal')">✕</button></div>
             <div class="flex justify-between items-center">
                 <div class="flex gap-1.5 items-center">
-                    <button onclick="wbColor='#fbbf24'; wbIsEraser=false;" class="w-6 h-6 rounded-full bg-amber-400 border border-white"></button>
-                    <button onclick="wbColor='#f43f5e'; wbIsEraser=false;" class="w-6 h-6 rounded-full bg-rose-500 border border-white"></button>
-                    <button onclick="wbColor='#34d399'; wbIsEraser=false;" class="w-6 h-6 rounded-full bg-emerald-400 border border-white"></button>
-                    <button onclick="wbIsEraser=true;" class="bg-rose-900/60 border border-rose-500 px-2 py-0.5 rounded text-[10px] font-bold text-rose-200">Silgi</button>
+                    <button type="button" onclick="wbColor='#fbbf24'; wbIsEraser=false;" class="w-6 h-6 rounded-full bg-amber-400 border border-white"></button>
+                    <button type="button" onclick="wbColor='#f43f5e'; wbIsEraser=false;" class="w-6 h-6 rounded-full bg-rose-500 border border-white"></button>
+                    <button type="button" onclick="wbColor='#34d399'; wbIsEraser=false;" class="w-6 h-6 rounded-full bg-emerald-400 border border-white"></button>
+                    <button type="button" onclick="wbIsEraser=true;" class="bg-rose-900/60 border border-rose-500 px-2 py-0.5 rounded text-[10px] font-bold text-rose-200">Silgi</button>
                 </div>
-                <button onclick="clearWhiteboard()" class="bg-red-500/20 text-red-400 px-2.5 py-1 rounded-lg text-xs font-bold">Temizle</button>
+                <button type="button" onclick="clearWhiteboard()" class="bg-red-500/20 text-red-400 px-2.5 py-1 rounded-lg text-xs font-bold">Temizle</button>
             </div>
             <canvas id="wb-canvas" width="340" height="280" class="w-full bg-[#120409] border border-rose-900/60 rounded-2xl touch-none cursor-crosshair"></canvas>
         </div>
     </div>
 
     <!-- OYUN SALONU -->
-    <div id="games-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+    <div id="games-modal" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-md space-y-3 text-center">
-            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">🎮 Oyun Salonu</h3><button onclick="closeModal('games-modal')">✕</button></div>
+            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">🎮 Oyun Salonu</h3><button type="button" onclick="closeModal('games-modal')">✕</button></div>
             <div class="flex gap-1 bg-[#120409] p-1 rounded-xl">
-                <button onclick="switchGameTab('xox')" id="tab-xox" class="flex-1 py-1.5 rounded-lg text-xs font-bold bg-rose-600 text-white">XOX</button>
-                <button onclick="switchGameTab('battleship')" id="tab-battleship" class="flex-1 py-1.5 rounded-lg text-xs font-bold text-rose-300/60">Amiral Battı</button>
-                <button onclick="switchGameTab('guess')" id="tab-guess" class="flex-1 py-1.5 rounded-lg text-xs font-bold text-rose-300/60">Sayı Tahmini</button>
+                <button type="button" onclick="switchGameTab('xox')" id="tab-xox" class="flex-1 py-1.5 rounded-lg text-xs font-bold bg-rose-600 text-white">XOX</button>
+                <button type="button" onclick="switchGameTab('battleship')" id="tab-battleship" class="flex-1 py-1.5 rounded-lg text-xs font-bold text-rose-300/60">Amiral Battı</button>
+                <button type="button" onclick="switchGameTab('guess')" id="tab-guess" class="flex-1 py-1.5 rounded-lg text-xs font-bold text-rose-300/60">Sayı Tahmini</button>
             </div>
 
             <div id="game-panel-xox" class="space-y-3 py-2">
                 <p id="xox-status" class="text-xs text-amber-300 font-bold">Sıra: X</p>
                 <div class="grid grid-cols-3 gap-2 w-48 mx-auto">
-                    <button onclick="makeXOXMove(0)" id="cell-0" class="w-14 h-14 bg-[#120409] border border-rose-900/50 rounded-xl font-black text-2xl text-amber-400 hover:border-amber-500 transition"></button>
-                    <button onclick="makeXOXMove(1)" id="cell-1" class="w-14 h-14 bg-[#120409] border border-rose-900/50 rounded-xl font-black text-2xl text-amber-400 hover:border-amber-500 transition"></button>
-                    <button onclick="makeXOXMove(2)" id="cell-2" class="w-14 h-14 bg-[#120409] border border-rose-900/50 rounded-xl font-black text-2xl text-amber-400 hover:border-amber-500 transition"></button>
-                    <button onclick="makeXOXMove(3)" id="cell-3" class="w-14 h-14 bg-[#120409] border border-rose-900/50 rounded-xl font-black text-2xl text-amber-400 hover:border-amber-500 transition"></button>
-                    <button onclick="makeXOXMove(4)" id="cell-4" class="w-14 h-14 bg-[#120409] border border-rose-900/50 rounded-xl font-black text-2xl text-amber-400 hover:border-amber-500 transition"></button>
-                    <button onclick="makeXOXMove(5)" id="cell-5" class="w-14 h-14 bg-[#120409] border border-rose-900/50 rounded-xl font-black text-2xl text-amber-400 hover:border-amber-500 transition"></button>
-                    <button onclick="makeXOXMove(6)" id="cell-6" class="w-14 h-14 bg-[#120409] border border-rose-900/50 rounded-xl font-black text-2xl text-amber-400 hover:border-amber-500 transition"></button>
-                    <button onclick="makeXOXMove(7)" id="cell-7" class="w-14 h-14 bg-[#120409] border border-rose-900/50 rounded-xl font-black text-2xl text-amber-400 hover:border-amber-500 transition"></button>
-                    <button onclick="makeXOXMove(8)" id="cell-8" class="w-14 h-14 bg-[#120409] border border-rose-900/50 rounded-xl font-black text-2xl text-amber-400 hover:border-amber-500 transition"></button>
+                    <button type="button" onclick="makeXOXMove(0)" id="cell-0" class="w-14 h-14 bg-[#120409] border border-rose-900/50 rounded-xl font-black text-2xl text-amber-400 hover:border-amber-500 transition"></button>
+                    <button type="button" onclick="makeXOXMove(1)" id="cell-1" class="w-14 h-14 bg-[#120409] border border-rose-900/50 rounded-xl font-black text-2xl text-amber-400 hover:border-amber-500 transition"></button>
+                    <button type="button" onclick="makeXOXMove(2)" id="cell-2" class="w-14 h-14 bg-[#120409] border border-rose-900/50 rounded-xl font-black text-2xl text-amber-400 hover:border-amber-500 transition"></button>
+                    <button type="button" onclick="makeXOXMove(3)" id="cell-3" class="w-14 h-14 bg-[#120409] border border-rose-900/50 rounded-xl font-black text-2xl text-amber-400 hover:border-amber-500 transition"></button>
+                    <button type="button" onclick="makeXOXMove(4)" id="cell-4" class="w-14 h-14 bg-[#120409] border border-rose-900/50 rounded-xl font-black text-2xl text-amber-400 hover:border-amber-500 transition"></button>
+                    <button type="button" onclick="makeXOXMove(5)" id="cell-5" class="w-14 h-14 bg-[#120409] border border-rose-900/50 rounded-xl font-black text-2xl text-amber-400 hover:border-amber-500 transition"></button>
+                    <button type="button" onclick="makeXOXMove(6)" id="cell-6" class="w-14 h-14 bg-[#120409] border border-rose-900/50 rounded-xl font-black text-2xl text-amber-400 hover:border-amber-500 transition"></button>
+                    <button type="button" onclick="makeXOXMove(7)" id="cell-7" class="w-14 h-14 bg-[#120409] border border-rose-900/50 rounded-xl font-black text-2xl text-amber-400 hover:border-amber-500 transition"></button>
+                    <button type="button" onclick="makeXOXMove(8)" id="cell-8" class="w-14 h-14 bg-[#120409] border border-rose-900/50 rounded-xl font-black text-2xl text-amber-400 hover:border-amber-500 transition"></button>
                 </div>
-                <button onclick="resetXOXGame()" class="w-full bg-[#2b0d18] hover:bg-rose-900/50 py-2 rounded-xl text-xs font-bold text-rose-200 transition">Oyunu Sıfırla</button>
+                <button type="button" onclick="resetXOXGame()" class="w-full bg-[#2b0d18] hover:bg-rose-900/50 py-2 rounded-xl text-xs font-bold text-rose-200 transition">Oyunu Sıfırla</button>
             </div>
 
             <div id="game-panel-battleship" class="hidden space-y-3 py-2">
                 <p id="bs-status" class="text-xs text-amber-300 font-bold">3 gizli gemiyi bul! Kalan Hak: <span id="bs-shots">10</span></p>
                 <div id="bs-grid" class="grid grid-cols-5 gap-1.5 w-60 mx-auto"></div>
-                <button onclick="resetBattleship()" class="w-full bg-[#2b0d18] hover:bg-rose-900/50 py-2 rounded-xl text-xs font-bold text-rose-200 transition">Yeni Harita Başlat</button>
+                <button type="button" onclick="resetBattleship()" class="w-full bg-[#2b0d18] hover:bg-rose-900/50 py-2 rounded-xl text-xs font-bold text-rose-200 transition">Yeni Harita Başlat</button>
             </div>
 
             <div id="game-panel-guess" class="hidden space-y-3 py-2">
                 <p id="guess-status" class="text-xs text-amber-300 font-bold">1 ile 50 arasında gizli sayıyı bul! (+25 Puan)</p>
                 <div class="flex gap-2 justify-center">
                     <input type="number" id="guess-input" min="1" max="50" placeholder="1-50" class="w-24 bg-[#120409] border border-rose-900/60 rounded-xl px-3 py-2 text-xs text-center">
-                    <button onclick="submitGuess()" class="bg-gradient-to-r from-rose-600 to-amber-600 px-4 py-2 rounded-xl text-xs font-bold text-white">Tahmin Et</button>
+                    <button type="button" onclick="submitGuess()" class="bg-gradient-to-r from-rose-600 to-amber-600 px-4 py-2 rounded-xl text-xs font-bold text-white">Tahmin Et</button>
                 </div>
                 <p id="guess-hint" class="text-xs text-rose-200/80 min-h-[1rem]"></p>
-                <button onclick="resetGuessGame()" class="w-full bg-[#2b0d18] hover:bg-rose-900/50 py-2 rounded-xl text-xs font-bold text-rose-200 transition">Yeni Sayı Üret</button>
+                <button type="button" onclick="resetGuessGame()" class="w-full bg-[#2b0d18] hover:bg-rose-900/50 py-2 rounded-xl text-xs font-bold text-rose-200 transition">Yeni Sayı Üret</button>
             </div>
         </div>
     </div>
 
     <!-- YARDIMCI MODALLAR -->
-    <div id="gif-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+    <div id="gif-modal" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-md space-y-3 max-h-[85vh] overflow-y-auto">
-            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">🎞️ GIF Seç</h3><button onclick="closeModal('gif-modal')">✕</button></div>
+            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">🎞️ GIF Seç</h3><button type="button" onclick="closeModal('gif-modal')">✕</button></div>
             <div id="gif-grid" class="grid grid-cols-2 gap-2"></div>
         </div>
     </div>
 
-    <div id="sticker-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
+    <div id="sticker-modal" class="fixed inset-0 bg-black/85 z-50 hidden items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3">
-            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">✨ Sticker</h3><button onclick="closeModal('sticker-modal')">✕</button></div>
+            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">✨ Sticker</h3><button type="button" onclick="closeModal('sticker-modal')">✕</button></div>
             <div id="sticker-grid" class="grid grid-cols-4 gap-2 pt-1 text-2xl text-center"></div>
         </div>
     </div>
 
-    <div id="code-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
+    <div id="code-modal" class="fixed inset-0 bg-black/85 z-50 hidden items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-md space-y-3">
-            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">💻 Kod Paylaş</h3><button onclick="closeModal('code-modal')">✕</button></div>
+            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">💻 Kod Paylaş</h3><button type="button" onclick="closeModal('code-modal')">✕</button></div>
             <textarea id="code-content-input" rows="5" placeholder="Kodunu buraya yapıştır..." class="w-full bg-[#120409] border border-rose-900/50 rounded-xl p-3 text-xs font-mono"></textarea>
-            <button onclick="sendCodeSnippet()" class="w-full bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-xs font-bold text-white">Gönder</button>
+            <button type="button" onclick="sendCodeSnippet()" class="w-full bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-xs font-bold text-white">Gönder</button>
         </div>
     </div>
 
-    <div id="poll-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
+    <div id="poll-modal" class="fixed inset-0 bg-black/85 z-50 hidden items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3">
-            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">📊 Anket Oluştur</h3><button onclick="closeModal('poll-modal')">✕</button></div>
+            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">📊 Anket Oluştur</h3><button type="button" onclick="closeModal('poll-modal')">✕</button></div>
             <input type="text" id="poll-question" placeholder="Soru..." class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
             <input type="text" id="poll-opt1" placeholder="Seçenek 1" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
             <input type="text" id="poll-opt2" placeholder="Seçenek 2" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-xs">
-            <button onclick="createPoll()" class="w-full bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-xs font-bold text-white">Başlat</button>
+            <button type="button" onclick="createPoll()" class="w-full bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-xs font-bold text-white">Başlat</button>
         </div>
     </div>
 
-    <div id="room-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+    <div id="room-modal" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3">
-            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">Yeni Oda Kur</h3><button onclick="closeModal('room-modal')">✕</button></div>
+            <div class="flex justify-between items-center"><h3 class="font-bold text-amber-400">Yeni Oda Kur</h3><button type="button" onclick="closeModal('room-modal')">✕</button></div>
             <input type="text" id="new-room-name" placeholder="Oda adı..." maxlength="20" class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-3 py-2 text-sm">
-            <button id="create-room-btn" class="w-full bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-sm font-bold text-white">Oluştur</button>
+            <button type="button" id="create-room-btn" class="w-full bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-sm font-bold text-white">Oluştur</button>
         </div>
     </div>
 
-    <div id="roles-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
+    <div id="roles-modal" class="fixed inset-0 bg-black/85 z-50 hidden items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3 max-h-[80vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">🛡️ Oda Moderasyonu</h3><button onclick="closeModal('roles-modal')">✕</button></div>
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">🛡️ Oda Moderasyonu</h3><button type="button" onclick="closeModal('roles-modal')">✕</button></div>
             <div id="room-members-roles-list" class="space-y-2"></div>
-            <button onclick="deleteCurrentRoom()" class="w-full bg-red-600/20 text-red-400 py-2 rounded-xl text-xs font-bold">Bu Odayı Sil</button>
+            <button type="button" onclick="deleteCurrentRoom()" class="w-full bg-red-600/20 text-red-400 py-2 rounded-xl text-xs font-bold">Bu Odayı Sil</button>
         </div>
     </div>
 
     <!-- PROFİLİM & AYARLAR -->
-    <div id="profile-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+    <div id="profile-modal" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">Profilim & Ayarlar</h3><button onclick="closeModal('profile-modal')">✕</button></div>
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">Profilim & Ayarlar</h3><button type="button" onclick="closeModal('profile-modal')">✕</button></div>
             <div class="flex flex-col items-center gap-2">
                 <img id="preview-avatar" src="" class="w-16 h-16 rounded-full object-cover border-2 border-amber-500">
                 <input type="file" id="upload-avatar-file" accept="image/*" class="hidden">
@@ -465,11 +469,11 @@
                 </select>
             </div>
             <div class="flex gap-2 pt-1">
-                <button id="save-profile" class="flex-1 bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-xs font-bold text-white">Kaydet</button>
-                <button id="modal-logout" class="bg-amber-600/20 text-amber-400 px-3 py-2.5 rounded-xl text-xs font-bold">Çıkış</button>
+                <button type="button" id="save-profile" class="flex-1 bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-xs font-bold text-white">Kaydet</button>
+                <button type="button" id="modal-logout" class="bg-amber-600/20 text-amber-400 px-3 py-2.5 rounded-xl text-xs font-bold">Çıkış</button>
             </div>
             <hr class="border-rose-900/50 my-2">
-            <button onclick="openDeleteAccountModal()" class="w-full bg-red-600/20 hover:bg-red-600/40 text-red-400 py-2.5 rounded-xl text-xs font-bold transition">⚠️ 2 Adımlı Hesap Silme</button>
+            <button type="button" onclick="openDeleteAccountModal()" class="w-full bg-red-600/20 hover:bg-red-600/40 text-red-400 py-2.5 rounded-xl text-xs font-bold transition">⚠️ 2 Adımlı Hesap Silme</button>
         </div>
     </div>
 
@@ -693,8 +697,18 @@
             initBgEffect(val);
         };
 
-        window.openModal = id => document.getElementById(id).classList.remove('hidden');
-        window.closeModal = id => document.getElementById(id).classList.add('hidden');
+        window.openModal = id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.classList.remove('hidden');
+            el.classList.add('flex');
+        };
+        window.closeModal = id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.classList.add('hidden');
+            el.classList.remove('flex');
+        };
         window.toggleToolsDrawer = () => document.getElementById('tools-drawer').classList.toggle('hidden');
         window.openMyProfile = function() { loadUserDataToUI(); openModal('profile-modal'); };
 
@@ -816,7 +830,7 @@
             if (!listEl) return;
             const entries = Object.entries(snap.val() || {});
             listEl.innerHTML = entries.map(([k, v], idx) => `
-                <button onclick="db.ref('cinema_queue/${k}').remove(); syncYoutubeVideo('${v.videoId}');" class="bg-[#120409] border border-amber-500/30 text-amber-200 px-2 py-1 rounded-lg shrink-0">
+                <button type="button" onclick="db.ref('cinema_queue/${k}').remove(); syncYoutubeVideo('${v.videoId}');" class="bg-[#120409] border border-amber-500/30 text-amber-200 px-2 py-1 rounded-lg shrink-0">
                     #${idx + 1} ${v.videoId}
                 </button>
             `).join('');
@@ -905,7 +919,7 @@
         const stickerList = ["🔥", "😂", "❤️", "👑", "😎", "🥳", "🤝", "💀", "🚀", "⚽", "🎮", "🍿"];
         setTimeout(() => {
             document.getElementById('gif-grid').innerHTML = gifList.map(url => `<img src="${url}" class="w-full h-24 object-cover rounded-xl cursor-pointer" onclick="sendGIF('${url}')">`).join('');
-            document.getElementById('sticker-grid').innerHTML = stickerList.map(st => `<button onclick="sendSticker('${st}')" class="bg-[#120409] p-2 rounded-xl hover:bg-rose-900/40">${st}</button>`).join('');
+            document.getElementById('sticker-grid').innerHTML = stickerList.map(st => `<button type="button" onclick="sendSticker('${st}')" class="bg-[#120409] p-2 rounded-xl hover:bg-rose-900/40">${st}</button>`).join('');
         }, 100);
 
         window.sendGIF = url => {
@@ -982,7 +996,9 @@
             if (user) {
                 currentUser = user;
                 setLoginError('');
-                document.getElementById('login-screen').classList.add('hidden');
+                const loginEl = document.getElementById('login-screen');
+                loginEl.classList.add('hidden');
+                loginEl.classList.remove('flex');
                 if ('Notification' in window && Notification.permission === 'default') {
                     Notification.requestPermission().catch(() => {});
                 }
@@ -1024,7 +1040,12 @@
                 });
 
                 loadUserDataToUI(); listenRooms(); loadRoom(currentRoom);
-            } else { currentUser = null; document.getElementById('login-screen').classList.remove('hidden'); }
+            } else {
+                currentUser = null;
+                const loginEl = document.getElementById('login-screen');
+                loginEl.classList.remove('hidden');
+                loginEl.classList.add('flex');
+            }
         });
 
         function getMyData() {
@@ -1084,8 +1105,8 @@
                         <div class="flex items-center justify-between bg-[#120409] p-2 rounded-xl border border-amber-500/40">
                             <span class="text-xs font-bold">${info.name || 'İsimsiz'}</span>
                             <div class="flex gap-1">
-                                <button onclick="acceptFriend('${uid}', '${safeName}')" class="bg-emerald-600 text-white text-[10px] px-2 py-1 rounded font-bold">Kabul</button>
-                                <button onclick="db.ref('friend_requests/${currentUser.uid}/${uid}').remove(); loadOnlineUsersList();" class="bg-red-600/30 text-red-400 text-[10px] px-2 py-1 rounded font-bold">Red</button>
+                                <button type="button" onclick="acceptFriend('${uid}', '${safeName}')" class="bg-emerald-600 text-white text-[10px] px-2 py-1 rounded font-bold">Kabul</button>
+                                <button type="button" onclick="db.ref('friend_requests/${currentUser.uid}/${uid}').remove(); loadOnlineUsersList();" class="bg-red-600/30 text-red-400 text-[10px] px-2 py-1 rounded font-bold">Red</button>
                             </div>
                         </div>`;
                     }).join('');
@@ -1174,8 +1195,8 @@
             const isFriend = !!myFriends[targetUid];
             const safeTarget = encodeURIComponent(targetName);
             document.getElementById('up-actions').innerHTML = `
-                <button onclick="startDM('${targetUid}', '${safeTarget}'); closeModal('user-profile-modal');" class="flex-1 bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-xs font-bold text-white">💬 Özel Mesaj</button>
-                ${!isFriend ? `<button onclick="db.ref('friend_requests/${targetUid}/${currentUser.uid}').set({name: getMyData().name}); showToast('Arkadaşlık isteği gönderildi!');" class="bg-rose-600/30 text-rose-200 px-3 py-2.5 rounded-xl text-xs font-bold">💖 Ekle</button>` : `<span class="bg-emerald-600/20 text-emerald-400 px-3 py-2.5 rounded-xl text-xs font-bold">✔ Arkadaş</span>`}
+                <button type="button" onclick="startDM('${targetUid}', '${safeTarget}'); closeModal('user-profile-modal');" class="flex-1 bg-gradient-to-r from-rose-600 to-amber-600 py-2.5 rounded-xl text-xs font-bold text-white">💬 Özel Mesaj</button>
+                ${!isFriend ? `<button type="button" onclick="db.ref('friend_requests/${targetUid}/${currentUser.uid}').set({name: getMyData().name}); showToast('Arkadaşlık isteği gönderildi!');" class="bg-rose-600/30 text-rose-200 px-3 py-2.5 rounded-xl text-xs font-bold">💖 Ekle</button>` : `<span class="bg-emerald-600/20 text-emerald-400 px-3 py-2.5 rounded-xl text-xs font-bold">✔ Arkadaş</span>`}
             `;
         };
 
@@ -1262,7 +1283,7 @@
                 list.innerHTML = Object.entries(users).filter(([uid]) => uid !== currentUser.uid).map(([uid, info]) => `
                     <div class="flex items-center justify-between bg-[#120409] p-2 rounded-xl border border-rose-900/50">
                         <span class="text-xs font-bold">${info.name || 'İsimsiz'}</span>
-                        <button onclick="db.ref('room_mutes/${currentRoom}/${uid}').set(true); showToast('Kullanıcı susturuldu.');" class="text-[10px] bg-red-600/30 text-red-400 px-2 py-1 rounded font-bold">Sustur</button>
+                        <button type="button" onclick="db.ref('room_mutes/${currentRoom}/${uid}').set(true); showToast('Kullanıcı susturuldu.');" class="text-[10px] bg-red-600/30 text-red-400 px-2 py-1 rounded font-bold">Sustur</button>
                     </div>
                 `).join('');
             });
@@ -1317,9 +1338,9 @@
             else if (data.type === 'code') content = `<div class="bg-[#120409] border border-rose-900/50 rounded-xl p-2.5 text-left my-1 overflow-x-auto max-w-[260px]"><pre class="text-[11px] text-emerald-300"><code>${data.code}</code></pre></div>`;
             else if (data.type === 'poll') {
                 const votes = data.votes || {}; const v1 = Object.values(votes).filter(v => v === 1).length; const v2 = Object.values(votes).filter(v => v === 2).length;
-                content = `<div class="bg-[#120409]/90 border border-rose-900/50 rounded-xl p-2.5 space-y-1.5 min-w-[200px]"><p class="text-xs font-bold text-amber-300">📊 ${data.question}</p><button onclick="votePoll('${room}', '${key}', 1)" class="w-full flex justify-between bg-[#1c0910] px-2.5 py-1 rounded-lg text-xs"><span>${data.opt1}</span><span class="font-bold text-amber-400">${v1}</span></button><button onclick="votePoll('${room}', '${key}', 2)" class="w-full flex justify-between bg-[#1c0910] px-2.5 py-1 rounded-lg text-xs"><span>${data.opt2}</span><span class="font-bold text-amber-400">${v2}</span></button></div>`;
+                content = `<div class="bg-[#120409]/90 border border-rose-900/50 rounded-xl p-2.5 space-y-1.5 min-w-[200px]"><p class="text-xs font-bold text-amber-300">📊 ${data.question}</p><button type="button" onclick="votePoll('${room}', '${key}', 1)" class="w-full flex justify-between bg-[#1c0910] px-2.5 py-1 rounded-lg text-xs"><span>${data.opt1}</span><span class="font-bold text-amber-400">${v1}</span></button><button type="button" onclick="votePoll('${room}', '${key}', 2)" class="w-full flex justify-between bg-[#1c0910] px-2.5 py-1 rounded-lg text-xs"><span>${data.opt2}</span><span class="font-bold text-amber-400">${v2}</span></button></div>`;
             } else if (data.type === 'game_invite') {
-                content = `<div class="bg-[#120409]/90 border border-amber-500/40 rounded-xl p-2.5 space-y-2 min-w-[190px]"><p class="text-xs font-bold text-amber-300">🎲 ${data.mesaj || 'Oyun daveti!'}</p><button onclick="openModal('games-modal'); initGames();" class="w-full bg-gradient-to-r from-rose-600 to-amber-600 py-1.5 rounded-lg text-xs font-bold text-white">Salona Katıl</button></div>`;
+                content = `<div class="bg-[#120409]/90 border border-amber-500/40 rounded-xl p-2.5 space-y-2 min-w-[190px]"><p class="text-xs font-bold text-amber-300">🎲 ${data.mesaj || 'Oyun daveti!'}</p><button type="button" onclick="openModal('games-modal'); initGames();" class="w-full bg-gradient-to-r from-rose-600 to-amber-600 py-1.5 rounded-lg text-xs font-bold text-white">Salona Katıl</button></div>`;
             } else {
                 content = `<div class="text-sm break-words">${formatMessageWithLinksAndMentions(data.mesaj || '')} ${data.edited ? '<span class="text-[9px] opacity-60">(düzenlendi)</span>' : ''}</div>`;
             }
@@ -1358,19 +1379,19 @@
                         <div class="text-[9px] opacity-75 text-right mt-0.5 flex items-center justify-end gap-1"><span>${timeStr}</span>${seenHtml}</div>
                     </div>
                     ${reactionsHtml}
-                    <div id="menu-${key}" class="hidden flex flex-col gap-1.5 mt-1 bg-[#1c0910] border border-rose-900/60 p-2.5 rounded-xl text-xs z-10 shadow-xl">
+                    <div id="menu-${key}" class="hidden flex-col gap-1.5 mt-1 bg-[#1c0910] border border-rose-900/60 p-2.5 rounded-xl text-xs z-10 shadow-xl">
                         <div class="flex gap-2 border-b border-rose-900/40 pb-1.5">
-                            <button onclick="toggleReaction('${room}', '${key}', '❤️')" class="hover:scale-125 transition">❤️</button>
-                            <button onclick="toggleReaction('${room}', '${key}', '🔥')" class="hover:scale-125 transition">🔥</button>
-                            <button onclick="toggleReaction('${room}', '${key}', '😂')" class="hover:scale-125 transition">😂</button>
-                            <button onclick="toggleReaction('${room}', '${key}', '👍')" class="hover:scale-125 transition">👍</button>
-                            <button onclick="toggleReaction('${room}', '${key}', '🎉')" class="hover:scale-125 transition">🎉</button>
+                            <button type="button" onclick="toggleReaction('${room}', '${key}', '❤️')" class="hover:scale-125 transition">❤️</button>
+                            <button type="button" onclick="toggleReaction('${room}', '${key}', '🔥')" class="hover:scale-125 transition">🔥</button>
+                            <button type="button" onclick="toggleReaction('${room}', '${key}', '😂')" class="hover:scale-125 transition">😂</button>
+                            <button type="button" onclick="toggleReaction('${room}', '${key}', '👍')" class="hover:scale-125 transition">👍</button>
+                            <button type="button" onclick="toggleReaction('${room}', '${key}', '🎉')" class="hover:scale-125 transition">🎉</button>
                         </div>
                         <div class="flex gap-2 pt-0.5 flex-wrap">
-                            <button onclick="setReplyTo('${key}', '${senderName}', '${safePreview}')" class="text-amber-400 font-bold">Yanıtla</button>
-                            <button onclick="pinMessage('${room}', '${key}', '${safePreview}', '${senderName}')" class="text-emerald-400 font-bold">Sabitle</button>
-                            ${isMe && data.type === 'text' ? `<button onclick="startEditMessage('${key}', '${safePreview}')" class="text-sky-400 font-bold">Düzenle</button>` : ''}
-                            ${isMe ? `<button onclick="db.ref('odalar/${room}/${key}').remove()" class="text-red-400 font-bold">Sil</button>` : ''}
+                            <button type="button" onclick="setReplyTo('${key}', '${senderName}', '${safePreview}')" class="text-amber-400 font-bold">Yanıtla</button>
+                            <button type="button" onclick="pinMessage('${room}', '${key}', '${safePreview}', '${senderName}')" class="text-emerald-400 font-bold">Sabitle</button>
+                            ${isMe && data.type === 'text' ? `<button type="button" onclick="startEditMessage('${key}', '${safePreview}')" class="text-sky-400 font-bold">Düzenle</button>` : ''}
+                            ${isMe ? `<button type="button" onclick="db.ref('odalar/${room}/${key}').remove()" class="text-red-400 font-bold">Sil</button>` : ''}
                         </div>
                     </div>
                 </div>
@@ -1380,43 +1401,36 @@
             if (bubbleEl) {
                 bubbleEl.onclick = () => {
                     const menuEl = document.getElementById(`menu-${key}`);
-                    if (menuEl) menuEl.classList.toggle('hidden');
+                    if (!menuEl) return;
+                    const willOpen = menuEl.classList.contains('hidden');
+                    menuEl.classList.toggle('hidden', !willOpen);
+                    menuEl.classList.toggle('flex', willOpen);
                 };
             }
 
-            // Soldaki mesajlar sağa, sağdaki mesajlar sola kaydırılınca yanıtla (dikey kaydırmayı engellemeden)
+            // Soldaki mesajlar sağa, sağdaki mesajlar sola kaydırılınca yanıtla
             let startX = 0;
             let startY = 0;
-            let currentDelta = 0;
+            let triggered = false;
             div.addEventListener('touchstart', e => {
                 if (!e.touches || !e.touches[0]) return;
                 startX = e.touches[0].clientX;
                 startY = e.touches[0].clientY;
-                currentDelta = 0;
+                triggered = false;
             }, { passive: true });
 
             div.addEventListener('touchmove', e => {
-                if (!e.touches || !e.touches[0]) return;
+                if (triggered || !e.touches || !e.touches[0]) return;
                 const dx = e.touches[0].clientX - startX;
                 const dy = e.touches[0].clientY - startY;
-                if (Math.abs(dx) <= Math.abs(dy) || Math.abs(dx) < 12) return;
-                if (!isMe && dx > 0) {
-                    currentDelta = Math.min(70, dx);
-                    div.style.transform = `translateX(${currentDelta * 0.35}px)`;
-                } else if (isMe && dx < 0) {
-                    currentDelta = Math.max(-70, dx);
-                    div.style.transform = `translateX(${currentDelta * 0.35}px)`;
-                }
-            }, { passive: true });
-
-            div.addEventListener('touchend', () => {
-                div.style.transform = '';
-                if (!isMe && currentDelta > 45) {
+                if (Math.abs(dy) > 25 || Math.abs(dx) < 55) return;
+                if (!isMe && dx > 55) {
+                    triggered = true;
                     setReplyTo(key, senderName, safePreview);
-                } else if (isMe && currentDelta < -45) {
+                } else if (isMe && dx < -55) {
+                    triggered = true;
                     setReplyTo(key, senderName, safePreview);
                 }
-                currentDelta = 0;
             }, { passive: true });
 
             return div;
@@ -1429,7 +1443,8 @@
                 if (snap.val() === emo) ref.remove();
                 else ref.set(emo);
             });
-            document.getElementById(`menu-${key}`)?.classList.add('hidden');
+            const mEl = document.getElementById(`menu-${key}`);
+            if (mEl) { mEl.classList.add('hidden'); mEl.classList.remove('flex'); }
         };
 
         window.scrollToMessage = function(key) {
@@ -1690,8 +1705,9 @@
 
         wtBtn.onmousedown = startVoiceNote;
         wtBtn.ontouchstart = startVoiceNote;
-        window.addEventListener('mouseup', stopVoiceNote);
-        window.addEventListener('touchend', stopVoiceNote);
+        wtBtn.onmouseup = stopVoiceNote;
+        wtBtn.ontouchend = stopVoiceNote;
+        wtBtn.ontouchcancel = stopVoiceNote;
 
         document.getElementById('google-btn').onclick = async () => {
             setLoginError('');
@@ -1863,6 +1879,7 @@
                     const isShip = g.ships && g.ships.includes(i);
                     if (hit && isShip) found++;
                     const btn = document.createElement('button');
+                    btn.type = 'button';
                     btn.className = `w-10 h-10 rounded-lg font-bold text-xs border border-rose-900/50 ${hit ? (isShip ? 'bg-emerald-600 text-white' : 'bg-rose-950/60 text-rose-500') : 'bg-[#120409] hover:border-amber-500'} transition`;
                     btn.textContent = hit ? (isShip ? '🚢' : '❌') : '?';
 
