@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>WrtS - Tam Sürüm</title>
-    <!-- WrtS Neon Çift Konuşma Balonu Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23fbbf24'/%3E%3Cstop offset='55%25' stop-color='%23f97316'/%3E%3Cstop offset='100%25' stop-color='%23f43f5e'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='60' cy='60' r='56' fill='%23111622' stroke='%232c3545' stroke-width='2'/%3E%3Cpath d='M60 24c-19.9 0-36 15.2-36 34 0 7.7 2.7 14.8 7.3 20.5L26 93l16.2-4.8c5.3 2.4 11.4 3.8 17.8 3.8 19.9 0 36-15.2 36-34S79.9 24 60 24z' fill='none' stroke='url(%23g)' stroke-width='4.5' stroke-linejoin='round'/%3E%3Cpath d='M60 35c-13.8 0-25 10.3-25 23 0 5.4 2 10.3 5.4 14.2L37 82l11-3.3c3.6 1.5 7.7 2.3 12 2.3 13.8 0 25-10.3 25-23S73.8 35 60 35z' fill='none' stroke='url(%23g)' stroke-width='4' stroke-linejoin='round'/%3E%3Ctext x='60' y='63' text-anchor='middle' fill='url(%23g)' font-family='Arial,sans-serif' font-weight='900' font-size='16'%3EWrtS%3C/text%3E%3C/svg%3E">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -41,7 +39,7 @@
             background: radial-gradient(circle at top right, var(--bg-glow), #14050a 45%, #090306 100%);
             touch-action: manipulation;
         }
-        button, input, select, textarea, a {
+        button, input, select, textarea {
             touch-action: manipulation;
         }
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -66,13 +64,6 @@
             0%, 100% { box-shadow: 0 0 10px rgba(251, 191, 36, 0.45), 0 0 20px rgba(244, 63, 94, 0.25); }
             50% { box-shadow: 0 0 18px rgba(251, 191, 36, 0.85), 0 0 30px rgba(244, 63, 94, 0.5); }
         }
-        @keyframes wrtsLogoAura {
-            0%, 100% { box-shadow: 0 0 18px rgba(249, 115, 22, 0.4), 0 0 34px rgba(244, 63, 94, 0.25); }
-            50% { box-shadow: 0 0 26px rgba(251, 191, 36, 0.65), 0 0 46px rgba(244, 63, 94, 0.45); }
-        }
-        .wrts-logo-badge {
-            animation: wrtsLogoAura 3.2s ease-in-out infinite;
-        }
         .glow-bubble {
             border: 1.5px solid rgba(251, 191, 36, 0.85) !important;
             animation: bubbleGlowPulse 2.2s ease-in-out infinite;
@@ -95,104 +86,33 @@
     <!-- TOAST BİLDİRİM ALANI -->
     <div id="toast-container" class="fixed top-16 right-3 z-[70] flex flex-col gap-2 pointer-events-none max-w-[260px]"></div>
 
-    <!-- GİRİŞ EKRANI (WrtS LOGOSU + YENİ SEZON BİLGİSİ + INSTAGRAM TANITIMI) -->
+    <!-- GİRİŞ EKRANI -->
     <div id="login-screen" class="fixed inset-0 bg-[#0d0407]/95 z-50 flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-[#1c0910] border border-rose-900/60 p-6 rounded-3xl w-full max-w-sm space-y-4 shadow-2xl backdrop-blur-md">
-            <!-- WrtS Neon Yuvarlak Logo -->
-            <div class="flex flex-col items-center justify-center pt-1">
-                <div class="wrts-logo-badge w-24 h-24 rounded-full bg-[#111622] border border-slate-600/50 p-1 flex items-center justify-center overflow-hidden relative">
-                    <img src="Gemini_Generated_Image_414eqe414eqe414e.jpeg" alt="WrtS Logo" class="w-full h-full object-cover rounded-full" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
-                    <svg class="hidden w-full h-full" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <linearGradient id="wrtsNeonGradLogin" x1="0%" y1="0%" x2="0%" y2="100%">
-                                <stop offset="0%" stop-color="#fbbf24"/>
-                                <stop offset="55%" stop-color="#f97316"/>
-                                <stop offset="100%" stop-color="#f43f5e"/>
-                            </linearGradient>
-                            <filter id="wrtsNeonGlowLogin" x="-30%" y="-30%" width="160%" height="160%">
-                                <feGaussianBlur stdDeviation="2.8" result="blur"/>
-                                <feMerge>
-                                    <feMergeNode in="blur"/>
-                                    <feMergeNode in="SourceGraphic"/>
-                                </feMerge>
-                            </filter>
-                        </defs>
-                        <circle cx="60" cy="60" r="56" fill="#111622" stroke="#334155" stroke-width="2"/>
-                        <g filter="url(#wrtsNeonGlowLogin)">
-                            <path d="M60 23c-20.4 0-37 15.6-37 34.8 0 7.9 2.8 15.2 7.5 21L25 94l16.7-4.9c5.5 2.5 11.7 3.9 18.3 3.9 20.4 0 37-15.6 37-34.8S80.4 23 60 23z" fill="none" stroke="url(#wrtsNeonGradLogin)" stroke-width="4.2" stroke-linejoin="round"/>
-                            <path d="M60 34.5c-14.1 0-25.5 10.6-25.5 23.6 0 5.5 2.1 10.6 5.5 14.6L36.5 82.8l11.3-3.4c3.7 1.5 7.9 2.4 12.2 2.4 14.1 0 25.5-10.6 25.5-23.6S74.1 34.5 60 34.5z" fill="none" stroke="url(#wrtsNeonGradLogin)" stroke-width="3.8" stroke-linejoin="round"/>
-                            <text x="60" y="63.5" text-anchor="middle" fill="url(#wrtsNeonGradLogin)" font-family="Inter, Arial, sans-serif" font-weight="900" font-size="16.5" letter-spacing="0.5">WrtS</text>
-                        </g>
-                    </svg>
-                </div>
-                <span class="mt-2.5 inline-flex items-center gap-1 bg-amber-500/15 border border-amber-400/40 text-amber-300 px-3 py-0.5 rounded-full text-[10px] font-bold tracking-wide">
-                    🚀 Yeni Sezon • Herkes Sıfırdan Başlıyor
-                </span>
-            </div>
-
-            <div class="text-center space-y-1">
-                <h1 class="text-2xl font-black text-rose-100 tracking-wider">WrtS Giriş</h1>
-                <p class="text-[11px] text-rose-300/75">Yeni hesabını oluştur veya giriş yaparak topluluğa katıl!</p>
-            </div>
-
+            <h1 class="text-2xl font-black text-center text-rose-100 tracking-wider">WrtS Giriş</h1>
             <p id="login-error-box" class="hidden text-xs text-amber-200 bg-red-950/80 border border-red-500/50 rounded-xl px-3 py-2 text-center"></p>
-
             <form id="email-form" class="space-y-3">
                 <input type="email" id="email" placeholder="E-posta adresi" required class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500">
                 <input type="password" id="password" placeholder="Şifre (en az 6 karakter)" minlength="6" required class="w-full bg-[#120409] border border-rose-900/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500">
-                <button id="email-submit-btn" type="submit" class="w-full bg-gradient-to-r from-rose-700 to-amber-600 hover:from-rose-600 hover:to-amber-500 py-3 rounded-xl font-bold text-sm transition shadow-lg text-white">Yeni Hesap Aç / Giriş Yap</button>
+                <button id="email-submit-btn" type="submit" class="w-full bg-rose-700 hover:bg-rose-600 py-3 rounded-xl font-bold text-sm transition shadow-lg text-white">Giriş Yap / Kayıt Ol</button>
             </form>
-
             <div class="text-center text-xs text-rose-300/50">veya</div>
-
             <button id="google-btn" type="button" class="w-full bg-white text-slate-900 hover:bg-rose-50 py-3 rounded-xl font-bold text-sm transition flex items-center justify-center gap-3 shadow">
                 <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.13 0-5.78-2.11-6.73-4.96H1.19v3.15C3.17 21.31 7.24 24 12 24z"/><path fill="#FBBC05" d="M5.27 14.24c-.25-.72-.38-1.49-.38-2.24s.13-1.52.38-2.24V6.6H1.19C.43 8.13 0 9.87 0 11.7c0 1.83.43 3.57 1.19 5.1l4.08-2.56z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.24 0 3.17 2.69 1.19 6.6l4.08 3.15c.95-2.85 3.6-4.96 6.73-4.96z"/></svg>
-                <span>Google ile Hızlı Katıl</span>
+                <span>Google ile Giriş Yap</span>
             </button>
-
-            <!-- INSTAGRAM @wrtschat TANITIM KARTI (GİRİŞ EKRANI) -->
-            <a href="https://www.instagram.com/wrtschat/" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between bg-gradient-to-r from-[#240b18] via-[#2c0d1c] to-[#26110c] hover:border-amber-400/70 border border-rose-500/35 rounded-2xl px-3.5 py-2.5 transition group">
-                <div class="flex items-center gap-2.5">
-                    <span class="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 flex items-center justify-center text-white shadow shrink-0">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-                    </span>
-                    <div class="text-left">
-                        <div class="text-[11px] font-black text-rose-100 group-hover:text-amber-300 transition">Instagram'da Takip Et: @wrtschat</div>
-                        <div class="text-[10px] text-rose-300/75">Duyurular, turnuvalar ve güncellemeler</div>
-                    </div>
-                </div>
-                <span class="text-xs font-bold text-amber-400">↗</span>
-            </a>
         </div>
     </div>
 
-    <!-- ÜST BAR (SOL KÖŞEDE WrtS LOGOSU İLE) -->
-    <header id="main-header" class="bg-[#1a070e]/95 backdrop-blur border-b border-rose-900/60 px-2 sm:px-3 py-2 flex items-center justify-between gap-1.5 shrink-0 z-20 shadow-lg">
+    <!-- ÜST BAR -->
+    <header id="main-header" class="bg-[#1a070e]/95 backdrop-blur border-b border-rose-900/60 px-2.5 sm:px-3 py-2 flex items-center justify-between gap-1.5 shrink-0 z-20 shadow-lg">
         <div class="flex items-center gap-1.5 min-w-0">
-            <!-- Ekranın Sol Köşesinde WrtS Logosu -->
-            <button type="button" onclick="openModal('menu-drawer-modal')" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#111622] border border-amber-500/40 p-0.5 flex items-center justify-center overflow-hidden shrink-0 shadow-md hover:scale-105 transition" title="WrtS Ana Menü">
-                <img src="Gemini_Generated_Image_414eqe414eqe414e.jpeg" alt="WrtS" class="w-full h-full object-cover rounded-full" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
-                <svg class="hidden w-full h-full" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <linearGradient id="wrtsNeonGradHeader" x1="0%" y1="0%" x2="0%" y2="100%">
-                            <stop offset="0%" stop-color="#fbbf24"/>
-                            <stop offset="55%" stop-color="#f97316"/>
-                            <stop offset="100%" stop-color="#f43f5e"/>
-                        </linearGradient>
-                    </defs>
-                    <circle cx="60" cy="60" r="56" fill="#111622"/>
-                    <path d="M60 23c-20.4 0-37 15.6-37 34.8 0 7.9 2.8 15.2 7.5 21L25 94l16.7-4.9c5.5 2.5 11.7 3.9 18.3 3.9 20.4 0 37-15.6 37-34.8S80.4 23 60 23z" fill="none" stroke="url(#wrtsNeonGradHeader)" stroke-width="5" stroke-linejoin="round"/>
-                    <path d="M60 34.5c-14.1 0-25.5 10.6-25.5 23.6 0 5.5 2.1 10.6 5.5 14.6L36.5 82.8l11.3-3.4c3.7 1.5 7.9 2.4 12.2 2.4 14.1 0 25.5-10.6 25.5-23.6S74.1 34.5 60 34.5z" fill="none" stroke="url(#wrtsNeonGradHeader)" stroke-width="4.5" stroke-linejoin="round"/>
-                    <text x="60" y="63.5" text-anchor="middle" fill="url(#wrtsNeonGradHeader)" font-family="Inter, Arial, sans-serif" font-weight="900" font-size="16.5">WrtS</text>
-                </svg>
-            </button>
-
             <button type="button" onclick="openModal('menu-drawer-modal')" class="relative bg-[#2b0d18] hover:bg-rose-900/50 text-amber-400 p-1.5 sm:p-2 rounded-xl text-sm sm:text-base font-bold flex items-center justify-center transition shrink-0" title="Menü">
                 ☰
                 <span id="header-menu-dot" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full animate-ping"></span>
             </button>
-            <span class="font-black text-sm sm:text-base text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-rose-400 tracking-wider shrink-0 hidden xs:inline sm:inline">WrtS</span>
-            <select id="room-select" class="bg-[#120409] border border-rose-900/60 text-[11px] sm:text-xs rounded-xl px-2 py-1.5 text-amber-300 font-semibold focus:outline-none max-w-[84px] sm:max-w-[115px] truncate">
+            <span class="font-black text-sm sm:text-base text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-rose-400 tracking-wider shrink-0">WrtS</span>
+            <select id="room-select" class="bg-[#120409] border border-rose-900/60 text-[11px] sm:text-xs rounded-xl px-2 py-1.5 text-amber-300 font-semibold focus:outline-none max-w-[88px] sm:max-w-[115px] truncate">
                 <option value="genel"># Genel</option>
                 <option value="sohbet"># Muhabbet</option>
                 <option value="oyun"># Oyun</option>
@@ -202,9 +122,6 @@
         </div>
 
         <div class="flex items-center gap-1.5 shrink-0">
-            <a href="https://www.instagram.com/wrtschat/" target="_blank" rel="noopener noreferrer" class="hidden sm:flex items-center gap-1 bg-gradient-to-r from-rose-600/25 to-amber-500/25 hover:from-rose-600/40 hover:to-amber-500/40 border border-amber-400/35 text-amber-200 px-2 py-1.5 rounded-xl text-[11px] font-bold transition" title="Instagram @wrtschat">
-                <span>📸</span><span>@wrtschat</span>
-            </a>
             <button type="button" onclick="requestNotificationPermission()" class="bg-[#2b0d18] text-amber-300 p-1.5 sm:p-2 rounded-xl text-xs font-bold" title="Bildirim İzni">🔔</button>
             <button type="button" onclick="toggleSearchBar()" class="bg-[#2b0d18] text-rose-200 p-1.5 sm:p-2 rounded-xl text-xs font-bold">🔍</button>
             <button type="button" onclick="openModal('users-modal'); loadOnlineUsersList();" class="relative bg-[#2b0d18] px-2 py-1.5 rounded-xl border border-rose-800/60 text-[11px] sm:text-xs text-emerald-400 flex items-center gap-1">
@@ -328,15 +245,7 @@
     <!-- HIZLI MENÜ -->
     <div id="menu-drawer-modal" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-4">
         <div class="bg-[#1c0910] border border-rose-900/60 rounded-3xl p-5 w-full max-w-sm space-y-3 max-h-[85vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2">
-                <div class="flex items-center gap-2">
-                    <div class="w-7 h-7 rounded-full bg-[#111622] border border-amber-500/40 p-0.5 flex items-center justify-center overflow-hidden">
-                        <img src="Gemini_Generated_Image_414eqe414eqe414e.jpeg" alt="WrtS" class="w-full h-full object-cover rounded-full" onerror="this.style.display='none';">
-                    </div>
-                    <h3 class="font-bold text-amber-400">🧭 WrtS Menü</h3>
-                </div>
-                <button type="button" onclick="closeModal('menu-drawer-modal')">✕</button>
-            </div>
+            <div class="flex justify-between items-center border-b border-rose-900/50 pb-2"><h3 class="font-bold text-amber-400">🧭 WrtS Menü</h3><button type="button" onclick="closeModal('menu-drawer-modal')">✕</button></div>
             <div class="grid grid-cols-2 gap-2 pt-1">
                 <button type="button" onclick="closeModal('menu-drawer-modal'); openDMListModal();" class="relative bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left">
                     <span>💬</span> Özel DM
@@ -348,20 +257,7 @@
                 <button type="button" onclick="closeModal('menu-drawer-modal'); openModal('games-modal'); initGames();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🎮</span> Oyun Salonu</button>
                 <button type="button" onclick="closeModal('menu-drawer-modal'); openModal('leaderboard-modal'); loadLeaderboard();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>🏅</span> Lig Tablosu</button>
                 <button type="button" onclick="closeModal('menu-drawer-modal'); openModal('stats-modal'); loadStats();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>📊</span> Lig & İstatistik</button>
-                <button type="button" onclick="closeModal('menu-drawer-modal'); openMyProfile();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left"><span>👤</span> Profilim</button>
-
-                <!-- INSTAGRAM @wrtschat TANITIM AFİŞİ (MENÜ İÇİ) -->
-                <a href="https://www.instagram.com/wrtschat/" target="_blank" rel="noopener noreferrer" class="col-span-2 bg-gradient-to-r from-rose-900/50 via-[#2b0d18] to-amber-900/50 hover:border-amber-400 border border-amber-500/40 p-3 rounded-2xl flex items-center justify-between gap-2 transition">
-                    <div class="flex items-center gap-2.5 min-w-0">
-                        <span class="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 flex items-center justify-center text-white text-sm shrink-0 shadow">📸</span>
-                        <div class="text-left min-w-0">
-                            <div class="text-xs font-black text-amber-300 truncate">Instagram'da Bizi Takip Et: @wrtschat</div>
-                            <div class="text-[10px] text-rose-200/80 truncate">Yeni güncellemeler, lig ödülleri ve etkinlikler!</div>
-                        </div>
-                    </div>
-                    <span class="text-xs font-black text-amber-300 shrink-0">Takip Et ↗</span>
-                </a>
-
+                <button type="button" onclick="closeModal('menu-drawer-modal'); openMyProfile();" class="bg-[#120409] border border-rose-900/50 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-left col-span-2"><span>👤</span> Profilim & Canlı Durum</button>
                 <button type="button" onclick="clearAllMessagesInRoom()" class="bg-red-600/20 hover:bg-red-600/40 border border-red-500/40 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold text-red-400 text-left col-span-2 transition"><span>🗑️</span> Bu Odadaki Tüm Mesajları Sil</button>
             </div>
         </div>
@@ -449,9 +345,6 @@
                     <div id="stat-badges" class="flex flex-wrap gap-1.5"></div>
                 </div>
             </div>
-            <a href="https://www.instagram.com/wrtschat/" target="_blank" rel="noopener noreferrer" class="block text-center bg-[#120409] hover:border-amber-400/60 border border-rose-900/50 rounded-xl py-2 px-3 text-[11px] font-bold text-amber-300 transition">
-                📸 Sezon Şampiyonları Instagram'da: @wrtschat ↗
-            </a>
         </div>
     </div>
 
@@ -834,55 +727,6 @@
         const auth = firebase.auth();
         const db = firebase.database();
 
-        // ==================== GENEL PAYLAŞIM SEZON 1 SIFIRLAMA MOTORU ====================
-        const PUBLIC_SEASON_KEY = 'wrts_public_season_v1_launch';
-        let seasonResetChecked = false;
-
-        function clearOldLocalProfileCache() {
-            const prefixes = ['wrts_name_', 'wrts_bio_', 'wrts_avatar_', 'wrts_activity_'];
-            const keysToRemove = [];
-            for (let i = 0; i < localStorage.length; i++) {
-                const k = localStorage.key(i);
-                if (k && prefixes.some(p => k.startsWith(p))) {
-                    keysToRemove.push(k);
-                }
-            }
-            keysToRemove.forEach(k => localStorage.removeItem(k));
-        }
-
-        async function runPublicLaunchSeasonResetIfNeeded() {
-            if (seasonResetChecked) return;
-            seasonResetChecked = true;
-            try {
-                const metaRef = db.ref('system_meta/season_version');
-                const snap = await metaRef.once('value');
-                if (snap.val() !== PUBLIC_SEASON_KEY) {
-                    await db.ref().update({
-                        stats: null,
-                        leagues: null,
-                        users_registry: null,
-                        status: null,
-                        friends: null,
-                        friend_requests: null,
-                        gizli_dm_listesi: null,
-                        odalar: null,
-                        pinned: null,
-                        announcements: null,
-                        wb_strokes: null,
-                        games: null,
-                        cinema_chat: null,
-                        cinema_queue: null,
-                        global_cinema: null,
-                        oda_listesi: null,
-                        room_mutes: null,
-                        typing: null,
-                        'system_meta/season_version': PUBLIC_SEASON_KEY,
-                        'system_meta/launchedAt': Date.now()
-                    });
-                }
-            } catch (_) {}
-        }
-
         let currentUser = null;
         let currentRoom = 'genel';
         let roomRef = null;
@@ -1245,10 +1089,12 @@
         }
 
         window.clearAllMessagesInRoom = function() {
-            db.ref(`odalar/${currentRoom}`).remove().then(() => {
-                showToast("Odadaki tüm mesajlar silindi.");
-                closeModal('menu-drawer-modal');
-            });
+            if (confirm("Bu odadaki tüm mesajları silmek istediğine emin misin?")) {
+                db.ref(`odalar/${currentRoom}`).remove().then(() => {
+                    showToast("Odadaki tüm mesajlar silindi.");
+                    closeModal('menu-drawer-modal');
+                });
+            }
         };
 
         window.openDeleteAccountModal = function() {
@@ -1533,7 +1379,7 @@
                         <span class="text-xs font-black text-amber-400 shrink-0">${tier.lp} LP</span>
                     </div>
                 `;
-                }).join('') : '<p class="text-xs text-rose-300/60 italic">Yeni sezon başladı! Oyun oynayarak ilk sıraya yerleş.</p>';
+                }).join('') : '<p class="text-xs text-rose-300/60 italic">Henüz lig kaydı yok. Oyun oynayarak LP kazan!</p>';
             });
         };
 
@@ -1689,23 +1535,7 @@
             });
         }
 
-        auth.onAuthStateChanged(async user => {
-            await runPublicLaunchSeasonResetIfNeeded();
-
-            // Önceki test sürümünden kalma oturumları çıkış yaptır ve yeni hesap açmaya yönlendir
-            const hasSeasonFlag = localStorage.getItem(PUBLIC_SEASON_KEY) === '1';
-            if (user && !hasSeasonFlag) {
-                clearOldLocalProfileCache();
-                localStorage.setItem(PUBLIC_SEASON_KEY, '1');
-                await auth.signOut().catch(() => {});
-                showToast("Yeni sezon başladı! Lütfen yeni hesabını oluştur.");
-                return;
-            }
-            if (!hasSeasonFlag) {
-                clearOldLocalProfileCache();
-                localStorage.setItem(PUBLIC_SEASON_KEY, '1');
-            }
-
+        auth.onAuthStateChanged(user => {
             if (user) {
                 currentUser = user;
                 setLoginError('');
@@ -1739,11 +1569,6 @@
                         leagueIcon: baseTier.icon,
                         updatedAt: Date.now()
                     };
-                });
-
-                db.ref(`stats/${user.uid}`).transaction(curr => {
-                    if (curr && typeof curr.msgs === 'number') return curr;
-                    return { msgs: 0 };
                 });
 
                 const statusRef = db.ref('status/' + user.uid);
@@ -2105,10 +1930,11 @@
             });
         };
         window.deleteCurrentRoom = () => {
-            db.ref('oda_listesi/' + currentRoom).remove();
-            closeModal('roles-modal');
-            currentRoom = 'genel'; loadRoom('genel');
-            showToast("Oda silindi.");
+            if (confirm("Odayı silmek istediğine emin misin?")) {
+                db.ref('oda_listesi/' + currentRoom).remove();
+                closeModal('roles-modal');
+                currentRoom = 'genel'; loadRoom('genel');
+            }
         };
 
         function formatMessageWithLinksAndMentions(rawText) {
@@ -2691,7 +2517,6 @@
 
         document.getElementById('google-btn').onclick = async () => {
             setLoginError('');
-            localStorage.setItem(PUBLIC_SEASON_KEY, '1');
             const provider = new firebase.auth.GoogleAuthProvider();
             try {
                 await auth.signInWithPopup(provider);
@@ -2708,7 +2533,6 @@
         document.getElementById('email-form').onsubmit = async e => {
             e.preventDefault();
             setLoginError('');
-            localStorage.setItem(PUBLIC_SEASON_KEY, '1');
             const email = document.getElementById('email').value.trim();
             const pass = document.getElementById('password').value;
             const btn = document.getElementById('email-submit-btn');
@@ -3607,206 +3431,224 @@
             if (wEl) wEl.textContent = formatClock(wMs);
             if (bEl) bEl.textContent = formatClock(bMs);
 
-            if (!chessState.winner && areBothChessPlayersReady(chessState) && currentUser && chessState.players) {
-                const myColor = getMyChessColor();
-                if (myColor && chessState.turn === myColor) {
-                    if (myColor === 'w' && wMs <= 0) {
-                        const blackWinner = (chessState.players.b && chessState.players.b.name) || 'Siyah';
-                        const blackWinnerUid = (chessState.players.b && chessState.players.b.uid) || '';
-                        db.ref(`games/${currentRoom}/chess`).update({
-                            wMs: 0,
-                            winner: `${blackWinner} (Süre Bitti!)`,
-                            winnerUid: blackWinnerUid
-                        });
-                    } else if (myColor === 'b' && bMs <= 0) {
-                        const whiteWinner = (chessState.players.w && chessState.players.w.name) || 'Beyaz';
-                        const whiteWinnerUid = (chessState.players.w && chessState.players.w.uid) || '';
-                        db.ref(`games/${currentRoom}/chess`).update({
-                            bMs: 0,
-                            winner: `${whiteWinner} (Süre Bitti!)`,
-                            winnerUid: whiteWinnerUid
-                        });
+            if (!chessState.winner && areBothChessPlayersReady(chessState)) {
+                if (wMs <= 0 || bMs <= 0) {
+                    const loserColor = wMs <= 0 ? 'w' : 'b';
+                    const winnerColor = loserColor === 'w' ? 'b' : 'w';
+                    const winnerPlayer = chessState.players[winnerColor];
+                    const winnerName = winnerPlayer?.name || (winnerColor === 'w' ? 'Beyaz' : 'Siyah');
+                    const matchId = chessState.matchId || 'default';
+                    db.ref(`games/${currentRoom}/chess`).update({
+                        winner: winnerColor,
+                        wMs,
+                        bMs,
+                        reason: `Süre doldu! Kazanan: ${winnerName}`
+                    }).catch(() => {});
+                    if (winnerPlayer && currentUser && winnerPlayer.uid === currentUser.uid && chessAwardedMatchId !== matchId) {
+                        chessAwardedMatchId = matchId;
+                        awardLeagueLP(40, 'Satranç Galibiyeti');
                     }
                 }
             }
         }
 
-        function getMyChessColor() {
-            if (!chessState || !chessState.players || !currentUser) return null;
-            if (chessState.players.w && chessState.players.w.uid === currentUser.uid) return 'w';
-            if (chessState.players.b && chessState.players.b.uid === currentUser.uid) return 'b';
-            return null;
-        }
-
-        window.joinChessSeat = function(color) {
-            if (!currentUser || !chessState) return;
-            const players = chessState.players || {};
-            if (players[color] && players[color].uid !== currentUser.uid) {
-                return showToast("Bu koltuk zaten dolu!", 'error');
-            }
-            const md = getMyData();
-            const updates = {};
-            const readyMap = { ...(chessState.ready || {}) };
-            if (color === 'w' && players.b && players.b.uid === currentUser.uid) {
-                updates['players/b'] = null;
-            }
-            if (color === 'b' && players.w && players.w.uid === currentUser.uid) {
-                updates['players/w'] = null;
-            }
-            updates[`players/${color}`] = { uid: currentUser.uid, name: md.name };
-            readyMap[currentUser.uid] = false;
-            updates['ready'] = readyMap;
-            db.ref(`games/${currentRoom}/chess`).update(updates);
-            showToast(color === 'w' ? 'Beyaz koltuğuna oturdun! Başlamak için "Hazır"a bas.' : 'Siyah koltuğuna oturdun! Başlamak için "Hazır"a bas.');
-        };
-
         window.toggleChessReady = function() {
-            if (!currentUser || !chessState) return;
-            const myColor = getMyChessColor();
+            if (!currentUser || !chessState || chessState.winner) return;
+            const wPlayer = chessState.players && chessState.players.w;
+            const bPlayer = chessState.players && chessState.players.b;
+            const myColor = wPlayer && wPlayer.uid === currentUser.uid ? 'w' : (bPlayer && bPlayer.uid === currentUser.uid ? 'b' : null);
             if (!myColor) {
-                return showToast("Önce Beyaz veya Siyah koltuğunu seç!", 'error');
+                return showToast("Önce Beyaz veya Siyah koltuğu seçmelisin.", 'error');
             }
-            if (chessState.winner) {
-                return showToast("Maç bitti; yeni maç başlatabilirsin.", 'error');
-            }
-            const prevReady = !!(chessState.ready && chessState.ready[currentUser.uid]);
-            const nextReady = !prevReady;
-            const nextReadyMap = { ...(chessState.ready || {}), [currentUser.uid]: nextReady };
-            const wUid = chessState.players?.w?.uid;
-            const bUid = chessState.players?.b?.uid;
-            const bothWillBeReady = !!(wUid && bUid && nextReadyMap[wUid] && nextReadyMap[bUid]);
+            const ref = db.ref(`games/${currentRoom}/chess`);
+            ref.transaction(curr => {
+                if (!curr || curr.winner) return curr;
+                curr.ready = curr.ready || {};
+                const nextReady = !curr.ready[currentUser.uid];
+                curr.ready[currentUser.uid] = nextReady;
 
-            const updates = {
-                [`ready/${currentUser.uid}`]: nextReady
-            };
-            if (bothWillBeReady && !chessState.lastMoveAt) {
-                updates.lastMoveAt = Date.now();
-            }
-            db.ref(`games/${currentRoom}/chess`).update(updates);
-            showToast(bothWillBeReady ? "İki oyuncu da hazır! Süre başladı!" : (nextReady ? "Hazır durumuna geçtin! Rakip bekleniyor." : "Hazır durumu iptal edildi."));
-        };
-
-        window.offerChessDraw = function() {
-            if (!currentUser || !chessState) return;
-            const myColor = getMyChessColor();
-            if (!myColor) return showToast("Sadece masadaki oyuncular beraberlik teklif edebilir.", 'error');
-            if (!areBothChessPlayersReady(chessState)) return showToast("Maç henüz başlamadı.", 'error');
-            if (chessState.winner) return showToast("Maç zaten sonuçlandı.", 'error');
-            db.ref(`games/${currentRoom}/chess/drawOffer`).set({
-                fromUid: currentUser.uid,
-                fromName: getMyData().name,
-                at: Date.now()
-            });
-            showToast("Beraberlik teklifi gönderildi.");
-        };
-
-        window.respondChessDraw = function(accept) {
-            if (!currentUser || !chessState || !chessState.drawOffer) return;
-            if (accept) {
-                db.ref(`games/${currentRoom}/chess`).update({
-                    winner: "Berabere (Anlaşmalı)",
-                    winnerUid: "draw",
-                    drawOffer: null
-                });
-            } else {
-                db.ref(`games/${currentRoom}/chess/drawOffer`).remove();
-                showToast("Beraberlik teklifi reddedildi.");
-            }
-        };
-
-        window.resignChessMatch = function() {
-            if (!currentUser || !chessState) return;
-            const myColor = getMyChessColor();
-            if (!myColor) return showToast("Oyunda değilsin.", 'error');
-            if (chessState.winner) return showToast("Maç zaten bitti.", 'error');
-            const oppColor = myColor === 'w' ? 'b' : 'w';
-            const oppPlayer = (chessState.players && chessState.players[oppColor]) || null;
-            const oppName = (oppPlayer && oppPlayer.name) || (oppColor === 'w' ? 'Beyaz' : 'Siyah');
-            db.ref(`games/${currentRoom}/chess`).update({
-                winner: `${oppName} (Rakip Terketti)`,
-                winnerUid: (oppPlayer && oppPlayer.uid) || '',
-                drawOffer: null
+                const wU = curr.players && curr.players.w && curr.players.w.uid;
+                const bU = curr.players && curr.players.b && curr.players.b.uid;
+                const bothReadyNow = !!(wU && bU && curr.ready[wU] && curr.ready[bU]);
+                if (bothReadyNow) {
+                    curr.lastMoveAt = Date.now();
+                } else {
+                    curr.lastMoveAt = null;
+                }
+                return curr;
+            }, (err, committed) => {
+                if (!err && committed) {
+                    showToast("Hazır durumun güncellendi.");
+                }
             });
         };
 
         window.sendChessQuickEmoji = function(emoji) {
-            if (!currentUser) return;
+            if (!currentUser || !emoji) return;
             const md = getMyData();
-            db.ref(`games/${currentRoom}/chess_chat`).push({
-                uid: currentUser.uid,
-                name: md.name,
+            db.ref(`games/${currentRoom}/chess/roomMessages`).push({
+                by: md.name,
                 text: emoji,
                 isEmoji: true,
                 at: Date.now()
             });
+            playWhatsAppSound('send');
         };
 
         window.sendChessRoomChat = function(e) {
             e.preventDefault();
             if (!currentUser) return;
             const inp = document.getElementById('chess-chat-input');
-            const val = (inp && inp.value || '').trim();
+            const val = inp ? inp.value.trim() : '';
             if (!val) return;
             const md = getMyData();
-            db.ref(`games/${currentRoom}/chess_chat`).push({
-                uid: currentUser.uid,
-                name: md.name,
+            db.ref(`games/${currentRoom}/chess/roomMessages`).push({
+                by: md.name,
                 text: filterBadWords(val),
                 isEmoji: false,
                 at: Date.now()
             });
             inp.value = '';
+            playWhatsAppSound('send');
         };
 
-        window.resetChessGame = function() {
-            chessSelected = null;
-            chessLegalTargets = [];
-            pendingPromotionMove = null;
-            document.getElementById('chess-promotion-panel')?.classList.add('hidden');
-            db.ref(`games/${currentRoom}/chess`).set({
-                matchId: 'chess_' + Date.now(),
-                board: createInitialChessBoard(),
-                turn: 'w',
-                players: {},
-                ready: {},
-                history: [],
-                wMs: CHESS_INITIAL_MS,
-                bMs: CHESS_INITIAL_MS,
-                lastMoveAt: null,
+        window.offerChessDraw = function() {
+            if (!currentUser || !chessState || chessState.winner) return;
+            const wPlayer = chessState.players && chessState.players.w;
+            const bPlayer = chessState.players && chessState.players.b;
+            const myColor = wPlayer && wPlayer.uid === currentUser.uid ? 'w' : (bPlayer && bPlayer.uid === currentUser.uid ? 'b' : null);
+            if (!myColor || !wPlayer || !bPlayer) {
+                return showToast("Beraberlik teklif etmek için aktif bir maçta oyuncu olmalısın.", 'error');
+            }
+            const md = getMyData();
+            db.ref(`games/${currentRoom}/chess/drawOffer`).set({
+                fromUid: currentUser.uid,
+                fromName: md.name,
+                fromColor: myColor,
+                at: Date.now()
+            });
+            db.ref(`games/${currentRoom}/chess/roomMessages`).push({
+                by: md.name,
+                text: '🤝 Beraberlik teklif etti.',
+                isEmoji: false,
+                at: Date.now()
+            });
+            showToast("Beraberlik teklifi gönderildi.");
+        };
+
+        window.respondChessDraw = function(accepted) {
+            if (!currentUser || !chessState || !chessState.drawOffer) return;
+            if (chessState.drawOffer.fromUid === currentUser.uid) {
+                return showToast("Kendi beraberlik teklifine yanıt veremezsin.", 'error');
+            }
+            const md = getMyData();
+            if (accepted) {
+                const { wMs, bMs } = computeLiveChessClocks(chessState);
+                db.ref(`games/${currentRoom}/chess`).update({
+                    winner: 'draw',
+                    wMs,
+                    bMs,
+                    drawOffer: null,
+                    reason: '🤝 Beraberlik kabul edildi!'
+                });
+                db.ref(`games/${currentRoom}/chess/roomMessages`).push({
+                    by: md.name,
+                    text: '🤝 Beraberliği kabul etti. Oyun berabere!',
+                    isEmoji: false,
+                    at: Date.now()
+                });
+            } else {
+                db.ref(`games/${currentRoom}/chess/drawOffer`).remove();
+                db.ref(`games/${currentRoom}/chess/roomMessages`).push({
+                    by: md.name,
+                    text: '❌ Beraberlik teklifini reddetti.',
+                    isEmoji: false,
+                    at: Date.now()
+                });
+                showToast("Beraberlik teklifi reddedildi.");
+            }
+        };
+
+        window.resignChessMatch = function() {
+            if (!currentUser || !chessState) return;
+            if (chessState.winner) return showToast("Bu maç zaten sona erdi.", 'error');
+            const wPlayer = chessState.players && chessState.players.w;
+            const bPlayer = chessState.players && chessState.players.b;
+            const myColor = wPlayer && wPlayer.uid === currentUser.uid ? 'w' : (bPlayer && bPlayer.uid === currentUser.uid ? 'b' : null);
+            if (!myColor) {
+                return showToast("Maçı terk etmek için Beyaz veya Siyah koltuğunda olmalısın.", 'error');
+            }
+            const winnerColor = myColor === 'w' ? 'b' : 'w';
+            const winnerName = chessState.players[winnerColor]?.name || (winnerColor === 'w' ? 'Beyaz' : 'Siyah');
+            const myName = getMyData().name;
+            const { wMs, bMs } = computeLiveChessClocks(chessState);
+
+            db.ref(`games/${currentRoom}/chess`).update({
+                winner: winnerColor,
+                wMs,
+                bMs,
                 drawOffer: null,
-                winner: null,
-                winnerUid: null
+                reason: `🏳️ ${myName} maçı terk etti! Kazanan: ${winnerName}`
+            }).then(() => {
+                db.ref(`games/${currentRoom}/chess/roomMessages`).push({
+                    by: myName,
+                    text: '🏳️ Maçı terk etti.',
+                    isEmoji: false,
+                    at: Date.now()
+                });
+                showToast("Maçı terk ettin.");
             });
         };
 
-        function executeChessMove(fr, fc, tr, tc, promoChoice = 'Q') {
+        function executeChessMove(sr, sc, r, c, promoRole = 'Q') {
             const board = normalizeChessBoard(chessState.board);
-            const myColor = getMyChessColor();
-            const piece = board[fr][fc];
-            const captured = board[tr][tc];
-            const isPromotion = piece[1] === 'P' && (tr === 0 || tr === 7);
-
+            const movingPiece = board[sr][sc];
+            if (!movingPiece) return;
+            const color = movingPiece[0];
             const nextBoard = board.map(row => [...row]);
-            nextBoard[tr][tc] = isPromotion ? (myColor + promoChoice) : piece;
-            nextBoard[fr][fc] = '';
+            nextBoard[r][c] = movingPiece;
+            nextBoard[sr][sc] = '';
 
-            const nextTurn = myColor === 'w' ? 'b' : 'w';
-            const now = Date.now();
-            const { wMs, bMs } = computeLiveChessClocks(chessState);
-
-            const oppHasMove = hasAnyLegalMove(nextBoard, nextTurn);
-            const oppInCheck = isInCheck(nextBoard, nextTurn);
-
-            let winnerText = null;
-            let winnerUid = null;
-            if (!oppHasMove) {
-                const winnerName = (chessState.players[myColor] && chessState.players[myColor].name) || (myColor === 'w' ? 'Beyaz' : 'Siyah');
-                winnerText = oppInCheck ? `${winnerName} (Şah Mat!)` : 'Berabere (Pat)';
-                winnerUid = oppInCheck ? ((chessState.players[myColor] && chessState.players[myColor].uid) || '') : 'draw';
+            let promoSuffix = '';
+            if ((movingPiece === 'wP' && r === 0) || (movingPiece === 'bP' && r === 7)) {
+                const safeRole = ['Q', 'R', 'B', 'N'].includes(promoRole) ? promoRole : 'Q';
+                nextBoard[r][c] = color + safeRole;
+                promoSuffix = `=${safeRole}`;
             }
 
-            const moveNote = `${CHESS_GLYPHS[piece]} ${FILES[fc]}${8 - fr}→${FILES[tc]}${8 - tr}${captured ? 'x' : ''}${isPromotion ? '=' + promoChoice : ''}${oppInCheck && oppHasMove ? '+' : ''}`;
-            const updatedHistory = [...(chessState.history || []), moveNote].slice(-24);
+            const now = Date.now();
+            let wMs = typeof chessState.wMs === 'number' ? chessState.wMs : CHESS_INITIAL_MS;
+            let bMs = typeof chessState.bMs === 'number' ? chessState.bMs : CHESS_INITIAL_MS;
+            if (chessState.lastMoveAt && areBothChessPlayersReady(chessState)) {
+                const elapsed = Math.max(0, now - chessState.lastMoveAt);
+                if (chessState.turn === 'w') wMs = Math.max(0, wMs - elapsed);
+                else bMs = Math.max(0, bMs - elapsed);
+            }
+
+            const nextTurn = chessState.turn === 'w' ? 'b' : 'w';
+            const opponentHasMove = hasAnyLegalMove(nextBoard, nextTurn);
+            const opponentInCheck = isInCheck(nextBoard, nextTurn);
+            const matchId = chessState.matchId || 'default';
+
+            let winner = '';
+            let reason = '';
+            if (!opponentHasMove) {
+                if (opponentInCheck) {
+                    winner = chessState.turn;
+                    reason = `♟️ Şah Mat! Kazanan: ${getMyData().name} (${winner === 'w' ? 'Beyaz' : 'Siyah'})`;
+                    if (chessAwardedMatchId !== matchId) {
+                        chessAwardedMatchId = matchId;
+                        awardLeagueLP(40, 'Satranç Şah Mat');
+                    }
+                } else {
+                    winner = 'draw';
+                    reason = '🤝 Pat! Hamle kalmadı, oyun berabere.';
+                }
+            }
+
+            const notation = `${FILES[sc]}${8 - sr}→${FILES[c]}${8 - r}${promoSuffix}`;
+            const oldHist = Array.isArray(chessState.history) ? chessState.history : Object.values(chessState.history || {});
+            const nextHist = [...oldHist, notation];
 
             chessSelected = null;
             chessLegalTargets = [];
@@ -3816,50 +3658,247 @@
             db.ref(`games/${currentRoom}/chess`).update({
                 board: nextBoard,
                 turn: nextTurn,
-                history: updatedHistory,
                 wMs,
                 bMs,
-                lastMoveAt: now,
+                lastMoveAt: winner ? null : now,
+                lastMove: { fr: sr, fc: sc, tr: r, tc: c },
+                history: nextHist,
                 drawOffer: null,
-                winner: winnerText,
-                winnerUid: winnerUid
+                winner,
+                reason
             });
         }
 
-        window.completeChessPromotion = function(promoType) {
+        window.completeChessPromotion = function(role) {
             if (!pendingPromotionMove) return;
-            const { fr, fc, tr, tc } = pendingPromotionMove;
-            executeChessMove(fr, fc, tr, tc, promoType || 'Q');
+            const { sr, sc, r, c } = pendingPromotionMove;
+            executeChessMove(sr, sc, r, c, role);
         };
 
-        window.onChessSquareClick = function(r, c) {
-            if (!chessState || chessState.winner || !currentUser) return;
-            const myColor = getMyChessColor();
-            if (!myColor) {
-                return showToast("Hamle yapmak için önce Beyaz veya Siyah koltuğunu al!", 'error');
+        function renderChessBoard() {
+            const boardEl = document.getElementById('chess-board');
+            if (!boardEl || !chessState) return;
+
+            const board = normalizeChessBoard(chessState.board);
+            const wPlayer = chessState.players && chessState.players.w ? chessState.players.w : null;
+            const bPlayer = chessState.players && chessState.players.b ? chessState.players.b : null;
+            const readyMap = chessState.ready || {};
+            const wReady = !!(wPlayer && readyMap[wPlayer.uid]);
+            const bReady = !!(bPlayer && readyMap[bPlayer.uid]);
+            const bothReady = areBothChessPlayersReady(chessState);
+
+            document.getElementById('chess-white-name').textContent = wPlayer ? wPlayer.name : 'Boş';
+            document.getElementById('chess-black-name').textContent = bPlayer ? bPlayer.name : 'Boş';
+
+            const wReadyBadge = document.getElementById('chess-white-ready-badge');
+            const bReadyBadge = document.getElementById('chess-black-ready-badge');
+            if (wReadyBadge) {
+                wReadyBadge.textContent = wPlayer ? (wReady ? '✅ Hazır' : '⏳ Bekliyor') : '';
+                wReadyBadge.className = wReady ? 'text-[9px] text-emerald-400 font-bold' : 'text-[9px] text-amber-300';
+            }
+            if (bReadyBadge) {
+                bReadyBadge.textContent = bPlayer ? (bReady ? '✅ Hazır' : '⏳ Bekliyor') : '';
+                bReadyBadge.className = bReady ? 'text-[9px] text-emerald-400 font-bold' : 'text-[9px] text-amber-300';
+            }
+
+            const myColor = !currentUser ? null : (wPlayer && wPlayer.uid === currentUser.uid ? 'w' : (bPlayer && bPlayer.uid === currentUser.uid ? 'b' : null));
+            const amIReady = !!(currentUser && readyMap[currentUser.uid]);
+            const readyBtn = document.getElementById('chess-ready-btn');
+            if (readyBtn) {
+                readyBtn.disabled = !myColor || !!chessState.winner;
+                readyBtn.classList.toggle('opacity-40', !myColor || !!chessState.winner);
+                readyBtn.textContent = amIReady ? '✔ Hazırsın' : '✅ Hazır';
+                readyBtn.className = amIReady
+                    ? 'bg-amber-600 hover:bg-amber-500 border border-amber-300/60 text-white px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold'
+                    : 'bg-emerald-700 hover:bg-emerald-600 border border-emerald-400/50 text-white px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold';
+            }
+
+            const resignBtn = document.getElementById('chess-resign-btn');
+            const drawBtn = document.getElementById('chess-draw-btn');
+            if (resignBtn) {
+                resignBtn.disabled = !myColor || !!chessState.winner;
+                resignBtn.classList.toggle('opacity-40', !myColor || !!chessState.winner);
+            }
+            if (drawBtn) {
+                drawBtn.disabled = !myColor || !bothReady || !!chessState.winner;
+                drawBtn.classList.toggle('opacity-40', !myColor || !bothReady || !!chessState.winner);
+            }
+
+            const drawPanel = document.getElementById('chess-draw-offer-panel');
+            const drawText = document.getElementById('chess-draw-offer-text');
+            if (drawPanel && drawText) {
+                if (!chessState.winner && chessState.drawOffer && chessState.drawOffer.fromUid && chessState.drawOffer.fromUid !== currentUser?.uid && myColor) {
+                    drawText.textContent = `🤝 ${chessState.drawOffer.fromName || 'Rakip'} beraberlik teklif etti!`;
+                    drawPanel.classList.remove('hidden');
+                } else {
+                    drawPanel.classList.add('hidden');
+                }
+            }
+
+            const flipBoard = myColor === 'b';
+
+            const turnBadge = document.getElementById('chess-turn-badge');
+            const statusEl = document.getElementById('chess-status');
+            if (turnBadge) {
+                turnBadge.textContent = !bothReady ? 'Hazır Bekleniyor' : (chessState.turn === 'w' ? 'Sıra: Beyaz' : 'Sıra: Siyah');
+            }
+
+            if (chessState.winner) {
+                const winText = chessState.winner === 'draw'
+                    ? (chessState.reason || '🤝 Oyun berabere bitti!')
+                    : (chessState.reason || `🏆 Kazanan: ${chessState.winner === 'w' ? 'Beyaz' : 'Siyah'}!`);
+                statusEl.textContent = winText;
+            } else if (!wPlayer || !bPlayer) {
+                statusEl.textContent = '2 oyuncu koltuk almalı ve ikisi de "Hazır"a basmalı. Süre kilitli!';
+            } else if (!bothReady) {
+                statusEl.textContent = '⏸️ Süre duruyor! İki oyuncu da "Hazır"a bastığında maç ve süre başlar.';
+            } else {
+                const inCheck = isInCheck(board, chessState.turn);
+                const turnName = chessState.turn === 'w' ? wPlayer.name : bPlayer.name;
+                const roleHint = myColor ? (myColor === chessState.turn ? 'Senin sıran!' : 'Rakip hamlesi bekleniyor...') : 'İzleyici modundasın';
+                statusEl.textContent = `${inCheck ? '⚠️ ŞAH! ' : ''}Sıra ${turnName} (${chessState.turn === 'w' ? 'Beyaz' : 'Siyah'}) — ${roleHint}`;
+            }
+
+            const roomMsgsEl = document.getElementById('chess-room-messages');
+            if (roomMsgsEl) {
+                const rMsgs = Object.values(chessState.roomMessages || {}).slice(-15);
+                roomMsgsEl.innerHTML = rMsgs.length
+                    ? rMsgs.map(m => `<div class="bg-[#1c0910] px-2 py-1 rounded-lg border border-rose-900/30"><span class="font-bold text-amber-400">${escapeHtml(m.by || 'Oyuncu')}:</span> <span class="${m.isEmoji ? 'text-base align-middle' : 'text-rose-100'}">${escapeHtml(m.text || '')}</span></div>`).join('')
+                    : 'Henüz oda mesajı yok.';
+                roomMsgsEl.scrollTop = roomMsgsEl.scrollHeight;
+            }
+
+            const histEl = document.getElementById('chess-history');
+            if (histEl) {
+                const moves = Array.isArray(chessState.history) ? chessState.history : Object.values(chessState.history || {});
+                histEl.innerHTML = moves.length
+                    ? moves.slice(-12).map((m, idx) => `<div>${moves.length - Math.min(12, moves.length) + idx + 1}. ${escapeHtml(m)}</div>`).join('')
+                    : 'Henüz hamle yapılmadı.';
+            }
+
+            boardEl.innerHTML = '';
+            const lastMove = chessState.lastMove || null;
+
+            for (let dispR = 0; dispR < 8; dispR++) {
+                for (let dispC = 0; dispC < 8; dispC++) {
+                    const r = flipBoard ? 7 - dispR : dispR;
+                    const c = flipBoard ? 7 - dispC : dispC;
+                    const piece = board[r][c];
+                    const isLight = (r + c) % 2 === 0;
+                    const isSelected = chessSelected && chessSelected[0] === r && chessSelected[1] === c;
+                    const isTarget = chessLegalTargets.some(([tr, tc]) => tr === r && tc === c);
+                    const isLast = lastMove && ((lastMove.fr === r && lastMove.fc === c) || (lastMove.tr === r && lastMove.tc === c));
+
+                    let bgClass = isLight ? 'bg-[#f3d5b5] text-[#1a070e]' : 'bg-[#7f1d1d] text-rose-50';
+                    if (isLast) bgClass = isLight ? 'bg-amber-300 text-[#1a070e]' : 'bg-amber-700 text-white';
+                    if (isSelected) bgClass = 'bg-emerald-500 text-white ring-2 ring-inset ring-white';
+                    else if (isTarget) bgClass = 'bg-sky-500/80 text-white ring-2 ring-inset ring-sky-200';
+
+                    const sq = document.createElement('button');
+                    sq.type = 'button';
+                    sq.className = `aspect-square flex items-center justify-center text-xl sm:text-[26px] leading-none transition ${bgClass}`;
+                    sq.textContent = piece ? (CHESS_GLYPHS[piece] || '') : '';
+                    sq.onclick = () => handleChessSquareClick(r, c);
+                    boardEl.appendChild(sq);
+                }
+            }
+            updateChessClocksUI();
+        }
+
+        window.joinChessSeat = function(color) {
+            if (!currentUser) return;
+            const md = getMyData();
+            const ref = db.ref(`games/${currentRoom}/chess`);
+            ref.transaction(curr => {
+                const st = curr || {
+                    matchId: 'm_' + Date.now(),
+                    board: createInitialChessBoard(),
+                    turn: 'w',
+                    wMs: CHESS_INITIAL_MS,
+                    bMs: CHESS_INITIAL_MS,
+                    lastMoveAt: null,
+                    players: {},
+                    ready: {},
+                    history: [],
+                    winner: '',
+                    reason: ''
+                };
+                st.players = st.players || {};
+                st.ready = st.ready || {};
+                const otherColor = color === 'w' ? 'b' : 'w';
+                if (st.players[otherColor] && st.players[otherColor].uid === currentUser.uid) {
+                    delete st.players[otherColor];
+                    delete st.ready[currentUser.uid];
+                    st.lastMoveAt = null;
+                }
+                if (st.players[color] && st.players[color].uid !== currentUser.uid) {
+                    return;
+                }
+                st.players[color] = { uid: currentUser.uid, name: md.name };
+                delete st.ready[currentUser.uid];
+                st.lastMoveAt = null;
+                return st;
+            }, (err, committed) => {
+                if (!committed) showToast("Bu koltuk zaten dolu!", 'error');
+                else showToast(`${color === 'w' ? 'Beyaz' : 'Siyah'} koltuğa oturdun. Şimdi "Hazır"a bas!`);
+            });
+        };
+
+        window.resetChessGame = function() {
+            if (!currentUser) return;
+            chessSelected = null;
+            chessLegalTargets = [];
+            pendingPromotionMove = null;
+            document.getElementById('chess-promotion-panel')?.classList.add('hidden');
+            const md = getMyData();
+            db.ref(`games/${currentRoom}/chess`).set({
+                matchId: 'm_' + Date.now(),
+                board: createInitialChessBoard(),
+                turn: 'w',
+                wMs: CHESS_INITIAL_MS,
+                bMs: CHESS_INITIAL_MS,
+                lastMoveAt: null,
+                players: { w: { uid: currentUser.uid, name: md.name } },
+                ready: {},
+                history: [],
+                drawOffer: null,
+                roomMessages: null,
+                winner: '',
+                reason: ''
+            }).then(() => showToast("Yeni satranç masası kuruldu. Hazır bekleniyor!"));
+        };
+
+        function handleChessSquareClick(r, c) {
+            if (!chessState || !currentUser || chessState.winner) return;
+            const wPlayer = chessState.players && chessState.players.w;
+            const bPlayer = chessState.players && chessState.players.b;
+            if (!wPlayer || !bPlayer) {
+                return showToast("Maç başlamadan önce 2 oyuncu koltuklara oturmalı!", 'error');
             }
             if (!areBothChessPlayersReady(chessState)) {
-                return showToast("Maçın başlaması için iki oyuncunun da 'Hazır' butonuna basması gerekiyor!", 'error');
+                return showToast("Maçın başlaması için iki tarafın da 'Hazır' butonuna basması gerekiyor!", 'error');
             }
-            if (chessState.turn !== myColor) {
-                return showToast("Sıra rakipte!", 'error');
-            }
-            if (pendingPromotionMove) return;
+
+            const myColor = wPlayer.uid === currentUser.uid ? 'w' : (bPlayer.uid === currentUser.uid ? 'b' : null);
+            if (!myColor) return showToast("Oynamak için Beyaz veya Siyah koltuğa otur!", 'error');
+            if (chessState.turn !== myColor) return showToast("Sıra rakipte!", 'error');
 
             const board = normalizeChessBoard(chessState.board);
             const clickedPiece = board[r][c];
 
-            const isLegalDest = chessSelected && chessLegalTargets.some(([lr, lc]) => lr === r && lc === c);
-            if (isLegalDest) {
-                const [fr, fc] = chessSelected;
-                const movingPiece = board[fr][fc];
-                if (movingPiece && movingPiece[1] === 'P' && (r === 0 || r === 7)) {
-                    pendingPromotionMove = { fr, fc, tr: r, tc: c };
-                    document.getElementById('chess-promotion-panel')?.classList.remove('hidden');
+            if (chessSelected) {
+                const [sr, sc] = chessSelected;
+                const isTarget = chessLegalTargets.some(([tr, tc]) => tr === r && tc === c);
+                if (isTarget) {
+                    const movingPiece = board[sr][sc];
+                    if ((movingPiece === 'wP' && r === 0) || (movingPiece === 'bP' && r === 7)) {
+                        pendingPromotionMove = { sr, sc, r, c };
+                        document.getElementById('chess-promotion-panel')?.classList.remove('hidden');
+                        return;
+                    }
+                    executeChessMove(sr, sc, r, c, 'Q');
                     return;
                 }
-                executeChessMove(fr, fc, r, c, 'Q');
-                return;
             }
 
             if (clickedPiece && clickedPiece[0] === myColor) {
@@ -3869,122 +3908,184 @@
                 chessSelected = null;
                 chessLegalTargets = [];
             }
-            renderChessUI();
-        };
-
-        function renderChessUI() {
-            const boardEl = document.getElementById('chess-board');
-            if (!boardEl || !chessState) return;
-
-            const board = normalizeChessBoard(chessState.board);
-            const players = chessState.players || {};
-            const readyMap = chessState.ready || {};
-            const wPlayer = players.w || null;
-            const bPlayer = players.b || null;
-            const bothReady = areBothChessPlayersReady(chessState);
-
-            document.getElementById('chess-white-name').textContent = wPlayer ? wPlayer.name : 'Boş';
-            document.getElementById('chess-black-name').textContent = bPlayer ? bPlayer.name : 'Boş';
-
-            const wReadyBadge = document.getElementById('chess-white-ready-badge');
-            const bReadyBadge = document.getElementById('chess-black-ready-badge');
-            if (wReadyBadge) wReadyBadge.textContent = wPlayer ? (readyMap[wPlayer.uid] ? '✅' : '⏳') : '';
-            if (bReadyBadge) bReadyBadge.textContent = bPlayer ? (readyMap[bPlayer.uid] ? '✅' : '⏳') : '';
-
-            const myColor = getMyChessColor();
-            const readyBtn = document.getElementById('chess-ready-btn');
-            if (readyBtn && currentUser) {
-                const amIReady = !!(myColor && readyMap[currentUser.uid]);
-                readyBtn.textContent = amIReady ? '✅ Hazırsın' : '⏳ Hazır';
-                readyBtn.className = amIReady
-                    ? 'bg-emerald-600 border border-emerald-300/60 text-white px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold'
-                    : 'bg-amber-600 hover:bg-amber-500 border border-amber-300/50 text-white px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold';
-            }
-
-            const turnBadge = document.getElementById('chess-turn-badge');
-            const statusEl = document.getElementById('chess-status');
-            const inCheckNow = isInCheck(board, chessState.turn || 'w');
-
-            const drawPanel = document.getElementById('chess-draw-offer-panel');
-            if (drawPanel && chessState.drawOffer && currentUser && chessState.drawOffer.fromUid !== currentUser.uid && myColor && !chessState.winner) {
-                document.getElementById('chess-draw-offer-text').textContent = `🤝 ${chessState.drawOffer.fromName} beraberlik teklif etti!`;
-                drawPanel.classList.remove('hidden');
-            } else if (drawPanel) {
-                drawPanel.classList.add('hidden');
-            }
-
-            if (chessState.winner) {
-                turnBadge.textContent = 'Maç Bitti';
-                statusEl.textContent = `🏆 Sonuç: ${chessState.winner}`;
-                const mId = chessState.matchId || chessState.winner;
-                if (currentUser && chessState.winnerUid === currentUser.uid && chessAwardedMatchId !== mId) {
-                    chessAwardedMatchId = mId;
-                    awardLeagueLP(60, 'Satranç Zaferi!');
-                }
-            } else if (!wPlayer || !bPlayer) {
-                turnBadge.textContent = 'Oyuncu Bekleniyor';
-                statusEl.textContent = 'Karşılıklı maç için Beyaz ve Siyah koltuklarının dolması bekleniyor.';
-            } else if (!bothReady) {
-                turnBadge.textContent = 'Hazır Bekleniyor';
-                const wTxt = readyMap[wPlayer.uid] ? 'Hazır' : 'Bekleniyor';
-                const bTxt = readyMap[bPlayer.uid] ? 'Hazır' : 'Bekleniyor';
-                statusEl.textContent = `⏳ Süre başlamadı! Beyaz (${wTxt}) — Siyah (${bTxt}). İki taraf da "Hazır"a basınca başlar.`;
-            } else {
-                const turnLabel = chessState.turn === 'w' ? '⚪ Beyaz Sırası' : '⚫ Siyah Sırası';
-                turnBadge.textContent = turnLabel;
-                statusEl.textContent = inCheckNow ? `⚠️ ŞAH! (${turnLabel})` : `${turnLabel} — Taşını seç ve hamleni yap.`;
-            }
-
-            const flipBoard = (myColor === 'b');
-            const rows = flipBoard ? [7, 6, 5, 4, 3, 2, 1, 0] : [0, 1, 2, 3, 4, 5, 6, 7];
-            const cols = flipBoard ? [7, 6, 5, 4, 3, 2, 1, 0] : [0, 1, 2, 3, 4, 5, 6, 7];
-
-            let html = '';
-            for (const r of rows) {
-                for (const c of cols) {
-                    const isLight = (r + c) % 2 === 0;
-                    const piece = board[r][c];
-                    const isSelected = chessSelected && chessSelected[0] === r && chessSelected[1] === c;
-                    const isTarget = chessLegalTargets.some(([lr, lc]) => lr === r && lc === c);
-                    const isKingThreat = inCheckNow && piece === ((chessState.turn || 'w') + 'K');
-
-                    let bgClass = isLight ? 'bg-[#f3d9b1]' : 'bg-[#9c5a3c]';
-                    if (isSelected) bgClass = 'bg-amber-400';
-                    else if (isKingThreat) bgClass = 'bg-red-600';
-
-                    const pieceColorClass = piece.startsWith('w')
-                        ? 'text-white drop-shadow-[0_1.5px_1.5px_rgba(0,0,0,0.95)]'
-                        : 'text-slate-950 drop-shadow-[0_1px_0.5px_rgba(255,255,255,0.45)]';
-
-                    html += `
-                        <button type="button" onclick="onChessSquareClick(${r}, ${c})" class="relative flex items-center justify-center aspect-square ${bgClass} text-xl sm:text-2xl font-black transition select-none">
-                            ${piece ? `<span class="${pieceColorClass}">${CHESS_GLYPHS[piece] || ''}</span>` : ''}
-                            ${isTarget ? `<span class="absolute w-3 h-3 rounded-full ${piece ? 'ring-2 ring-rose-600 bg-transparent w-6 h-6' : 'bg-emerald-500/80'}"></span>` : ''}
-                        </button>
-                    `;
-                }
-            }
-            boardEl.innerHTML = html;
-
-            const histEl = document.getElementById('chess-history');
-            const hist = chessState.history || [];
-            histEl.innerHTML = hist.length
-                ? hist.map((h, i) => `<span class="inline-block bg-[#1c0910] border border-rose-900/40 px-1.5 py-0.5 rounded mr-1 mb-1">${i + 1}. ${escapeHtml(h)}</span>`).join('')
-                : 'Henüz hamle yapılmadı.';
-            updateChessClocksUI();
+            renderChessBoard();
         }
 
-        // ==================== ÇOK OYUNCULU XOX, AMİRAL BATTI & SAYI TAHMİN ====================
+        function initChessSync() {
+            if (chessRoomRef) chessRoomRef.off();
+            if (chessClockInterval) clearInterval(chessClockInterval);
+
+            chessRoomRef = db.ref(`games/${currentRoom}/chess`);
+            chessRoomRef.on('value', snap => {
+                const val = snap.val();
+                if (!val) {
+                    chessState = {
+                        matchId: 'm_' + Date.now(),
+                        board: createInitialChessBoard(),
+                        turn: 'w',
+                        wMs: CHESS_INITIAL_MS,
+                        bMs: CHESS_INITIAL_MS,
+                        lastMoveAt: null,
+                        players: {},
+                        ready: {},
+                        history: [],
+                        winner: '',
+                        reason: ''
+                    };
+                    db.ref(`games/${currentRoom}/chess`).set(chessState);
+                    return;
+                }
+                chessState = val;
+                renderChessBoard();
+            });
+
+            chessClockInterval = setInterval(updateChessClocksUI, 500);
+        }
+
+        // ==================== ÇOK OYUNCULU XOX (FIREBASE SENKRON) ====================
         let xoxRoomRef = null;
         let xoxState = null;
         let xoxAwardedMatchId = null;
 
+        function initXOXSync() {
+            if (xoxRoomRef) xoxRoomRef.off();
+            xoxRoomRef = db.ref(`games/${currentRoom}/xox`);
+            xoxRoomRef.on('value', snap => {
+                const val = snap.val();
+                if (!val) {
+                    const initialXox = {
+                        matchId: 'xox_' + Date.now(),
+                        board: Array(9).fill(''),
+                        turn: 'X',
+                        players: {},
+                        winner: '',
+                        statusText: 'X ve O koltuklarını seçip başlayın!'
+                    };
+                    xoxState = initialXox;
+                    db.ref(`games/${currentRoom}/xox`).set(initialXox);
+                    return;
+                }
+                xoxState = val;
+                renderXOXBoard();
+            });
+        }
+
+        function renderXOXBoard() {
+            if (!xoxState) return;
+            const board = Array.isArray(xoxState.board) ? xoxState.board : Array.from({ length: 9 }, (_, i) => (xoxState.board && xoxState.board[i]) || '');
+            const players = xoxState.players || {};
+            document.getElementById('xox-x-name').textContent = players.X ? players.X.name : 'Boş';
+            document.getElementById('xox-o-name').textContent = players.O ? players.O.name : 'Boş';
+
+            for (let i = 0; i < 9; i++) {
+                const cell = document.getElementById('cell-' + i);
+                if (cell) cell.textContent = board[i] || '';
+            }
+
+            const statusEl = document.getElementById('xox-status');
+            if (xoxState.winner) {
+                statusEl.textContent = xoxState.statusText || (xoxState.winner === 'draw' ? 'Berabere!' : `Kazanan: ${xoxState.winner}!`);
+            } else if (!players.X || !players.O) {
+                statusEl.textContent = '2 oyuncu X ve O koltuklarına oturmalı!';
+            } else {
+                const turnPlayer = players[xoxState.turn];
+                statusEl.textContent = `Sıra ${turnPlayer ? turnPlayer.name : xoxState.turn} (${xoxState.turn}) oyuncusunda!`;
+            }
+        }
+
+        window.joinXOXSeat = function(symbol) {
+            if (!currentUser) return;
+            const md = getMyData();
+            db.ref(`games/${currentRoom}/xox`).transaction(curr => {
+                const st = curr || {
+                    matchId: 'xox_' + Date.now(),
+                    board: Array(9).fill(''),
+                    turn: 'X',
+                    players: {},
+                    winner: '',
+                    statusText: ''
+                };
+                st.players = st.players || {};
+                const other = symbol === 'X' ? 'O' : 'X';
+                if (st.players[other] && st.players[other].uid === currentUser.uid) {
+                    delete st.players[other];
+                }
+                if (st.players[symbol] && st.players[symbol].uid !== currentUser.uid) {
+                    return;
+                }
+                st.players[symbol] = { uid: currentUser.uid, name: md.name };
+                return st;
+            }, (err, committed) => {
+                if (!committed) showToast("Bu koltuk dolu!", 'error');
+                else showToast(`${symbol} koltuğuna oturdun!`);
+            });
+        };
+
+        window.makeXOXMove = function(idx) {
+            if (!currentUser || !xoxState || xoxState.winner) return;
+            const players = xoxState.players || {};
+            if (!players.X || !players.O) return showToast("Önce iki oyuncu da X ve O koltuklarını seçmeli!", 'error');
+
+            const mySymbol = players.X.uid === currentUser.uid ? 'X' : (players.O.uid === currentUser.uid ? 'O' : null);
+            if (!mySymbol) return showToast("Oynamak için X veya O koltuğuna otur!", 'error');
+            if (xoxState.turn !== mySymbol) return showToast("Sıra rakipte!", 'error');
+
+            const board = Array.isArray(xoxState.board) ? [...xoxState.board] : Array.from({ length: 9 }, (_, i) => (xoxState.board && xoxState.board[i]) || '');
+            if (board[idx]) return;
+
+            board[idx] = mySymbol;
+            const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+            let winner = '';
+            let statusText = '';
+            const matchId = xoxState.matchId || 'xox_default';
+
+            if (wins.some(([a, b, c]) => board[a] && board[a] === board[b] && board[a] === board[c])) {
+                winner = mySymbol;
+                statusText = `🏆 Kazanan: ${getMyData().name} (${mySymbol})!`;
+                if (xoxAwardedMatchId !== matchId) {
+                    xoxAwardedMatchId = matchId;
+                    awardLeagueLP(30, 'XOX Galibiyeti');
+                }
+            } else if (!board.includes('')) {
+                winner = 'draw';
+                statusText = '🤝 Oyun berabere bitti!';
+            }
+
+            db.ref(`games/${currentRoom}/xox`).update({
+                board,
+                turn: mySymbol === 'X' ? 'O' : 'X',
+                winner,
+                statusText
+            });
+        };
+
+        window.resetXOXGame = function() {
+            if (!currentUser) return;
+            const md = getMyData();
+            db.ref(`games/${currentRoom}/xox`).set({
+                matchId: 'xox_' + Date.now(),
+                board: Array(9).fill(''),
+                turn: 'X',
+                players: { X: { uid: currentUser.uid, name: md.name } },
+                winner: '',
+                statusText: 'Yeni XOX oyunu başladı! O oyuncusu bekleniyor.'
+            });
+        };
+
+        // ==================== AMİRAL BATTI & SAYI TAHMİN ====================
         let bsShips = [];
-        let bsAttempts = 10;
+        let bsShots = 10;
         let bsHits = 0;
-        let bsRevealed = [];
-        let guessSecret = 25;
-        let guessTries = 0;
+        let bsGameOver = false;
+        let secretNumber = Math.floor(Math.random() * 50) + 1;
+        let guessGameOver = false;
+
+        window.initGames = function() {
+            initChessSync();
+            initXOXSync();
+            resetBattleship();
+            resetGuessGame();
+        };
 
         window.switchGameTab = function(tab) {
             ['chess', 'xox', 'battleship', 'guess'].forEach(t => {
@@ -3996,191 +4097,79 @@
             });
         };
 
-        window.joinXOXSeat = function(mark) {
-            if (!currentUser || !xoxState) return;
-            const players = xoxState.players || {};
-            if (players[mark] && players[mark].uid !== currentUser.uid) {
-                return showToast("Bu koltuk dolu!", 'error');
+        window.resetBattleship = function() {
+            bsShips = [];
+            bsGameOver = false;
+            while (bsShips.length < 3) {
+                const pos = Math.floor(Math.random() * 25);
+                if (!bsShips.includes(pos)) bsShips.push(pos);
             }
-            const md = getMyData();
-            const updates = {};
-            if (mark === 'X' && players.O && players.O.uid === currentUser.uid) updates['players/O'] = null;
-            if (mark === 'O' && players.X && players.X.uid === currentUser.uid) updates['players/X'] = null;
-            updates[`players/${mark}`] = { uid: currentUser.uid, name: md.name };
-            db.ref(`games/${currentRoom}/xox`).update(updates);
+            bsShots = 10; bsHits = 0;
+            document.getElementById('bs-status').textContent = "3 gizli gemiyi bul! Kalan Hak: 10 (+50 LP)";
+            const grid = document.getElementById('bs-grid'); grid.innerHTML = '';
+            for (let i = 0; i < 25; i++) {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.dataset.idx = String(i);
+                btn.className = "w-11 h-11 bg-[#120409] border border-rose-900/50 rounded-lg text-sm font-bold hover:border-amber-400 transition";
+                btn.textContent = "🌊";
+                btn.onclick = () => fireBattleship(i, btn);
+                grid.appendChild(btn);
+            }
         };
-
-        window.makeXOXMove = function(idx) {
-            if (!currentUser || !xoxState || xoxState.winner) return;
-            const players = xoxState.players || {};
-            const myMark = (players.X && players.X.uid === currentUser.uid) ? 'X'
-                : ((players.O && players.O.uid === currentUser.uid) ? 'O' : null);
-            if (!myMark) return showToast("Önce X veya O koltuğuna otur!", 'error');
-            if (xoxState.turn !== myMark) return showToast("Sıra rakipte!", 'error');
-
-            const board = Array.isArray(xoxState.board) ? [...xoxState.board] : Array(9).fill('');
-            if (board[idx]) return;
-            board[idx] = myMark;
-
-            const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-            let winnerText = null;
-            let winnerUid = null;
-            for (const [a, b, c] of wins) {
-                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-                    const wName = (players[myMark] && players[myMark].name) || myMark;
-                    winnerText = `🎉 Kazanan: ${wName} (${myMark})!`;
-                    winnerUid = currentUser.uid;
-                    break;
-                }
-            }
-            if (!winnerText && !board.includes('')) {
-                winnerText = "🤝 Oyun Berabere!";
-                winnerUid = "draw";
-            }
-
-            db.ref(`games/${currentRoom}/xox`).update({
-                board,
-                turn: myMark === 'X' ? 'O' : 'X',
-                winner: winnerText,
-                winnerUid: winnerUid
-            });
-        };
-
-        window.resetXOXGame = function() {
-            db.ref(`games/${currentRoom}/xox`).set({
-                matchId: 'xox_' + Date.now(),
-                board: Array(9).fill(''),
-                turn: 'X',
-                players: {},
-                winner: null,
-                winnerUid: null
-            });
-        };
-
-        function renderXOXUI() {
-            if (!xoxState) return;
-            const board = Array.isArray(xoxState.board) ? xoxState.board : Array(9).fill('');
-            const players = xoxState.players || {};
-            document.getElementById('xox-x-name').textContent = players.X ? players.X.name : 'Boş';
-            document.getElementById('xox-o-name').textContent = players.O ? players.O.name : 'Boş';
-
-            for (let i = 0; i < 9; i++) {
-                const cell = document.getElementById(`cell-${i}`);
-                if (cell) cell.textContent = board[i] || '';
-            }
-
-            const statusEl = document.getElementById('xox-status');
-            if (xoxState.winner) {
-                statusEl.textContent = xoxState.winner;
-                const mId = xoxState.matchId || xoxState.winner;
-                if (currentUser && xoxState.winnerUid === currentUser.uid && xoxAwardedMatchId !== mId) {
-                    xoxAwardedMatchId = mId;
-                    awardLeagueLP(30, 'XOX Zaferi!');
+        function fireBattleship(idx, btn) {
+            if (bsGameOver || bsShots <= 0 || btn.disabled) return;
+            btn.disabled = true; bsShots--;
+            if (bsShips.includes(idx)) {
+                btn.textContent = "💥"; btn.classList.add('bg-rose-700'); bsHits++;
+                if (bsHits === 3) {
+                    bsGameOver = true;
+                    document.getElementById('bs-status').textContent = "TEBRİKLER! Tüm gemileri batırdın! (+50 LP)";
+                    awardLeagueLP(50, 'Amiral Battı Galibiyeti');
+                    return;
                 }
             } else {
-                statusEl.textContent = `Sıra: ${xoxState.turn === 'X' ? '❌ X' : '⭕ O'}`;
+                btn.textContent = "❌"; btn.classList.add('opacity-40');
+            }
+            if (bsShots === 0 && bsHits < 3) {
+                bsGameOver = true;
+                document.getElementById('bs-status').textContent = "Hakkın bitti! Gemiler 🚢 ile gösterildi.";
+                document.querySelectorAll('#bs-grid button').forEach(b => {
+                    const cellIdx = Number(b.dataset.idx);
+                    if (bsShips.includes(cellIdx) && b.textContent !== '💥') {
+                        b.textContent = '🚢';
+                        b.classList.add('border-amber-400');
+                    }
+                });
+            } else {
+                document.getElementById('bs-status').textContent = `İsabet: ${bsHits}/3 | Kalan Hak: ${bsShots}`;
             }
         }
-
-        let chessChatWatcherRef = null;
-
-        window.initGames = function() {
-            if (chessRoomRef) chessRoomRef.off();
-            chessRoomRef = db.ref(`games/${currentRoom}/chess`);
-            chessRoomRef.on('value', snap => {
-                const val = snap.val();
-                if (!val) {
-                    resetChessGame();
-                    return;
-                }
-                chessState = val;
-                renderChessUI();
-            });
-
-            if (chessChatWatcherRef) chessChatWatcherRef.off();
-            chessChatWatcherRef = db.ref(`games/${currentRoom}/chess_chat`).limitToLast(20);
-            chessChatWatcherRef.on('value', snap => {
-                const box = document.getElementById('chess-room-messages');
-                if (!box) return;
-                const entries = Object.values(snap.val() || {});
-                box.innerHTML = entries.length ? entries.map(m => `
-                    <div class="bg-[#1c0910] px-2 py-0.5 rounded border border-rose-900/30">
-                        <span class="font-bold text-amber-400">${escapeHtml(m.name || 'Oyuncu')}:</span>
-                        <span class="${m.isEmoji ? 'text-base' : 'text-rose-100'}">${escapeHtml(m.text || '')}</span>
-                    </div>
-                `).join('') : 'Henüz oda mesajı yok.';
-                box.scrollTop = box.scrollHeight;
-            });
-
-            if (chessClockInterval) clearInterval(chessClockInterval);
-            chessClockInterval = setInterval(updateChessClocksUI, 500);
-
-            if (xoxRoomRef) xoxRoomRef.off();
-            xoxRoomRef = db.ref(`games/${currentRoom}/xox`);
-            xoxRoomRef.on('value', snap => {
-                const val = snap.val();
-                if (!val) {
-                    resetXOXGame();
-                    return;
-                }
-                xoxState = val;
-                renderXOXUI();
-            });
-
-            if (bsRevealed.length === 0) resetBattleship();
-            resetGuessGame();
-        };
-
-        window.resetBattleship = function() {
-            bsShips = []; bsAttempts = 10; bsHits = 0; bsRevealed = Array(25).fill(false);
-            while (bsShips.length < 3) {
-                const r = Math.floor(Math.random() * 25);
-                if (!bsShips.includes(r)) bsShips.push(r);
-            }
-            renderBattleship();
-        };
-        function renderBattleship() {
-            const grid = document.getElementById('bs-grid');
-            document.getElementById('bs-status').textContent = bsHits === 3 ? "🎉 Tüm gemileri batırdın!" : (bsAttempts <= 0 ? "💥 Hak bitti! Kaybettin." : `Bulunan: ${bsHits}/3 | Kalan Hak: ${bsAttempts}`);
-            grid.innerHTML = Array.from({ length: 25 }, (_, i) => {
-                let txt = "🌊", cls = "bg-[#120409] border-rose-900/50";
-                if (bsRevealed[i]) {
-                    if (bsShips.includes(i)) { txt = "🚢"; cls = "bg-rose-600 border-amber-400"; }
-                    else { txt = "💦"; cls = "bg-slate-800 border-slate-700 opacity-50"; }
-                }
-                return `<button type="button" onclick="fireBattleship(${i})" class="w-11 h-11 rounded-xl border ${cls} text-lg flex items-center justify-center transition">${txt}</button>`;
-            }).join('');
-        }
-        window.fireBattleship = function(idx) {
-            if (bsAttempts <= 0 || bsHits === 3 || bsRevealed[idx]) return;
-            bsRevealed[idx] = true; bsAttempts--;
-            if (bsShips.includes(idx)) {
-                bsHits++;
-                if (bsHits === 3) awardLeagueLP(50, 'Amiral Battı Zaferi!');
-            }
-            renderBattleship();
-        };
 
         window.resetGuessGame = function() {
-            guessSecret = Math.floor(Math.random() * 50) + 1; guessTries = 0;
+            secretNumber = Math.floor(Math.random() * 50) + 1;
+            guessGameOver = false;
+            const submitBtn = document.getElementById('guess-submit-btn');
+            if (submitBtn) submitBtn.disabled = false;
             document.getElementById('guess-status').textContent = "1 ile 50 arasında gizli sayıyı bul! (+25 LP)";
             document.getElementById('guess-hint').textContent = "";
             document.getElementById('guess-input').value = "";
-            const subBtn = document.getElementById('guess-submit-btn');
-            if (subBtn) subBtn.disabled = false;
         };
         window.submitGuess = function() {
+            if (guessGameOver) return showToast("Sayıyı zaten buldun! Yeni Sayı Üret'e bas.");
             const val = parseInt(document.getElementById('guess-input').value, 10);
-            if (!val || val < 1 || val > 50) return;
-            guessTries++;
-            if (val === guessSecret) {
-                document.getElementById('guess-status').textContent = `🎉 Bildin! Sayı ${guessSecret} (${guessTries} denemede)`;
-                document.getElementById('guess-hint').textContent = "Tebrikler! +25 LP kazandın.";
-                const subBtn = document.getElementById('guess-submit-btn');
-                if (subBtn) subBtn.disabled = true;
-                awardLeagueLP(25, 'Sayı Tahmin Zaferi!');
+            if (!val || val < 1 || val > 50) return showToast("1-50 arası geçerli bir sayı gir!", 'error');
+            const hint = document.getElementById('guess-hint');
+            if (val === secretNumber) {
+                guessGameOver = true;
+                const submitBtn = document.getElementById('guess-submit-btn');
+                if (submitBtn) submitBtn.disabled = true;
+                hint.textContent = `🎉 DOĞRU! Sayı ${secretNumber} idi! (+25 LP)`;
+                awardLeagueLP(25, 'Sayı Tahmini');
+            } else if (val < secretNumber) {
+                hint.textContent = "⬆️ Daha BÜYÜK bir sayı dene!";
             } else {
-                document.getElementById('guess-hint').textContent = val < guessSecret ? "⬆️ Daha BÜYÜK bir sayı dene!" : "⬇️ Daha KÜÇÜK bir sayı dene!";
+                hint.textContent = "⬇️ Daha KÜÇÜK bir sayı dene!";
             }
         };
     </script>
